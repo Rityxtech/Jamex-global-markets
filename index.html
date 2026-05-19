@@ -15,8 +15,8 @@
         }
         // Also handle the ?p= query param method
         var l = window.location;
-        if (l.search[1] === '/') {
-          var decoded = l.search.slice(1).split('&').map(function(s) {
+        if (l.search.startsWith('?p=/')) {
+          var decoded = l.search.slice(3).split('&').map(function(s) {
             return s.replace(/~and~/g, '&');
           });
           history.replaceState(null, null,

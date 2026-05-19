@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Invest from './pages/Invest';
@@ -32,6 +32,25 @@ function ScrollToTop() {
   return null;
 }
 
+/** Renders the marketing Home for guests; redirects logged-in users to /dashboard */
+function RootRoute() {
+  const { user, loading } = useAuthStore();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background text-on-surface">
+        <span className="material-symbols-outlined animate-spin text-4xl text-primary">progress_activity</span>
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <Home />;
+}
+
 export default function App() {
   const { initialize } = useAuthStore();
 
@@ -44,7 +63,7 @@ export default function App() {
       <ScrollToTop />
       <Header />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<RootRoute />} />
         
         {/* Public Routes (Only accessible if logged out) */}
         <Route element={<PublicRoute />}>
@@ -73,4 +92,3 @@ export default function App() {
     </BrowserRouter>
   );
 }
-

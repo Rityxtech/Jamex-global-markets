@@ -183,8 +183,9 @@ export default function Sidebar() {
                                 <span className="text-sm">Support</span>
                             </Link>
                             <button onClick={async () => {
+                                setIsMobileMenuOpen(false);
                                 await useAuthStore.getState().signOut();
-                                navigate('/login');
+                                navigate('/');
                             }} className="w-full flex items-center gap-3 px-4 h-10 mt-2 text-error bg-error/10 hover:bg-error/20 transition-all duration-300 rounded-xl font-bold text-left shadow-sm border border-error/20">
                                 <span className="material-symbols-outlined text-[20px]">logout</span>
                                 <span className="text-sm">Logout</span>

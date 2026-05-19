@@ -6,13 +6,8 @@ export default function Header() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   
-  const { user, signOut } = useAuthStore();
+  const { user } = useAuthStore();
   const isLoggedIn = !!user;
-
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/login');
-  };
 
   // Handle scroll effect for glassmorphism intensity
   useEffect(() => {
@@ -36,38 +31,25 @@ export default function Header() {
       {/* Background glow effect for bright premium feel */}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-transparent pointer-events-none rounded-b-xl"></div>
       
-      {/* LEFT SIDE: Brand (Logged Out) or Menu Trigger (Logged In Mobile) */}
+      {/* LEFT SIDE: Brand */}
       <div className="flex items-center gap-4 relative z-10">
-        {!isLoggedIn ? (
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2563eb] to-[#b4c5ff] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-              <span className="material-symbols-outlined text-white text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>public</span>
-            </div>
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#0d1322] to-[#2563eb] tracking-tight">
-              Jamex Global
-            </span>
-          </Link>
-        ) : (
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => window.dispatchEvent(new Event('toggle-mobile-menu'))}
-              className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-white/50 text-[#0d1322] border border-[#2563eb]/20 shadow-sm active:scale-95 transition-all"
-            >
-              <span className="material-symbols-outlined">menu</span>
-            </button>
-            <h1 className="text-lg md:text-xl font-bold text-[#0d1322] tracking-tight hidden sm:block md:hidden">
-              Jamex Global
-            </h1>
-            
-            {/* Desktop Logged In Nav items (optional addition for premium feel) */}
-            <div className="hidden lg:flex items-center bg-white/50 backdrop-blur-md px-3 py-1.5 rounded-xl border border-[#2563eb]/10 shadow-inner">
-              <span className="material-symbols-outlined text-[#2563eb]/60 text-[20px] mr-2">search</span>
-              <input 
-                className="bg-transparent border-none outline-none focus:ring-0 text-sm text-[#0d1322] placeholder:text-gray-400 w-48 font-medium" 
-                placeholder="Search assets..." 
-                type="text" 
-              />
-            </div>
+        <Link to={isLoggedIn ? "/dashboard" : "/"} className="flex items-center gap-2 group">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2563eb] to-[#b4c5ff] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+            <span className="material-symbols-outlined text-white text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>public</span>
+          </div>
+          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#0d1322] to-[#2563eb] tracking-tight">
+            Jamex Global
+          </span>
+        </Link>
+        
+        {isLoggedIn && (
+          <div className="hidden lg:flex items-center bg-white/50 backdrop-blur-md px-3 py-1.5 rounded-xl border border-[#2563eb]/10 shadow-inner ml-2">
+            <span className="material-symbols-outlined text-[#2563eb]/60 text-[20px] mr-2">search</span>
+            <input 
+              className="bg-transparent border-none outline-none focus:ring-0 text-sm text-[#0d1322] placeholder:text-gray-400 w-48 font-medium" 
+              placeholder="Search assets..." 
+              type="text" 
+            />
           </div>
         )}
       </div>
@@ -103,20 +85,23 @@ export default function Header() {
               Deposit
             </button>
             <div className="flex items-center gap-3 pl-3 border-l border-gray-200">
-              <button onClick={handleLogout} className="relative w-10 h-10 rounded-full bg-white/60 hover:bg-error/10 border border-[#2563eb]/10 flex items-center justify-center text-gray-600 hover:text-error transition-all shadow-sm group">
-                <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">logout</span>
-              </button>
-              <Link to="/profile" className="w-10 h-10 rounded-full border-2 border-white shadow-md overflow-hidden hover:border-[#2563eb] transition-colors bg-gray-100 cursor-pointer">
+              <button 
+                onClick={() => {
+                  if (window.innerWidth < 768) {
+                    window.dispatchEvent(new Event('toggle-mobile-menu'));
+                  } else {
+                    navigate('/profile');
+                  }
+                }}
+                className="w-10 h-10 rounded-full border-2 border-white shadow-md overflow-hidden hover:border-[#2563eb] transition-colors bg-gray-100 cursor-pointer p-0"
+              >
                 <img alt="User Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8rnZBb6DNeNhGDYvtVvvofqp-s6sLQVmilHaqeqKBcD-6Mz-EGcqhvwJDsaBzor3-TNIGY7YLMF0PKALoslp4OYBS5ixeDdkQYPZwrzya2HwHdalEYNUi7f1gTmczAlDEcRC8PzfbFV1QluVYj7k6Jb8PjpIY8nX_QEQeBid_xg-qSOW6ZwEVm9A8u9oAw21hdjZ73UmfRwHrvrtfgOGn_5VQHH_Rg6r93mz6P3L7IbsrKZID-y6mrrW9D7gLWmEF7q3E74C9qzfj" className="w-full h-full object-cover" />
-              </Link>
+              </button>
             </div>
           </div>
         )}
 
-        {/* Fake Logo on the right end (as requested) */}
-        <div className="flex items-center justify-center w-8 h-8 rounded bg-gradient-to-tr from-pink-500 to-orange-400 text-white font-black text-xs shadow-lg ml-2 border border-white/50 cursor-help" title="Fake Logo (To be removed)">
-          FL
-        </div>
+
       </div>
     </header>
   );

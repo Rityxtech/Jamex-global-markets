@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
 export default function Login() {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
+    const [formData, setFormData] = useState({ email: '', password: '' });
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
@@ -19,17 +22,36 @@ export default function Login() {
         return () => window.removeEventListener('mousemove', handleMouseMove);
     }, []);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isProcessing || isSuccess) return;
         
         setIsProcessing(true);
-        // Artificial delay to simulate secure handshake
-        setTimeout(() => {
+        setErrorMsg('');
+
+        try {
+            const { error } = await supabase.auth.signInWithPassword({
+                email: formData.email,
+                password: formData.password,
+            });
+
+            if (error) {
+                setErrorMsg(error.message);
+                setIsProcessing(false);
+                return;
+            }
+
             setIsProcessing(false);
             setIsSuccess(true);
-            setTimeout(() => navigate('/dashboard'), 1500);
-        }, 2000);
+            setTimeout(() => navigate('/dashboard'), 1000);
+        } catch (error: any) {
+            setErrorMsg(error.message || 'An error occurred during login');
+            setIsProcessing(false);
+        }
     };
 
     const gradient1 = `radial-gradient(circle at ${20 + (mousePos.x * 10)}% ${30 + (mousePos.y * 10)}%, rgba(37, 99, 235, 0.15) 0%, transparent 40%)`;
@@ -84,6 +106,12 @@ export default function Login() {
                         {/* Form */}
                         <div className="p-8">
                             <form className="space-y-6" onSubmit={handleSubmit}>
+                                {errorMsg && (
+                                    <div className="bg-error/10 border border-error/50 text-error px-4 py-3 rounded-lg text-sm font-bold flex items-center gap-2">
+                                        <span className="material-symbols-outlined">error</span>
+                                        {errorMsg}
+                                    </div>
+                                )}
                                 {/* Email Field */}
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-on-surface-variant flex items-center gap-2" htmlFor="email">
@@ -97,6 +125,8 @@ export default function Login() {
                                         placeholder="name@firm.com" 
                                         required 
                                         type="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
                                     />
                                 </div>
                                 
@@ -117,6 +147,8 @@ export default function Login() {
                                             placeholder="••••••••••••" 
                                             required 
                                             type={showPassword ? "text" : "password"}
+                                            value={formData.password}
+                                            onChange={handleChange}
                                         />
                                         <button 
                                             className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer" 

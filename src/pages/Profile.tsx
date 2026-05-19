@@ -13,30 +13,10 @@ export default function Profile() {
             {/* Main Content Area */}
             <main className="md:ml-64 min-h-screen flex flex-col pt-14 md:pt-16 pb-20 md:pb-0">
                 {/* TopNavBar */}
-                <header className="fixed top-0 right-0 left-0 md:left-64 z-30 bg-surface/90 backdrop-blur-xl h-14 md:h-16 border-b border-outline-variant/20 flex items-center justify-between px-4 md:px-margin-desktop shadow-sm transition-all">
-                    <div className="flex items-center gap-6">
-                        <h1 className="text-xl md:text-headline-md font-bold text-primary tracking-tight md:hidden">Jamex</h1>
-                        <div className="hidden lg:flex items-center bg-surface-container-low px-3 py-1.5 rounded-lg border border-outline-variant/30">
-                            <span className="material-symbols-outlined text-on-surface-variant text-body-md mr-2">search</span>
-                            <input className="bg-transparent border-none outline-none focus:ring-0 text-label-sm text-on-surface placeholder:text-outline w-48" placeholder="Search profile..." type="text" />
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3 md:gap-4">
-                        <div className="flex items-center gap-2 md:gap-3 border-l border-outline-variant/30 pl-3 md:pl-4">
-                            <span className="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors text-[20px] md:text-[24px]">notifications</span>
-                            <span onClick={() => navigate('/wallet')} className="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors hidden sm:block text-[24px]">account_balance_wallet</span>
-                            <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-surface-container-highest overflow-hidden border border-primary cursor-pointer transition-colors ml-1" onClick={() => window.innerWidth < 768 ? window.dispatchEvent(new Event('toggle-mobile-menu')) : navigate('/profile')}>
-                                <img alt="User Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjHMWFfdoF2Mysc4qW_RGhD3_ie09HnonrwrC7G1h5yZAcHzWD-Qwmx8C1y1VFLmeUfHHR8kpJq9P4HQM9h8GGC3ADt6HiairNW4MynzETeHkLZ83d2KKNc1ak7eMdC2A3JB9__u8rpcO4sRTL1RIKfp_yxkm0TzhX8aivQ11Oq-e15K7hZ5zD2Z-A-nU-xxojMGhwqNZdjrOD1udjTCrTneDiejvuiuHDV3P7WiXwUW2vbmiDciIAPQsYtyhv4pbrkV8-Z9iTdOk-" />
-                            </div>
-                        </div>
-                    </div>
-                </header>
+                
 
                 <div className="p-4 md:p-margin-desktop flex-1 space-y-4 md:space-y-6 max-w-[1200px] mx-auto w-full mb-12">
-                    <header className="mb-2 md:mb-6">
-                        <h1 className="text-2xl md:text-headline-lg font-bold text-on-surface tracking-tight mb-1">User Profile</h1>
-                        <p className="text-[11px] md:text-body-md text-on-surface-variant leading-snug max-w-xl">Manage your institutional account details and wallet configurations.</p>
-                    </header>
+                    
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-gutter">
                         {/* Profile Identity Card */}

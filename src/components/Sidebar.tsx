@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
 
 export default function Sidebar() {
     const location = useLocation();
@@ -117,10 +118,13 @@ export default function Sidebar() {
                         <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/support")}>headset_mic</span>
                         <span className="text-label-md font-label-md">Support</span>
                     </Link>
-                    <Link to="/" className="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-error transition-colors">
+                    <button onClick={async () => {
+                        await useAuthStore.getState().signOut();
+                        navigate('/login');
+                    }} className="w-full flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-error transition-colors cursor-pointer text-left">
                         <span className="material-symbols-outlined text-[20px]">logout</span>
                         <span className="text-label-md font-label-md">Logout</span>
-                    </Link>
+                    </button>
                 </div>
             </aside>
         </>

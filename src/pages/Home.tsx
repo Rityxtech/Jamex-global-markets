@@ -6,35 +6,7 @@ export default function Home() {
 
   return (
     <div className="deep-mesh-bg text-on-surface font-body-md selection:bg-primary/30 min-h-screen dark">
-      <header className="fixed top-0 w-full z-50 flex justify-between items-center px-margin-desktop h-16 bg-surface/80 backdrop-blur-md dark:bg-surface/80 border-b border-outline-variant/30 shadow-sm">
-        <div className="flex items-center gap-8">
-          <span className="text-headline-md font-headline-md font-bold text-primary tracking-tight">Jamex Global Markets</span>
-          <nav className="hidden md:flex items-center gap-6">
-            <Link to="/dashboard" className="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200">Dashboard</Link>
-            <Link to="/market" className="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200">Market</Link>
-            <Link to="/invest" className="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200">Wealth</Link>
-            <Link to="/wallet" className="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200">Wallet</Link>
-          </nav>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="hidden lg:flex items-center bg-surface-container rounded-lg px-3 py-1.5 border border-outline-variant/30">
-            <span className="material-symbols-outlined text-on-surface-variant text-body-md" data-icon="search">search</span>
-            <input className="bg-transparent border-none focus:ring-0 text-label-sm w-48 text-on-surface outline-none placeholder-gray-500" placeholder="Search markets..." type="text" />
-          </div>
-          <div className="flex items-center gap-3">
-            <button className="text-on-surface-variant hover:text-primary transition-colors">
-              <span className="material-symbols-outlined" data-icon="notifications">notifications</span>
-            </button>
-            <button className="text-on-surface-variant hover:text-primary transition-colors cursor-pointer" onClick={() => navigate('/deposit')}>
-              <span className="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
-            </button>
-            <button onClick={() => navigate('/deposit')} className="cursor-pointer bg-primary-container text-on-primary-container px-4 py-1.5 font-label-sm text-label-sm rounded hover:opacity-90 active:scale-95 transition-all">Deposit</button>
-            <div className="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant flex items-center justify-center overflow-hidden">
-              <img alt="User Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJkx9uKfepPHrjU3IumIxK8Fd2b-9BYt4sQrEHNCb0qp_EDEoFZ2uE0BNhpR0nm0jIspYGxIgqjfD1s2iNzjpNxTcZ6fGHyiLTdzX9TZOeCrYQJdM7jPOUuBaMwzWGdNunUJ-uWM_DivJnv13mtfaAuVqqJJPYbwc8PQf-D5unykooiaS9NotEAcqXBhqHzHf9oAMFy5w1SP7lCkZSNDNPrhnZi5xz1SZBLEpmfYABtKc3iCEXiQCv9IQydmvQgqJrsrA0KyzuCWnc" />
-            </div>
-          </div>
-        </div>
-      </header>
+      
 
       <main className="pt-16">
         <section className="relative min-h-[870px] flex items-center justify-center mesh-gradient px-margin-desktop py-section-padding-v overflow-hidden">

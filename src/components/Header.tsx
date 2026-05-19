@@ -1,69 +1,123 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useSidebarStore } from '../store/sidebarStore';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
 
-export default function Header({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
-  const { toggle } = useSidebarStore();
+export default function Header() {
+  const navigate = useNavigate();
+  const [scrolled, setScrolled] = useState(false);
   
+  const { user, signOut } = useAuthStore();
+  const isLoggedIn = !!user;
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
+
+  // Handle scroll effect for glassmorphism intensity
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <nav className="fixed top-0 w-full h-12 md:h-16 bg-white/70 backdrop-blur-xl border-b border-blue-900/5 z-50 flex justify-center shadow-sm">
-      <div className="w-full max-w-full px-3 md:px-6 flex justify-between items-center h-full gap-2 md:gap-4">
-        {/* Left Side: Logo */}
-        <div className="flex items-center gap-3 min-w-0 shrink-0">
-          <Link to="/" className="flex items-center gap-1.5 md:gap-2 group">
-            <div className="w-6 h-6 md:w-8 md:h-8 rounded bg-[#0a0f18] border border-transparent flex shrink-0 justify-center items-center shadow-md cursor-pointer group-hover:bg-electricBlue transition-colors">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="md:w-3.5 md:h-3.5">
-                <path d="M12 2L2 12L12 22L22 12L12 2Z" stroke="#ffffff" strokeWidth="2" strokeLinejoin="round" />
-                <path d="M12 8L8 12L12 16L16 12L12 8Z" fill="#10B981" />
-              </svg>
+    <header 
+      className={`fixed top-0 right-0 z-[60] transition-all duration-300 ${
+        isLoggedIn ? 'left-0 md:left-64' : 'left-0'
+      } ${
+        scrolled 
+          ? 'bg-white/80 backdrop-blur-xl shadow-[0_4px_30px_rgba(37,99,235,0.1)] border-b border-white/40' 
+          : 'bg-white/60 backdrop-blur-md border-b border-white/20'
+      } h-16 flex items-center justify-between px-4 md:px-8`}
+    >
+      {/* Background glow effect for bright premium feel */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-transparent pointer-events-none rounded-b-xl"></div>
+      
+      {/* LEFT SIDE: Brand (Logged Out) or Menu Trigger (Logged In Mobile) */}
+      <div className="flex items-center gap-4 relative z-10">
+        {!isLoggedIn ? (
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2563eb] to-[#b4c5ff] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+              <span className="material-symbols-outlined text-white text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>public</span>
             </div>
-            <span className="text-[11px] md:text-sm font-extrabold tracking-widest text-[#0a0f18] uppercase transition-colors whitespace-nowrap">Aura Quant</span>
+            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#0d1322] to-[#2563eb] tracking-tight">
+              Jamex Global
+            </span>
           </Link>
-        </div>
-
-        {/* Links */}
-        <div className="hidden md:flex items-center gap-8 text-[11px] font-bold uppercase tracking-widest text-gray-500">
-          {!isLoggedIn ? (
-             <>
-                <Link to="/" className="text-[#0a0f18] relative after:content-[''] after:absolute after:-bottom-5 after:left-0 after:w-full after:h-[2px] after:bg-electricBlue">Home</Link>
-                <a href="#" className="hover:text-[#0a0f18] transition-colors">Markets</a>
-                <a href="#" className="hover:text-[#0a0f18] transition-colors">Strategies</a>
-                <a href="#" className="hover:text-[#0a0f18] transition-colors">About</a>
-                <a href="#" className="hover:text-[#0a0f18] transition-colors">Contact</a>
-             </>
-          ) : (
-             <>
-                <Link to="/dashboard" className="text-[#0a0f18] relative after:content-[''] after:absolute after:-bottom-5 after:left-0 after:w-full after:h-[2px] after:bg-electricBlue">Dashboard</Link>
-                <Link to="/invest" className="hover:text-[#0a0f18] transition-colors">Invest</Link>
-                <Link to="/allocations" className="hover:text-[#0a0f18] transition-colors">Allocations</Link>
-                <Link to="/transactions" className="hover:text-[#0a0f18] transition-colors">History</Link>
-             </>
-          )}
-        </div>
-
-        {/* Auth / Profile Area */}
-        <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
-          {!isLoggedIn ? (
-            <>
-              <Link to="/login" className="text-[9px] md:text-[11px] font-bold uppercase tracking-wider text-gray-600 hover:text-[#0a0f18] transition-colors px-2 md:px-3 py-1.5 md:py-2">Login</Link>
-              <Link to="/register" className="bg-[#0a0f18] hover:bg-gray-800 text-white text-[9px] md:text-[11px] font-bold uppercase tracking-wider px-3 md:px-5 py-1.5 md:py-2 rounded shadow-md transition-all whitespace-nowrap">Open Account</Link>
-            </>
-          ) : (
-            <div className="flex items-center gap-2 md:gap-4">
-               <div className="hidden sm:flex flex-col items-end">
-                   <span className="text-[10px] md:text-[11px] font-bold text-[#0a0f18] leading-none">Alexander</span>
-                   <span className="text-[8px] md:text-[9px] text-gray-500 font-mono tracking-widest uppercase">Verified</span>
-               </div>
-               <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-300 overflow-hidden shadow-sm">
-                   <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=100&auto=format&fit=crop" className="w-full h-full object-cover" alt="User Avatar" />
-               </div>
-               <button onClick={toggle} className="md:hidden p-1 ml-1 text-[#0a0f18] hover:bg-gray-100 rounded">
-                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-               </button>
+        ) : (
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => window.dispatchEvent(new Event('toggle-mobile-menu'))}
+              className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-white/50 text-[#0d1322] border border-[#2563eb]/20 shadow-sm active:scale-95 transition-all"
+            >
+              <span className="material-symbols-outlined">menu</span>
+            </button>
+            <h1 className="text-lg md:text-xl font-bold text-[#0d1322] tracking-tight hidden sm:block md:hidden">
+              Jamex Global
+            </h1>
+            
+            {/* Desktop Logged In Nav items (optional addition for premium feel) */}
+            <div className="hidden lg:flex items-center bg-white/50 backdrop-blur-md px-3 py-1.5 rounded-xl border border-[#2563eb]/10 shadow-inner">
+              <span className="material-symbols-outlined text-[#2563eb]/60 text-[20px] mr-2">search</span>
+              <input 
+                className="bg-transparent border-none outline-none focus:ring-0 text-sm text-[#0d1322] placeholder:text-gray-400 w-48 font-medium" 
+                placeholder="Search assets..." 
+                type="text" 
+              />
             </div>
-          )}
+          </div>
+        )}
+      </div>
+
+      {/* CENTER: Navigation Links (Logged Out Desktop) */}
+      {!isLoggedIn && (
+        <nav className="hidden md:flex items-center gap-8 relative z-10">
+          <Link to="/" className="text-sm font-bold text-[#2563eb] border-b-2 border-[#2563eb] py-1">Home</Link>
+          <a href="#" className="text-sm font-semibold text-gray-600 hover:text-[#2563eb] transition-colors py-1">Markets</a>
+          <a href="#" className="text-sm font-semibold text-gray-600 hover:text-[#2563eb] transition-colors py-1">Wealth</a>
+          <a href="#" className="text-sm font-semibold text-gray-600 hover:text-[#2563eb] transition-colors py-1">Company</a>
+        </nav>
+      )}
+
+      {/* RIGHT SIDE: Auth Buttons / Profile & Fake Logo */}
+      <div className="flex items-center gap-4 relative z-10">
+        {!isLoggedIn ? (
+          <div className="hidden sm:flex items-center gap-3">
+            <Link to="/login" className="px-5 py-2 text-sm font-bold text-[#0d1322] hover:text-[#2563eb] transition-colors">
+              Sign In
+            </Link>
+            <Link to="/register" className="px-5 py-2 text-sm font-bold bg-[#2563eb] text-white rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 transition-all">
+              Get Started
+            </Link>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => navigate('/deposit')} 
+              className="hidden sm:flex items-center gap-1 bg-[#2563eb] text-white px-4 py-2 rounded-xl font-bold text-sm shadow-[0_4px_14px_rgba(37,99,235,0.3)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.5)] transition-all active:scale-95"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              Deposit
+            </button>
+            <div className="flex items-center gap-3 pl-3 border-l border-gray-200">
+              <button onClick={handleLogout} className="relative w-10 h-10 rounded-full bg-white/60 hover:bg-error/10 border border-[#2563eb]/10 flex items-center justify-center text-gray-600 hover:text-error transition-all shadow-sm group">
+                <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">logout</span>
+              </button>
+              <Link to="/profile" className="w-10 h-10 rounded-full border-2 border-white shadow-md overflow-hidden hover:border-[#2563eb] transition-colors bg-gray-100 cursor-pointer">
+                <img alt="User Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8rnZBb6DNeNhGDYvtVvvofqp-s6sLQVmilHaqeqKBcD-6Mz-EGcqhvwJDsaBzor3-TNIGY7YLMF0PKALoslp4OYBS5ixeDdkQYPZwrzya2HwHdalEYNUi7f1gTmczAlDEcRC8PzfbFV1QluVYj7k6Jb8PjpIY8nX_QEQeBid_xg-qSOW6ZwEVm9A8u9oAw21hdjZ73UmfRwHrvrtfgOGn_5VQHH_Rg6r93mz6P3L7IbsrKZID-y6mrrW9D7gLWmEF7q3E74C9qzfj" className="w-full h-full object-cover" />
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Fake Logo on the right end (as requested) */}
+        <div className="flex items-center justify-center w-8 h-8 rounded bg-gradient-to-tr from-pink-500 to-orange-400 text-white font-black text-xs shadow-lg ml-2 border border-white/50 cursor-help" title="Fake Logo (To be removed)">
+          FL
         </div>
       </div>
-    </nav>
+    </header>
   );
 }

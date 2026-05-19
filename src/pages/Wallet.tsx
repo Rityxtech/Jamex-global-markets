@@ -13,27 +13,7 @@ export default function Wallet() {
       {/* Main Content Area */}
       <main className="md:ml-64 flex flex-col min-h-screen pt-14 md:pt-16 pb-20 md:pb-0">
         {/* TopAppBar */}
-        <header className="fixed top-0 right-0 left-0 md:left-64 h-14 md:h-16 glass-panel z-40 flex items-center justify-between px-4 md:px-margin-desktop border-b border-outline-variant/20 shadow-sm transition-all">
-          <div className="flex items-center gap-6">
-            <h2 className="text-xl md:text-headline-md font-bold text-primary tracking-tight">Wallet</h2>
-            <nav className="hidden lg:flex items-center gap-6">
-              <Link to="/dashboard" className="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 text-label-sm font-label-sm">Dashboard</Link>
-              <Link to="/market" className="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 text-label-sm font-label-sm">Market</Link>
-              <Link to="/invest" className="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 text-label-sm font-label-sm">Wealth</Link>
-              <Link to="/wallet" className="text-primary font-bold border-b-2 border-primary pb-1 text-label-sm font-label-sm">Wallet</Link>
-            </nav>
-          </div>
-          <div className="flex items-center gap-3 md:gap-4">
-            <button className="cursor-pointer flex items-center justify-center p-1 md:p-2 text-on-surface-variant hover:text-primary transition-all">
-              <span className="material-symbols-outlined text-[20px] md:text-[24px]">notifications</span>
-            </button>
-            <div className="h-6 md:h-8 w-[1px] bg-outline-variant/30"></div>
-            <button className="cursor-pointer bg-primary text-on-primary px-3 py-1.5 md:px-4 md:py-1.5 rounded-md md:rounded-lg text-[11px] md:text-label-sm font-bold active:scale-95 transition-all w-max whitespace-nowrap shadow-sm shadow-primary/20">
-              Deposit
-            </button>
-            <img onClick={() => window.innerWidth < 768 ? window.dispatchEvent(new Event('toggle-mobile-menu')) : navigate('/profile')} alt="User Profile" className="w-7 h-7 md:w-8 md:h-8 rounded-full border border-outline-variant/50 cursor-pointer hover:border-primary transition-colors ml-1 md:ml-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4qv5uHrCNfTAzktnUcZd0fxiWOMicaf4jlnCKzpcn-FFIENBEHeID87RF1MJceDgEZ3hdGWp65AOA9UbrMemPCu5H8Jkss2LfCUeHnyPwczYn6f-QijUc3msHEL-VVD4LVs8Pg9cVNJcUjLtm9Tvw8DHJBigqvht2KAgYSXOJD7Oj-9wTX-gkL-zjdtBGh65lKTCgYUdiQNYbW7-vBxfkhxvw0y2MHCkPrfFDLSdK9EQ-Qyuuhe_SHMZI_tEWjmLJYGqkiKm-i3zw" />
-          </div>
-        </header>
+        
 
         <div className="p-4 md:p-margin-desktop space-y-4 md:space-y-gutter max-w-[1600px] mx-auto w-full">
           {/* Wallet Split Overview */}

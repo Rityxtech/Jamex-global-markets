@@ -13,33 +13,7 @@ export default function Dashboard() {
       {/* Main Content Area */}
       <main className="md:ml-64 min-h-screen flex flex-col pt-14 md:pt-16 pb-20 md:pb-0">
         {/* TopNavBar */}
-        <header className="fixed top-0 right-0 left-0 md:left-64 z-30 bg-surface/90 backdrop-blur-xl h-14 md:h-16 border-b border-outline-variant/20 flex items-center justify-between px-4 md:px-margin-desktop shadow-sm transition-all">
-          <div className="flex items-center gap-6">
-            <h1 className="text-xl md:text-headline-md font-bold text-primary tracking-tight md:hidden">Jamex</h1>
-            <div className="hidden lg:flex items-center bg-surface-container-low px-3 py-1.5 rounded-lg border border-outline-variant/30">
-              <span className="material-symbols-outlined text-on-surface-variant text-body-md mr-2">search</span>
-              <input className="bg-transparent border-none outline-none focus:ring-0 text-label-sm text-on-surface placeholder:text-outline w-48" placeholder="Search markets..." type="text" />
-            </div>
-            <nav className="hidden md:flex gap-6">
-              <Link to="/dashboard" className="text-primary font-bold border-b-2 border-primary pb-1 text-label-sm">Dashboard</Link>
-              <Link to="/market" className="text-on-surface-variant font-medium hover:text-primary transition-colors text-label-sm">Market</Link>
-              <Link to="/invest" className="text-on-surface-variant font-medium hover:text-primary transition-colors text-label-sm">Wealth</Link>
-              <Link to="/wallet" className="text-on-surface-variant font-medium hover:text-primary transition-colors text-label-sm">Wallet</Link>
-            </nav>
-          </div>
-          <div className="flex items-center gap-3 md:gap-4">
-            <button onClick={() => navigate('/deposit')} className="cursor-pointer bg-primary text-on-primary px-3 py-1 md:px-4 md:py-1.5 rounded-md md:rounded font-bold text-[11px] md:text-label-sm hover:opacity-90 transition-all active:scale-95 shadow-sm shadow-primary/20">
-              Deposit
-            </button>
-            <div className="flex items-center gap-2 md:gap-3 border-l border-outline-variant/30 pl-3 md:pl-4">
-              <span className="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors text-[20px] md:text-[24px]">notifications</span>
-              <span onClick={() => navigate('/wallet')} className="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors text-[20px] md:text-[24px] hidden sm:block">account_balance_wallet</span>
-              <div onClick={() => window.innerWidth < 768 ? window.dispatchEvent(new Event('toggle-mobile-menu')) : navigate('/profile')} className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant cursor-pointer hover:border-primary transition-colors ml-1">
-                <img alt="User Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8rnZBb6DNeNhGDYvtVvvofqp-s6sLQVmilHaqeqKBcD-6Mz-EGcqhvwJDsaBzor3-TNIGY7YLMF0PKALoslp4OYBS5ixeDdkQYPZwrzya2HwHdalEYNUi7f1gTmczAlDEcRC8PzfbFV1QluVYj7k6Jb8PjpIY8nX_QEQeBid_xg-qSOW6ZwEVm9A8u9oAw21hdjZ73UmfRwHrvrtfgOGn_5VQHH_Rg6r93mz6P3L7IbsrKZID-y6mrrW9D7gLWmEF7q3E74C9qzfj" />
-              </div>
-            </div>
-          </div>
-        </header>
+        
 
         {/* Canvas Body */}
         <div className="p-4 md:p-margin-desktop flex-1 space-y-4 md:space-y-6 max-w-[1600px] w-full mx-auto">

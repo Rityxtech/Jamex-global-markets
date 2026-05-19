@@ -30,27 +30,7 @@ export default function ConfirmInvestment() {
     return (
         <div className="deep-mesh-bg text-on-surface font-body-md min-h-screen flex flex-col dark bg-background">
             {/* Top Navigation Anchor - Subflow Header */}
-            <header className="fixed top-0 w-full z-50 flex justify-between items-center px-4 md:px-margin-desktop h-14 md:h-16 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 shadow-sm transition-all">
-                <div className="flex items-center gap-3 md:gap-4">
-                    <button 
-                        onClick={() => navigate(-1)} 
-                        className="w-8 h-8 md:w-10 md:h-10 hover:bg-surface-variant/50 rounded-full transition-all flex items-center justify-center border border-outline-variant/20"
-                    >
-                        <span className="material-symbols-outlined text-[20px] md:text-[24px]">arrow_back</span>
-                    </button>
-                    <span className="text-lg md:text-headline-md font-bold text-primary tracking-tight">Confirm Investment</span>
-                </div>
-                <div className="flex items-center gap-4 md:gap-6">
-                    <div className="hidden sm:flex flex-col items-end">
-                        <span className="text-[9px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Main Balance</span>
-                        <span className="text-[11px] md:text-label-md text-primary font-bold font-tabular-nums">$42,500.00</span>
-                    </div>
-                    <div className="hidden sm:block w-px h-6 md:h-8 bg-outline-variant/30"></div>
-                    <div onClick={() => window.innerWidth < 768 ? window.dispatchEvent(new Event('toggle-mobile-menu')) : navigate('/profile')} className="w-7 h-7 md:w-8 md:h-8 rounded-full border border-primary/30 overflow-hidden cursor-pointer hover:border-primary transition-colors">
-                        <img alt="Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCea_efR2jl-VLtvMrPy4h2aCxPDq_OU8qoXlFgjxbrAzuXxVkGAhEmEGqvBz-9SLn2tcFsyaZ8b8HMxBjLxRLvHKmzaabkfGHEoG9m218oaSHL4dIi-CU5gvY6PRlbu6t2mMlS4Ekb_OcEnDsrNcxgoCudQ3ivQkB8M4XUnRBmvOSOQFIWZovfbWXRD7FsIFGjFj0wsAejTV9soedzMV6qHOTsRyWQKyKSHyGyw1aImKkXkOZFrw_NQP5R9OWzhV3bmPCiF5RCwdB"/>
-                    </div>
-                </div>
-            </header>
+            
 
             <main className="pt-20 pb-24 md:pt-24 md:pb-12 px-4 md:px-margin-desktop max-w-[1200px] mx-auto w-full flex-1">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 items-start">

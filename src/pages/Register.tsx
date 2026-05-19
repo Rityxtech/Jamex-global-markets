@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
 export default function Register() {
     const navigate = useNavigate();
@@ -18,17 +19,45 @@ export default function Register() {
     
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const [errorMsg, setErrorMsg] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isProcessing || isSuccess) return;
         
+        setErrorMsg('');
+        if (formData.password !== formData.confirmPassword) {
+            setErrorMsg('Passwords do not match');
+            return;
+        }
+
         setIsProcessing(true);
-        setTimeout(() => {
+        
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email: formData.email,
+                password: formData.password,
+                options: {
+                    data: {
+                        full_name: formData.fullName,
+                        referral_code: formData.referral,
+                    }
+                }
+            });
+
+            if (error) {
+                setErrorMsg(error.message);
+                setIsProcessing(false);
+                return;
+            }
+
             setIsProcessing(false);
             setIsSuccess(true);
-            // In a real app, we would navigate to dashboard or login
             setTimeout(() => navigate('/dashboard'), 1500);
-        }, 1500);
+        } catch (error: any) {
+            setErrorMsg(error.message || 'An error occurred during signup');
+            setIsProcessing(false);
+        }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,15 +77,7 @@ export default function Register() {
              style={{ overflowX: 'hidden' }}>
 
             {/* Navigation Shell */}
-            <header className="fixed top-0 w-full z-50 flex justify-between items-center px-4 md:px-8 h-16 bg-surface/40 backdrop-blur-md">
-                <div className="flex items-center gap-2">
-                    <span className="text-xl md:text-2xl font-bold tracking-tight text-on-surface">Jamex Global Markets</span>
-                </div>
-                <div className="flex gap-4 items-center">
-                    <span className="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">language</span>
-                    <span className="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">security</span>
-                </div>
-            </header>
+            
 
             <main className="flex-grow flex items-center justify-center px-4 py-24">
                 {/* Center Registration Card */}
@@ -70,6 +91,12 @@ export default function Register() {
 
                     {/* Form Content */}
                     <form onSubmit={handleSubmit} className="p-8 space-y-5 relative z-10">
+                        {errorMsg && (
+                            <div className="bg-error/10 border border-error/50 text-error px-4 py-3 rounded-lg text-sm font-bold flex items-center gap-2">
+                                <span className="material-symbols-outlined">error</span>
+                                {errorMsg}
+                            </div>
+                        )}
                         
                         {/* Full Name */}
                         <div className="space-y-2">

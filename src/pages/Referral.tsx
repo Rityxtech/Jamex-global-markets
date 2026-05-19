@@ -18,24 +18,7 @@ export default function Referral() {
 
             <main className="md:ml-64 min-h-screen flex flex-col pt-14 md:pt-16 pb-20 md:pb-0">
                 {/* Top Navigation */}
-                <header className="fixed top-0 right-0 left-0 md:left-64 z-30 bg-surface/90 backdrop-blur-xl h-14 md:h-16 border-b border-outline-variant/20 flex items-center justify-between px-4 md:px-margin-desktop shadow-sm transition-all">
-                    <div className="flex items-center gap-6">
-                        <h1 className="text-xl md:text-headline-md font-bold text-primary tracking-tight md:hidden">Jamex</h1>
-                        <div className="hidden lg:flex items-center bg-surface-container-low px-3 py-1.5 rounded-lg border border-outline-variant/30">
-                            <span className="material-symbols-outlined text-on-surface-variant text-body-md mr-2">search</span>
-                            <input className="bg-transparent border-none outline-none focus:ring-0 text-label-sm text-on-surface placeholder:text-outline w-48" placeholder="Search..." type="text" />
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3 md:gap-4">
-                        <div className="flex items-center gap-2 md:gap-3 border-l border-outline-variant/30 pl-3 md:pl-4">
-                            <span className="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors text-[20px] md:text-[24px]">notifications</span>
-                            <span onClick={() => navigate('/wallet')} className="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors text-[20px] md:text-[24px] hidden sm:block">account_balance_wallet</span>
-                            <div onClick={() => window.innerWidth < 768 ? window.dispatchEvent(new Event('toggle-mobile-menu')) : navigate('/profile')} className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant cursor-pointer hover:border-primary transition-colors ml-1">
-                                <img alt="User Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuozQXlpXVOTSFoXBFXU2RlknBUEkmeyA6___htlrvIf3LODASB5l0nOjYwmEyc75egs6J86-koVeztslzAefgUaA1Gh473YptsRC0Iy3ufmkb4sZdHW6kxaF27bWHOYbwVMq49rCx-yib43L59jnU6-bpB7J5wTx17i-D8Wer8B9R5M2V5SpncN97eBMeLjfJgBV-oNyh51enGeQjvh9JMl6zR-dceiom85LCKWqaZmOkphXyVbZVk8US0X3GASnWOPB9jnxvCXod"/>
-                            </div>
-                        </div>
-                    </div>
-                </header>
+                
 
                 <div className="p-4 md:p-margin-desktop flex-1 space-y-4 md:space-y-6 max-w-[1400px] mx-auto w-full mb-6">
                     {/* Referral Center Header */}

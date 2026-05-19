@@ -15,31 +15,12 @@ export default function Kyc() {
             <Sidebar />
 
             {/* Top Navigation for Mobile (Optional but consistent) */}
-            <header className="fixed top-0 right-0 left-0 md:left-64 z-30 bg-surface/90 backdrop-blur-xl h-14 md:h-16 border-b border-outline-variant/20 flex items-center justify-between px-4 md:px-margin-desktop shadow-sm transition-all md:hidden">
-                <div className="flex items-center gap-6">
-                    <h1 className="text-xl font-bold text-primary tracking-tight">Jamex</h1>
-                </div>
-                <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors text-[20px]">notifications</span>
-                    <div onClick={() => window.innerWidth < 768 ? window.dispatchEvent(new Event('toggle-mobile-menu')) : navigate('/profile')} className="w-7 h-7 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant cursor-pointer hover:border-primary transition-colors">
-                        <img alt="User Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCV6BXZxWJ6LbXOWGErdidLbtVyBnyfGVP0cKohEzMTYXegWfXmmXgo88mavYxu5B5n9cr8dwc8DJQYswc32T_d1lNE2MFl-o7cm5zk06cbQ4i8TBwFvXKNHJeHVB_-Ed1b0GNnBWYvX7DSkdM3ae_XDXLAQ_5jJkLAp4JXHnrMYWyJWjQ0kx6MkKwM7ULwikdT1xiu2uO_lKZlgTCoInhTJ7GbIJQWgqnqSZRA7oHzRrK7GP0lNvtAjTKrp1RHAfTXS0sXAwfQE2im" />
-                    </div>
-                </div>
-            </header>
+            
 
             {/* Main Content Area */}
             <main className="md:ml-64 p-4 md:p-margin-desktop pt-20 md:pt-16 pb-24 md:pb-12 min-h-screen flex flex-col max-w-[1400px] mx-auto w-full">
                 {/* Header / Status Bar */}
-                <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 md:mb-8 gap-3 mt-2 md:mt-4">
-                    <div>
-                        <h2 className="text-2xl md:text-headline-lg font-bold text-on-surface mb-1 tracking-tight">Identity Verification</h2>
-                        <p className="text-[11px] md:text-body-md text-on-surface-variant leading-snug">Complete your KYC to unlock full institutional trading features.</p>
-                    </div>
-                    <div className="flex items-center gap-2 md:gap-3 bg-surface-container-low px-3 py-1.5 md:px-4 md:py-2 rounded-lg border border-outline-variant/30 w-full sm:w-auto mt-1 md:mt-0">
-                        <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-[#f59e0b] animate-pulse shrink-0"></div>
-                        <span className="text-[10px] md:text-sm font-bold text-on-surface uppercase tracking-wider">Status: <span className="text-[#f59e0b]">Pending</span></span>
-                    </div>
-                </header>
+                
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 flex-grow">
                     {/* Left Column: Personal Form */}

@@ -60,7 +60,7 @@ export default function Sidebar() {
             )}
 
             {/* Sidebar */}
-            <aside className={`fixed left-0 top-16 h-[calc(100dvh-132px)] md:h-[calc(100dvh-64px)] w-64 bg-surface-container dark:bg-surface-container border-r border-outline-variant/20 flex flex-col pt-3 pb-1 md:pb-4 z-50 transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 shadow-2xl md:shadow-none`}>
+            <aside className={`fixed left-0 top-14 md:top-16 h-[calc(100dvh-124px)] md:h-[calc(100dvh-64px)] w-64 bg-surface-container dark:bg-surface-container border-r border-outline-variant/20 flex flex-col pt-3 pb-1 md:pb-4 z-50 transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 shadow-2xl md:shadow-none`}>
                 
                 {/* Premium Profile & Quick Actions Section */}
                 <div className="px-3 mb-2">

@@ -24,7 +24,7 @@ export default function Header() {
         scrolled 
           ? 'bg-white/80 backdrop-blur-xl shadow-[0_4px_30px_rgba(37,99,235,0.1)] border-b border-white/40' 
           : 'bg-white/60 backdrop-blur-md border-b border-white/20'
-      } h-16 flex items-center justify-between px-4 md:px-8`}
+      } h-14 md:h-16 flex items-center justify-between px-4 md:px-8`}
     >
       {/* Background glow effect for bright premium feel */}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-transparent pointer-events-none rounded-b-xl"></div>

@@ -32,12 +32,12 @@ export default function BottomNav() {
         <div className="md:hidden fixed bottom-0 left-0 w-full z-50 pointer-events-none" style={{ filter: 'drop-shadow(0 -4px 20px rgba(0,0,0,0.4))' }}>
             <div className="absolute bottom-0 left-0 w-full h-[68px] bg-surface-container-highest pointer-events-auto"
                 style={{
-                    WebkitMaskImage: `url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjY4IiB2aWV3Qm94PSIwIDAgMTAwIDY4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0wLDAgQzE1LDAgMjAsNSAyNSwxNSBDMzMsMzAgNDAsMzYgNTAsMzYgQzYwLDM2IDY3LDMwIDc1LDE1IEM4MCw1IDg1LDAgMTAwLDAgTDEwMCw2OCBMMCw2OCBaIiBmaWxsPSJibGFjayIvPjwvc3ZnPg=='), linear-gradient(black, black), linear-gradient(black, black)`,
-                    WebkitMaskSize: '100px 68px, calc(50% - 50px) 100%, calc(50% - 50px) 100%',
+                    WebkitMaskImage: `url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODQiIGhlaWdodD0iNjgiIHZpZXdCb3g9IjAgMCA4NCA2OCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMCwwIEMxMiwwIDE2LDQgMjAsMTIgQzI2LDI0IDMzLDMyIDQyLDMyIEM1MSwzMiA1OCwyNCA2NCwxMiBDNjgsNCA3MiwwIDg0LDAgTDg0LDY4IEwwLDY4IFoiIGZpbGw9ImJsYWNrIi8+PC9zdmc+'), linear-gradient(black, black), linear-gradient(black, black)`,
+                    WebkitMaskSize: '84px 68px, calc(50% - 42px) 100%, calc(50% - 42px) 100%',
                     WebkitMaskPosition: 'top center, top left, top right',
                     WebkitMaskRepeat: 'no-repeat',
-                    maskImage: `url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjY4IiB2aWV3Qm94PSIwIDAgMTAwIDY4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0wLDAgQzE1LDAgMjAsNSAyNSwxNSBDMzMsMzAgNDAsMzYgNTAsMzYgQzYwLDM2IDY3LDMwIDc1LDE1IEM4MCw1IDg1LDAgMTAwLDAgTDEwMCw2OCBMMCw2OCBaIiBmaWxsPSJibGFjayIvPjwvc3ZnPg=='), linear-gradient(black, black), linear-gradient(black, black)`,
-                    maskSize: '100px 68px, calc(50% - 50px) 100%, calc(50% - 50px) 100%',
+                    maskImage: `url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODQiIGhlaWdodD0iNjgiIHZpZXdCb3g9IjAgMCA4NCA2OCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMCwwIEMxMiwwIDE2LDQgMjAsMTIgQzI2LDI0IDMzLDMyIDQyLDMyIEM1MSwzMiA1OCwyNCA2NCwxMiBDNjgsNCA3MiwwIDg0LDAgTDg0LDY4IEwwLDY4IFoiIGZpbGw9ImJsYWNrIi8+PC9zdmc+'), linear-gradient(black, black), linear-gradient(black, black)`,
+                    maskSize: '84px 68px, calc(50% - 42px) 100%, calc(50% - 42px) 100%',
                     maskPosition: 'top center, top left, top right',
                     maskRepeat: 'no-repeat'
                 }}
@@ -51,8 +51,8 @@ export default function BottomNav() {
                 
                 {/* CENTER FAB */}
                 <Link to="/wallet" className="flex flex-col items-center justify-center w-[20%] h-full relative group">
-                    <div className={`absolute -top-6 w-14 h-14 rounded-full flex items-center justify-center text-white transition-all duration-300 ${isWalletActive ? 'bg-primary scale-105 shadow-[0_0_20px_rgba(37,99,235,0.6)] ring-2 ring-primary ring-offset-2 ring-offset-surface-container-highest' : 'bg-gradient-to-tr from-primary to-tertiary shadow-[0_8px_24px_rgba(37,99,235,0.4)] hover:scale-105 active:scale-95'}`}>
-                        <span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>account_balance_wallet</span>
+                    <div className={`absolute -top-5 w-12 h-12 rounded-full flex items-center justify-center text-white transition-all duration-300 ${isWalletActive ? 'bg-primary scale-105 shadow-[0_0_20px_rgba(37,99,235,0.6)] ring-2 ring-primary ring-offset-2 ring-offset-surface-container-highest' : 'bg-gradient-to-tr from-primary to-tertiary shadow-[0_8px_24px_rgba(37,99,235,0.4)] hover:scale-105 active:scale-95'}`}>
+                        <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>account_balance_wallet</span>
                     </div>
                     <span className={`text-[9px] font-bold uppercase tracking-wider absolute bottom-2 transition-colors ${isWalletActive ? 'text-primary' : 'text-on-surface-variant'}`}>Wallet</span>
                 </Link>

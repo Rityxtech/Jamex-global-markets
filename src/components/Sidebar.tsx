@@ -152,7 +152,7 @@ export default function Sidebar() {
                     </div>
 
                     {/* TRANSACTIONS SECTION */}
-                    <div>
+                    <div className="hidden md:block">
                         <h3 className="px-4 text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest mb-0.5">Transfers</h3>
                         <div className="space-y-0">
                             <Link to="/transactions" className={getLinkClass("/transactions")}>

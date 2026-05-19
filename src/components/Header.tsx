@@ -31,7 +31,7 @@ export default function Header() {
       
       {/* LEFT SIDE: Brand */}
       <div className="flex items-center gap-4 relative z-10">
-        <Link to={isLoggedIn ? "/dashboard" : "/"} className="flex items-center gap-2 group">
+        <Link to="/" className="flex items-center gap-2 group">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2563eb] to-[#b4c5ff] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
             <span className="material-symbols-outlined text-white text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>public</span>
           </div>

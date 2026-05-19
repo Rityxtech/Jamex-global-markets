@@ -141,7 +141,7 @@ export default function Sidebar() {
                                 <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/loans")}>real_estate_agent</span>
                                 <span className="text-sm">Loans</span>
                             </Link>
-                            <Link to="/wallet" className={getLinkClass("/wallet")}>
+                            <Link to="/wallet" className={`${getLinkClass("/wallet")} hidden md:flex`}>
                                 <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/wallet")}>account_balance_wallet</span>
                                 <span className="text-sm">Wallet</span>
                             </Link>
@@ -175,7 +175,7 @@ export default function Sidebar() {
                                 <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/settings")}>settings</span>
                                 <span className="text-sm">Settings</span>
                             </Link>
-                            <Link to="/support" className={getLinkClass("/support")}>
+                            <Link to="/support" className={`${getLinkClass("/support")} hidden md:flex`}>
                                 <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/support")}>headset_mic</span>
                                 <span className="text-sm">Support</span>
                             </Link>

@@ -230,9 +230,9 @@ export default function Wallet() {
           <span className="material-symbols-outlined text-[24px]">receipt_long</span>
           <span className="text-[9px] font-bold uppercase tracking-wider">History</span>
         </Link>
-        <Link to="/settings" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-          <span className="material-symbols-outlined text-[24px]">menu</span>
-          <span className="text-[9px] font-bold uppercase tracking-wider">Menu</span>
+        <Link to="/support" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
+          <span className="material-symbols-outlined text-[24px]">headset_mic</span>
+          <span className="text-[9px] font-bold uppercase tracking-wider">Support</span>
         </Link>
       </nav>
     </div>

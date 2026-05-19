@@ -34,12 +34,14 @@ export default function Sidebar() {
         };
     }, [isMobileMenuOpen]);
 
-    const getLinkClass = (path: string) => {
+    const getLinkClass = (path: string, hideOnMobile: boolean = false) => {
         const isActive = location.pathname === path;
+        const displayClass = hideOnMobile ? 'hidden md:flex' : 'flex';
+        
         if (isActive) {
-            return "flex items-center gap-3 px-4 py-1.5 bg-primary/10 text-primary rounded-xl font-bold transition-all duration-300";
+            return `${displayClass} items-center gap-3 px-4 py-1.5 bg-primary/10 text-primary transition-all duration-300 rounded-xl font-bold border border-primary/20 shadow-sm shadow-primary/5`;
         }
-        return "flex items-center gap-3 px-4 py-1.5 text-on-surface-variant hover:bg-surface-variant/30 hover:text-on-surface transition-all duration-300 rounded-xl font-medium";
+        return `${displayClass} items-center gap-3 px-4 py-1.5 text-on-surface-variant hover:bg-surface-variant/30 hover:text-on-surface transition-all duration-300 rounded-xl font-medium border border-transparent`;
     };
 
     const getIconStyle = (path: string) => {
@@ -141,7 +143,7 @@ export default function Sidebar() {
                                 <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/loans")}>real_estate_agent</span>
                                 <span className="text-sm">Loans</span>
                             </Link>
-                            <Link to="/wallet" className={`${getLinkClass("/wallet")} hidden md:flex`}>
+                            <Link to="/wallet" className={getLinkClass("/wallet", true)}>
                                 <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/wallet")}>account_balance_wallet</span>
                                 <span className="text-sm">Wallet</span>
                             </Link>
@@ -175,7 +177,7 @@ export default function Sidebar() {
                                 <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/settings")}>settings</span>
                                 <span className="text-sm">Settings</span>
                             </Link>
-                            <Link to="/support" className={`${getLinkClass("/support")} hidden md:flex`}>
+                            <Link to="/support" className={getLinkClass("/support", true)}>
                                 <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/support")}>headset_mic</span>
                                 <span className="text-sm">Support</span>
                             </Link>

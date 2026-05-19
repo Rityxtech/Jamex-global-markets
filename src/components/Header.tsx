@@ -35,8 +35,9 @@ export default function Header() {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2563eb] to-[#b4c5ff] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
             <span className="material-symbols-outlined text-white text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>public</span>
           </div>
-          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#0d1322] to-[#2563eb] tracking-tight">
-            Jamex Global
+          <span className="text-base md:text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#0d1322] to-[#2563eb] tracking-tight">
+            <span className="md:hidden">Jamex</span>
+            <span className="hidden md:inline">Jamex Global</span>
           </span>
         </Link>
         
@@ -65,11 +66,11 @@ export default function Header() {
       {/* RIGHT SIDE: Auth Buttons / Profile & Fake Logo */}
       <div className="flex items-center gap-4 relative z-10">
         {!isLoggedIn ? (
-          <div className="hidden sm:flex items-center gap-3">
-            <Link to="/login" className="px-5 py-2 text-sm font-bold text-[#0d1322] hover:text-[#2563eb] transition-colors">
+          <div className="flex items-center gap-1 sm:gap-3">
+            <Link to="/login" className="px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-[#0d1322] hover:text-[#2563eb] transition-colors">
               Sign In
             </Link>
-            <Link to="/register" className="px-5 py-2 text-sm font-bold bg-[#2563eb] text-white rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 transition-all">
+            <Link to="/register" className="px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold bg-[#2563eb] text-white rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 transition-all">
               Get Started
             </Link>
           </div>

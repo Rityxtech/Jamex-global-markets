@@ -1,0 +1,304 @@
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+
+export default function Home() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="deep-mesh-bg text-on-surface font-body-md selection:bg-primary/30 min-h-screen dark">
+      <header className="fixed top-0 w-full z-50 flex justify-between items-center px-margin-desktop h-16 bg-surface/80 backdrop-blur-md dark:bg-surface/80 border-b border-outline-variant/30 shadow-sm">
+        <div className="flex items-center gap-8">
+          <span className="text-headline-md font-headline-md font-bold text-primary tracking-tight">Jamex Global Markets</span>
+          <nav className="hidden md:flex items-center gap-6">
+            <Link to="/dashboard" className="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200">Dashboard</Link>
+            <Link to="/market" className="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200">Market</Link>
+            <Link to="/invest" className="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200">Wealth</Link>
+            <Link to="/wallet" className="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200">Wallet</Link>
+          </nav>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="hidden lg:flex items-center bg-surface-container rounded-lg px-3 py-1.5 border border-outline-variant/30">
+            <span className="material-symbols-outlined text-on-surface-variant text-body-md" data-icon="search">search</span>
+            <input className="bg-transparent border-none focus:ring-0 text-label-sm w-48 text-on-surface outline-none placeholder-gray-500" placeholder="Search markets..." type="text" />
+          </div>
+          <div className="flex items-center gap-3">
+            <button className="text-on-surface-variant hover:text-primary transition-colors">
+              <span className="material-symbols-outlined" data-icon="notifications">notifications</span>
+            </button>
+            <button className="text-on-surface-variant hover:text-primary transition-colors cursor-pointer" onClick={() => navigate('/deposit')}>
+              <span className="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+            </button>
+            <button onClick={() => navigate('/deposit')} className="cursor-pointer bg-primary-container text-on-primary-container px-4 py-1.5 font-label-sm text-label-sm rounded hover:opacity-90 active:scale-95 transition-all">Deposit</button>
+            <div className="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant flex items-center justify-center overflow-hidden">
+              <img alt="User Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJkx9uKfepPHrjU3IumIxK8Fd2b-9BYt4sQrEHNCb0qp_EDEoFZ2uE0BNhpR0nm0jIspYGxIgqjfD1s2iNzjpNxTcZ6fGHyiLTdzX9TZOeCrYQJdM7jPOUuBaMwzWGdNunUJ-uWM_DivJnv13mtfaAuVqqJJPYbwc8PQf-D5unykooiaS9NotEAcqXBhqHzHf9oAMFy5w1SP7lCkZSNDNPrhnZi5xz1SZBLEpmfYABtKc3iCEXiQCv9IQydmvQgqJrsrA0KyzuCWnc" />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="pt-16">
+        <section className="relative min-h-[870px] flex items-center justify-center mesh-gradient px-margin-desktop py-section-padding-v overflow-hidden">
+          <div className="absolute inset-0 opacity-20 pointer-events-none">
+            <div className="absolute top-0 left-0 w-full h-full" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
+          </div>
+          <div className="relative z-10 max-w-5xl text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 glass-card rounded-full mb-6 border-primary/20">
+              <span className="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_8px_rgba(78,222,163,0.5)]"></span>
+              <span className="text-label-sm font-label-sm text-tertiary tracking-wider uppercase">Institutional Access Now Live</span>
+            </div>
+            <h1 className="font-display-lg text-display-lg text-on-surface mb-6 tracking-tight">
+              Institutional Grade <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">Digital Wealth</span> Management
+            </h1>
+            <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto mb-10 leading-relaxed">
+              Unlocking the future of finance with institutional-grade security, deep liquidity, and professional-grade trading tools for global markets.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button onClick={() => navigate('/register')} className="cursor-pointer bg-primary-container text-on-primary-container px-8 py-4 font-headline-md text-body-md rounded-lg shadow-lg shadow-primary-container/20 hover:opacity-90 active:scale-95 transition-all">
+                Get Started
+              </button>
+              <button onClick={() => navigate('/market')} className="cursor-pointer glass-card text-on-surface px-8 py-4 font-headline-md text-body-md rounded-lg hover:border-primary/50 transition-all">
+                View Markets
+              </button>
+            </div>
+            <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div className="text-center">
+                <div className="text-headline-md font-headline-md text-primary mb-1">$42.8B+</div>
+                <div className="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest">AUM Managed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-headline-md font-headline-md text-primary mb-1">0.01s</div>
+                <div className="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest">Execution Speed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-headline-md font-headline-md text-primary mb-1">24/7</div>
+                <div className="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest">Expert Support</div>
+              </div>
+              <div className="text-center">
+                <div className="text-headline-md font-headline-md text-primary mb-1">150+</div>
+                <div className="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest">Digital Assets</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="landing-ticker-wrap h-12 border-y border-outline-variant/20 flex items-center">
+          <div className="landing-ticker-move flex items-center gap-12 whitespace-nowrap px-8">
+            <div className="flex items-center gap-2">
+              <span className="text-label-sm font-label-sm text-on-surface">BTC/USD</span>
+              <span className="text-tabular-nums text-tertiary font-tabular-nums">64,231.50</span>
+              <span className="material-symbols-outlined text-[14px] text-tertiary" data-icon="north_east">north_east</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-label-sm font-label-sm text-on-surface">ETH/USD</span>
+              <span className="text-tabular-nums text-tertiary font-tabular-nums">3,452.12</span>
+              <span className="material-symbols-outlined text-[14px] text-tertiary" data-icon="north_east">north_east</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-label-sm font-label-sm text-on-surface">XAU/USD</span>
+              <span className="text-tabular-nums text-error font-tabular-nums">2,341.05</span>
+              <span className="material-symbols-outlined text-[14px] text-error" data-icon="south_east">south_east</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-label-sm font-label-sm text-on-surface">USDT/USD</span>
+              <span className="text-tabular-nums text-on-surface-variant font-tabular-nums">1.0001</span>
+              <span className="material-symbols-outlined text-[14px] text-on-surface-variant" data-icon="horizontal_rule">horizontal_rule</span>
+            </div>
+            {/* Duplicate for infinite loop effect */}
+            <div className="flex items-center gap-2">
+              <span className="text-label-sm font-label-sm text-on-surface">BTC/USD</span>
+              <span className="text-tabular-nums text-tertiary font-tabular-nums">64,231.50</span>
+              <span className="material-symbols-outlined text-[14px] text-tertiary" data-icon="north_east">north_east</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-label-sm font-label-sm text-on-surface">ETH/USD</span>
+              <span className="text-tabular-nums text-tertiary font-tabular-nums">3,452.12</span>
+              <span className="material-symbols-outlined text-[14px] text-tertiary" data-icon="north_east">north_east</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-label-sm font-label-sm text-on-surface">XAU/USD</span>
+              <span className="text-tabular-nums text-error font-tabular-nums">2,341.05</span>
+              <span className="material-symbols-outlined text-[14px] text-error" data-icon="south_east">south_east</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 px-margin-desktop max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+            <div className="max-w-xl">
+              <h2 className="font-headline-lg text-headline-lg text-on-surface mb-4">Our Wealth Solutions</h2>
+              <p className="font-body-md text-body-md text-on-surface-variant">Sophisticated investment vehicles tailored for high-net-worth individuals and corporate entities.</p>
+            </div>
+            <button className="text-primary font-label-md text-label-md flex items-center gap-2 hover:underline cursor-pointer" onClick={() => navigate('/invest')}>
+              Explore all solutions <span className="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+            <div className="glass-card p-6 rounded-xl hover:border-primary/40 transition-all group">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                <span className="material-symbols-outlined text-[28px]" data-icon="account_balance">account_balance</span>
+              </div>
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-3">Institutional Custody</h3>
+              <p className="font-body-md text-body-md text-on-surface-variant mb-6">Secured vaulting and multi-signature cold storage for digital assets with top-tier insurance coverage.</p>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-2 text-label-sm font-label-sm text-on-surface-variant">
+                  <span className="material-symbols-outlined text-tertiary text-[16px]" data-icon="check_circle">check_circle</span>
+                  Cold Storage Architecture
+                </li>
+                <li className="flex items-center gap-2 text-label-sm font-label-sm text-on-surface-variant">
+                  <span className="material-symbols-outlined text-tertiary text-[16px]" data-icon="check_circle">check_circle</span>
+                  Insurance Backed
+                </li>
+              </ul>
+            </div>
+            <div className="glass-card p-6 rounded-xl hover:border-primary/40 transition-all group">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                <span className="material-symbols-outlined text-[28px]" data-icon="monitoring">monitoring</span>
+              </div>
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-3">Trading Contracts</h3>
+              <p className="font-body-md text-body-md text-on-surface-variant mb-6">Advanced derivative instruments and liquidity solutions for hedging and alpha generation.</p>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-2 text-label-sm font-label-sm text-on-surface-variant">
+                  <span className="material-symbols-outlined text-tertiary text-[16px]" data-icon="check_circle">check_circle</span>
+                  Leveraged Exposures
+                </li>
+                <li className="flex items-center gap-2 text-label-sm font-label-sm text-on-surface-variant">
+                  <span className="material-symbols-outlined text-tertiary text-[16px]" data-icon="check_circle">check_circle</span>
+                  Real-time Risk Metrics
+                </li>
+              </ul>
+            </div>
+            <div className="glass-card p-6 rounded-xl hover:border-primary/40 transition-all group">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                <span className="material-symbols-outlined text-[28px]" data-icon="diamond">diamond</span>
+              </div>
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-3">Private Wealth</h3>
+              <p className="font-body-md text-body-md text-on-surface-variant mb-6">Bespoke portfolio management and personalized advisory services for the digital frontier.</p>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-2 text-label-sm font-label-sm text-on-surface-variant">
+                  <span className="material-symbols-outlined text-tertiary text-[16px]" data-icon="check_circle">check_circle</span>
+                  Tax Efficiency Focus
+                </li>
+                <li className="flex items-center gap-2 text-label-sm font-label-sm text-on-surface-variant">
+                  <span className="material-symbols-outlined text-tertiary text-[16px]" data-icon="check_circle">check_circle</span>
+                  Dedicated Relationship Lead
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-surface-container py-20 px-margin-desktop">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="relative">
+              <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-[80px]"></div>
+              <div className="relative glass-card p-4 rounded-2xl">
+                <img alt="Security Infrastructure" className="rounded-xl w-full aspect-video object-cover grayscale opacity-80 hover:grayscale-0 transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNt_9Oc0JcjbioZaOzFWDqiMucZo12wbDb4XmKJVk9PMKJ5Ecs6g5phxEKJ5UyiDAzkqFhm0zd8h5_iHPs2Y_NRyQsg9arEE_oNOyM3wRVn6FLzQWpzuZVHtIFSXypoxvLgyhlxvpHsQ95H2nu2-WGdNNjTOCDy_z6N15Oi2tWoiJUOAnxzhsxcSieQtNszV5jcO4AvnMD-W0wc3N5zEMtIzACGFK8Nrf1vv1oXwsgM9Fn1hXmaAIStqQF8zRCgxe_yMniJd7LI0Hb" />
+                <div className="absolute bottom-8 right-8 glass-card p-6 rounded-lg border-tertiary/20 max-w-xs shadow-2xl">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="material-symbols-outlined text-tertiary" data-icon="verified_user" style={{ fontVariationSettings: "'FILL' 1" }}>verified_user</span>
+                    <span className="text-label-md font-label-md text-on-surface">SOC2 Type II Certified</span>
+                  </div>
+                  <p className="text-label-sm font-label-sm text-on-surface-variant">Our infrastructure meets the highest global standards for financial security.</p>
+                </div>
+              </div>
+            </div>
+            <div>
+              <span className="text-label-sm font-label-sm text-primary uppercase tracking-[0.2em] block mb-4">Security First</span>
+              <h2 className="font-headline-lg text-headline-lg text-on-surface mb-6">Institutional Grade Security &amp; Compliance</h2>
+              <div className="space-y-8">
+                <div className="flex gap-4">
+                  <div className="mt-1">
+                    <span className="material-symbols-outlined text-primary" data-icon="v_key">key</span>
+                  </div>
+                  <div>
+                    <h4 className="font-headline-md text-body-md font-bold text-on-surface mb-2">Biometric 2FA &amp; Multi-Sig</h4>
+                    <p className="font-body-md text-body-md text-on-surface-variant">Every transaction requires multi-factor authentication and multi-signature authorization from geographically dispersed vaults.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="mt-1">
+                    <span className="material-symbols-outlined text-primary" data-icon="policy">policy</span>
+                  </div>
+                  <div>
+                    <h4 className="font-headline-md text-body-md font-bold text-on-surface mb-2">Automated KYC/AML</h4>
+                    <p className="font-body-md text-body-md text-on-surface-variant">Real-time compliance monitoring using industry-leading forensic tools to ensure a secure ecosystem for all institutional participants.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="mt-1">
+                    <span className="material-symbols-outlined text-primary" data-icon="shield">shield</span>
+                  </div>
+                  <div>
+                    <h4 className="font-headline-md text-body-md font-bold text-on-surface mb-2">Advanced Encryption</h4>
+                    <p className="font-body-md text-body-md text-on-surface-variant">End-to-end AES-256 bit encryption for all data at rest and in transit, protected by hardware security modules (HSM).</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-24 px-margin-desktop text-center">
+          <h2 className="font-headline-lg text-headline-lg text-on-surface mb-4">Global Reach, Local Presence</h2>
+          <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto mb-16">Jamex Global Markets serves institutions and private wealth clients across 50+ jurisdictions with local regulatory expertise.</p>
+          <div className="relative w-full max-w-5xl mx-auto h-[400px] glass-card rounded-3xl overflow-hidden border-outline-variant/30">
+            <img alt="Global Network" className="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-1000" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4LgdCbea3Vzl_UuVkRAD-ucOjst_veUgZELvHaoGVURbKre1PDhZuf8oRN_HZ1bfcTIIDV-bwYYvLb3XKu-O4MyGTtfRL2HVzRwrBrRl-woYvprZe2yNhCgkoF4ASOeE72ARHRN8DFS_Ffrepa2WLBrKPi6M__T0UeHXGF58Ton9vqO1-wCSy-ipdRiLQmAAb-6Eas6lu517q4UcqgHf1gFeCB7Eo-bwBlhZt2wLYkT20yrUnEznixk4Y4o0xYubQqfPcIF_KHMCC" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div className="p-4 glass-card rounded-xl">
+                  <div className="text-headline-md font-headline-md text-on-surface">50+</div>
+                  <div className="text-label-sm font-label-sm text-on-surface-variant">Countries</div>
+                </div>
+                <div className="p-4 glass-card rounded-xl">
+                  <div className="text-headline-md font-headline-md text-on-surface">12</div>
+                  <div className="text-label-sm font-label-sm text-on-surface-variant">Global Offices</div>
+                </div>
+                <div className="p-4 glass-card rounded-xl">
+                  <div className="text-headline-md font-headline-md text-on-surface">24/7</div>
+                  <div className="text-label-sm font-label-sm text-on-surface-variant">Support</div>
+                </div>
+                <div className="p-4 glass-card rounded-xl">
+                  <div className="text-headline-md font-headline-md text-on-surface">1ms</div>
+                  <div className="text-label-sm font-label-sm text-on-surface-variant">Latency</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 px-margin-desktop">
+          <div className="max-w-7xl mx-auto bg-primary-container rounded-3xl p-12 text-center relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%)', backgroundSize: '20px 20px' }}></div>
+            <h2 className="font-display-lg text-display-lg text-on-primary-container mb-6 relative z-10">Ready to institutionalize your portfolio?</h2>
+            <p className="font-body-lg text-body-lg text-on-primary-container/80 max-w-xl mx-auto mb-10 relative z-10">Join the world's leading family offices and institutional traders on the most secure wealth platform.</p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
+              <button className="cursor-pointer bg-on-primary-container text-primary-container px-10 py-4 font-headline-md text-body-md rounded-xl hover:opacity-90 transition-all font-bold">Contact Sales</button>
+              <button onClick={() => navigate('/register')} className="cursor-pointer bg-primary-container border-2 border-on-primary-container/30 text-on-primary-container px-10 py-4 font-headline-md text-body-md rounded-xl hover:bg-on-primary-container hover:text-primary-container transition-all">Get Started</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="w-full py-12 px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-4 bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant/10">
+        <div className="flex flex-col gap-2">
+          <span className="text-headline-md font-headline-md font-bold text-primary">Jamex Global</span>
+          <p className="text-label-sm font-label-sm text-on-surface-variant max-w-sm">© 2024 Jamex Global Markets. Regulated Institutional Wealth Management.</p>
+        </div>
+        <div className="flex flex-wrap justify-center gap-6">
+          <a className="text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Terms of Service</a>
+          <a className="text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Privacy Policy</a>
+          <a className="text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Risk Disclosure</a>
+          <a className="text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Security</a>
+        </div>
+        <div className="flex gap-4">
+          <a className="w-10 h-10 rounded-full glass-card flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">
+            <span className="material-symbols-outlined" data-icon="public">public</span>
+          </a>
+          <a className="w-10 h-10 rounded-full glass-card flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">
+            <span className="material-symbols-outlined" data-icon="support_agent">support_agent</span>
+          </a>
+        </div>
+      </footer>
+    </div>
+  );
+}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import BottomNav from '../components/BottomNav';
 
 export default function Loans() {
     const navigate = useNavigate();
@@ -264,30 +265,8 @@ export default function Loans() {
                 </div>
             </main>
 
-            {/* Mobile Bottom NavBar */}
-            <nav className="md:hidden fixed bottom-0 left-0 w-full h-[68px] bg-surface/95 backdrop-blur-xl border-t border-outline-variant/20 flex justify-between items-center px-2 z-50 pb-safe shadow-[0_-4px_24px_rgba(0,0,0,0.4)]">
-                <Link to="/dashboard" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">dashboard</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
-                </Link>
-                <Link to="/invest" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">account_balance</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Invest</span>
-                </Link>
-                <Link to="/loans" className="flex flex-col items-center justify-center w-full h-full gap-1 text-primary relative">
-                    <div className="absolute -top-3 w-10 h-1 bg-primary rounded-b-full"></div>
-                    <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>real_estate_agent</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Loans</span>
-                </Link>
-                <Link to="/wallet" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Wallet</span>
-                </Link>
-                <Link to="/support" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">headset_mic</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Support</span>
-                </Link>
-            </nav>
+            <BottomNav />
+            
         </div>
     );
 }

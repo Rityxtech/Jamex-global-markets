@@ -37,11 +37,12 @@ export default function Sidebar() {
     const getLinkClass = (path: string, hideOnMobile: boolean = false) => {
         const isActive = location.pathname === path;
         const displayClass = hideOnMobile ? 'hidden md:flex' : 'flex';
+        const baseClass = `${displayClass} items-center gap-3 px-4 h-10 transition-all duration-300 rounded-xl whitespace-nowrap`;
         
         if (isActive) {
-            return `${displayClass} items-center gap-3 px-4 py-1.5 bg-primary/10 text-primary transition-all duration-300 rounded-xl font-bold border border-primary/20 shadow-sm shadow-primary/5`;
+            return `${baseClass} bg-primary/10 text-primary font-bold border border-primary/20 shadow-sm shadow-primary/5`;
         }
-        return `${displayClass} items-center gap-3 px-4 py-1.5 text-on-surface-variant hover:bg-surface-variant/30 hover:text-on-surface transition-all duration-300 rounded-xl font-medium border border-transparent`;
+        return `${baseClass} text-on-surface-variant hover:bg-surface-variant/30 hover:text-on-surface font-medium border border-transparent`;
     };
 
     const getIconStyle = (path: string) => {
@@ -59,7 +60,7 @@ export default function Sidebar() {
             )}
 
             {/* Sidebar */}
-            <aside className={`fixed left-0 top-16 h-[calc(100vh-132px)] md:h-[calc(100vh-64px)] w-64 bg-surface-container dark:bg-surface-container border-r border-outline-variant/20 flex flex-col pt-3 pb-1 md:pb-4 z-50 transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 shadow-2xl md:shadow-none`}>
+            <aside className={`fixed left-0 top-16 h-[calc(100dvh-132px)] md:h-[calc(100dvh-64px)] w-64 bg-surface-container dark:bg-surface-container border-r border-outline-variant/20 flex flex-col pt-3 pb-1 md:pb-4 z-50 transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 shadow-2xl md:shadow-none`}>
                 
                 {/* Premium Profile & Quick Actions Section */}
                 <div className="px-3 mb-2">
@@ -184,7 +185,7 @@ export default function Sidebar() {
                             <button onClick={async () => {
                                 await useAuthStore.getState().signOut();
                                 navigate('/login');
-                            }} className="w-full flex items-center gap-3 px-4 py-2 mt-2 text-error bg-error/10 hover:bg-error/20 transition-all duration-300 rounded-xl font-bold text-left shadow-sm border border-error/20">
+                            }} className="w-full flex items-center gap-3 px-4 h-10 mt-2 text-error bg-error/10 hover:bg-error/20 transition-all duration-300 rounded-xl font-bold text-left shadow-sm border border-error/20">
                                 <span className="material-symbols-outlined text-[20px]">logout</span>
                                 <span className="text-sm">Logout</span>
                             </button>

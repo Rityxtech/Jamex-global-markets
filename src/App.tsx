@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Invest from './pages/Invest';
@@ -22,6 +22,16 @@ import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import { useAuthStore } from './store/authStore';
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 export default function App() {
   const { initialize } = useAuthStore();
 
@@ -31,6 +41,7 @@ export default function App() {
 
   return (
     <BrowserRouter basename="/Jamex-global-markets">
+      <ScrollToTop />
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />

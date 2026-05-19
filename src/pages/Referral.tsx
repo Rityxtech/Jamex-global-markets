@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import BottomNav from '../components/BottomNav';
 
 export default function Referral() {
     const navigate = useNavigate();
@@ -22,13 +23,9 @@ export default function Referral() {
 
                 <div className="p-4 md:p-margin-desktop flex-1 space-y-4 md:space-y-6 max-w-[1400px] mx-auto w-full mb-6">
                     {/* Referral Center Header */}
-                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 md:gap-6 mt-2 md:mt-4">
-                        <div>
-                            <h1 className="text-2xl md:text-headline-lg font-bold text-on-surface tracking-tight mb-1">Referral Center</h1>
-                            <p className="text-[11px] md:text-body-md text-on-surface-variant leading-snug">Manage your institutional network and earned commissions.</p>
-                        </div>
+                    <div className="flex flex-col mt-2 md:mt-4 w-full">
                         {/* Quick Share Card */}
-                        <div className="glass-card p-3 md:p-4 rounded-xl flex flex-col sm:flex-row items-center gap-2 md:gap-4 w-full lg:w-auto min-w-0 lg:min-w-[350px] border border-outline-variant/20">
+                        <div className="glass-card p-3 md:p-4 rounded-xl flex flex-col sm:flex-row items-center gap-2 md:gap-4 w-full border border-outline-variant/20">
                             <div className="flex-1 w-full">
                                 <p className="text-[9px] md:text-label-sm text-primary mb-1 md:mb-1.5 font-bold uppercase tracking-wider">Your Unique Invite Link</p>
                                 <div className="flex bg-surface-container-lowest border border-outline-variant/50 rounded-lg p-1">
@@ -262,30 +259,8 @@ export default function Referral() {
                 </div>
             </main>
 
-            {/* Mobile Bottom Navigation */}
-            <nav className="md:hidden fixed bottom-0 left-0 w-full h-[68px] bg-surface/95 backdrop-blur-xl border-t border-outline-variant/20 flex justify-between items-center px-2 z-50 pb-safe shadow-[0_-4px_24px_rgba(0,0,0,0.4)]">
-                <Link to="/dashboard" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">dashboard</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
-                </Link>
-                <Link to="/invest" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">account_balance</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Invest</span>
-                </Link>
-                <Link to="/wallet" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Wallet</span>
-                </Link>
-                <Link to="/referrals" className="flex flex-col items-center justify-center w-full h-full gap-1 text-primary relative">
-                    <div className="absolute -top-3 w-10 h-1 bg-primary rounded-b-full"></div>
-                    <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>groups</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Referrals</span>
-                </Link>
-                <Link to="/support" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">headset_mic</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Support</span>
-                </Link>
-            </nav>
+            <BottomNav />
+            
         </div>
     );
 }

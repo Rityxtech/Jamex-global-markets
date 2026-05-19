@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import BottomNav from '../components/BottomNav';
 
 export default function TransactionHistory() {
     const navigate = useNavigate();
@@ -13,23 +14,7 @@ export default function TransactionHistory() {
                 
 
                 <div className="p-4 md:p-margin-desktop flex-1 space-y-4 md:space-y-6 max-w-[1600px] mx-auto w-full mb-6">
-                    {/* Header Section */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 md:gap-4 mt-2 md:mt-4">
-                        <div>
-                            <h1 className="text-2xl md:text-headline-lg font-bold text-on-surface tracking-tight mb-1">Transaction History</h1>
-                            <p className="text-[11px] md:text-body-md text-on-surface-variant leading-snug">Comprehensive log of institutional movements and trading yields.</p>
-                        </div>
-                        <div className="flex gap-2 w-full sm:w-auto">
-                            <button className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-surface-container-low rounded-lg border border-outline-variant/50 text-[10px] md:text-label-md font-bold uppercase tracking-wider hover:border-primary hover:text-primary transition-colors">
-                                <span className="material-symbols-outlined text-[16px] md:text-[18px]">download</span>
-                                Export CSV
-                            </button>
-                            <button className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-surface-container-low rounded-lg border border-outline-variant/50 text-[10px] md:text-label-md font-bold uppercase tracking-wider hover:border-primary hover:text-primary transition-colors">
-                                <span className="material-symbols-outlined text-[16px] md:text-[18px]">print</span>
-                                Print
-                            </button>
-                        </div>
-                    </div>
+
 
                     {/* Filters Bento Grid */}
                     <div className="glass-card rounded-xl p-4 md:p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 border border-outline-variant/20">
@@ -262,30 +247,8 @@ export default function TransactionHistory() {
                 </div>
             </main>
 
-            {/* Mobile Bottom NavBar - 5 sleek items */}
-            <nav className="md:hidden fixed bottom-0 left-0 w-full h-[68px] bg-surface/95 backdrop-blur-xl border-t border-outline-variant/20 flex justify-between items-center px-2 z-50 pb-safe shadow-[0_-4px_24px_rgba(0,0,0,0.4)]">
-                <Link to="/dashboard" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">dashboard</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
-                </Link>
-                <Link to="/invest" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">account_balance</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Invest</span>
-                </Link>
-                <Link to="/wallet" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Wallet</span>
-                </Link>
-                <Link to="/transactions" className="flex flex-col items-center justify-center w-full h-full gap-1 text-primary relative">
-                    <div className="absolute -top-3 w-10 h-1 bg-primary rounded-b-full"></div>
-                    <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>receipt_long</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">History</span>
-                </Link>
-                <Link to="/support" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">headset_mic</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Support</span>
-                </Link>
-            </nav>
+            <BottomNav />
+            
         </div>
     );
 }

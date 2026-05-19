@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import BottomNav from '../components/BottomNav';
 
 export default function Withdraw() {
     const navigate = useNavigate();
@@ -38,17 +39,7 @@ export default function Withdraw() {
                 
 
                 <div className="p-4 md:p-margin-desktop flex-1 space-y-4 md:space-y-6 max-w-[1200px] mx-auto w-full mb-6">
-                    {/* Page Header */}
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 md:gap-4 mt-2 md:mt-4">
-                        <div>
-                            <h1 className="text-2xl md:text-headline-lg font-bold text-on-surface tracking-tight mb-1">Withdraw Funds</h1>
-                            <p className="text-[11px] md:text-body-md text-on-surface-variant leading-snug">Transfer assets securely to external wallets or institutional accounts.</p>
-                        </div>
-                        <div className="flex items-center justify-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 bg-error/10 border border-error/20 rounded-lg text-error text-[10px] md:text-label-sm animate-pulse font-bold uppercase tracking-wider w-full md:w-auto mt-1 md:mt-0">
-                            <span className="material-symbols-outlined text-[16px] md:text-[18px]">verified_user</span>
-                            Security Mode Active
-                        </div>
-                    </div>
+
 
                     {/* Bento Layout Content */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-6">
@@ -292,30 +283,8 @@ export default function Withdraw() {
                 </div>
             </main>
 
-            {/* Mobile Bottom NavBar - 5 sleek items */}
-            <nav className="md:hidden fixed bottom-0 left-0 w-full h-[68px] bg-surface/95 backdrop-blur-xl border-t border-outline-variant/20 flex justify-between items-center px-2 z-50 pb-safe shadow-[0_-4px_24px_rgba(0,0,0,0.4)]">
-                <Link to="/dashboard" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">dashboard</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
-                </Link>
-                <Link to="/invest" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">account_balance</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Invest</span>
-                </Link>
-                <Link to="/wallet" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Wallet</span>
-                </Link>
-                <Link to="/transactions" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">receipt_long</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">History</span>
-                </Link>
-                <Link to="/withdraw" className="flex flex-col items-center justify-center w-full h-full gap-1 text-primary relative">
-                    <div className="absolute -top-3 w-10 h-1 bg-primary rounded-b-full"></div>
-                    <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>exit_to_app</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Withdraw</span>
-                </Link>
-            </nav>
+            <BottomNav />
+            
         </div>
     );
 }

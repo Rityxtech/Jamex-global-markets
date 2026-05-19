@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import BottomNav from '../components/BottomNav';
 
 export default function Invest() {
     const navigate = useNavigate();
@@ -38,10 +39,7 @@ export default function Invest() {
                 <div className="p-4 md:p-margin-desktop flex-1 space-y-4 md:space-y-6 max-w-[1600px] mx-auto w-full mb-6">
                     {/* Page Header */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-2 md:mb-8 gap-3 md:gap-4">
-                        <div>
-                            <h2 className="font-bold text-2xl md:text-headline-lg text-on-surface tracking-tight mb-1">Investment Analytics</h2>
-                            <p className="text-[11px] md:text-body-md text-on-surface-variant leading-snug">Institutional portfolio tracking and return forecasting.</p>
-                        </div>
+
                         <div className="flex gap-2 md:gap-4 w-full sm:w-auto">
                             <div className="glass-card p-3 md:px-6 md:py-3 rounded-xl flex flex-col flex-1 min-w-0 md:min-w-[180px] border border-outline-variant/20">
                                 <span className="text-[9px] md:text-label-sm text-on-surface-variant uppercase font-bold tracking-wider mb-0.5">Portfolio Value</span>
@@ -272,30 +270,8 @@ export default function Invest() {
                 </div>
             </main>
 
-            {/* Mobile Bottom NavBar - 5 sleek items */}
-            <nav className="md:hidden fixed bottom-0 left-0 w-full h-[68px] bg-surface/95 backdrop-blur-xl border-t border-outline-variant/20 flex justify-between items-center px-2 z-50 pb-safe shadow-[0_-4px_24px_rgba(0,0,0,0.4)]">
-                <Link to="/dashboard" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">dashboard</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
-                </Link>
-                <Link to="/invest" className="flex flex-col items-center justify-center w-full h-full gap-1 text-primary relative">
-                    <div className="absolute -top-3 w-10 h-1 bg-primary rounded-b-full"></div>
-                    <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>account_balance</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Invest</span>
-                </Link>
-                <Link to="/wallet" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Wallet</span>
-                </Link>
-                <Link to="/transactions" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">receipt_long</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">History</span>
-                </Link>
-                <Link to="/support" className="flex flex-col items-center justify-center w-full h-full gap-1 text-on-surface-variant hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">headset_mic</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Support</span>
-                </Link>
-            </nav>
+            <BottomNav />
+            
         </div>
     );
 }

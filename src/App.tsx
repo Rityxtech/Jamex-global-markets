@@ -21,7 +21,7 @@ import Loans from './pages/Loans';
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/Jamex-global-markets">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />

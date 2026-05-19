@@ -20,9 +20,7 @@ export default function Header() {
 
   return (
     <header 
-      className={`fixed top-0 right-0 z-[60] transition-all duration-300 ${
-        isLoggedIn ? 'left-0 md:left-64' : 'left-0'
-      } ${
+      className={`fixed top-0 right-0 left-0 z-[60] transition-all duration-300 ${
         scrolled 
           ? 'bg-white/80 backdrop-blur-xl shadow-[0_4px_30px_rgba(37,99,235,0.1)] border-b border-white/40' 
           : 'bg-white/60 backdrop-blur-md border-b border-white/20'

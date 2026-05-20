@@ -1,23 +1,11 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import BottomNav from '../components/BottomNav';
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
   return (
-    <div className="deep-mesh-bg text-on-surface selection:bg-primary/30 min-h-screen dark bg-background">
-      {/* SideNavBar (Desktop/Tablet) */}
-      <Sidebar />
-      
-      {/* Main Content Area */}
-      <main className="md:ml-64 min-h-screen flex flex-col pt-14 md:pt-16 pb-20 md:pb-0">
-        {/* TopNavBar */}
-        
-
-        {/* Canvas Body */}
-        <div className="p-4 md:p-margin-desktop flex-1 space-y-4 md:space-y-6 max-w-[1600px] w-full mx-auto">
+    <div className="flex-1 p-4 md:p-margin-desktop space-y-4 md:space-y-6 max-w-[1600px] w-full mx-auto">
           
           {/* Quick Actions & ROI Timer */}
           <div className="flex flex-col lg:flex-row gap-3 md:gap-gutter">
@@ -225,26 +213,6 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Footer */}
-        <footer className="w-full py-6 md:py-12 px-4 md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4 border-t border-outline-variant/10 bg-surface-container-lowest mt-auto text-center md:text-left">
-          <div className="flex flex-col items-center md:items-start gap-1 md:gap-2">
-            <p className="text-sm md:text-headline-md font-bold text-primary">Jamex Global Markets</p>
-            <p className="text-[10px] md:text-sm text-on-surface-variant">© 2024 Jamex Global. Institutional Wealth Management.</p>
-          </div>
-          <div className="flex flex-wrap justify-center gap-4 md:gap-6">
-            <a className="text-[10px] md:text-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Terms</a>
-            <a className="text-[10px] md:text-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Privacy</a>
-            <a className="text-[10px] md:text-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Risk</a>
-            <a className="text-[10px] md:text-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Security</a>
-          </div>
-        </footer>
-      </main>
-
-      {/* BottomNavBar (Mobile Only) - Refined to 5 compact items */}
-      <BottomNav />
-            
     </div>
   );
 }

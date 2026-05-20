@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import BottomNav from '../components/BottomNav';
 
 export default function Settings() {
     const navigate = useNavigate();
@@ -9,13 +7,7 @@ export default function Settings() {
     const [dateFormat, setDateFormat] = useState('MM/DD/YYYY');
 
     return (
-        <div className="deep-mesh-bg text-on-surface min-h-screen flex flex-col font-body-md text-body-md dark bg-background">
-            <Sidebar />
-
-            <main className="md:ml-64 min-h-screen flex flex-col pt-14 md:pt-16 pb-20 md:pb-0">
-                
-
-                <div className="p-4 md:p-margin-desktop flex-1 space-y-4 md:space-y-6 max-w-[1200px] mx-auto w-full mb-6">
+        <div className="flex-1 p-4 md:p-margin-desktop space-y-4 md:space-y-6 max-w-[1200px] mx-auto w-full mb-6">
                     
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-gutter">
@@ -178,11 +170,6 @@ export default function Settings() {
                             <button className="bg-transparent border border-error/50 text-error px-4 py-2.5 md:px-6 md:py-2.5 rounded-lg text-[11px] md:text-label-md font-bold uppercase tracking-wider hover:bg-error hover:text-on-error transition-all active:scale-95 w-full sm:w-auto whitespace-nowrap mt-2 sm:mt-0">Deactivate</button>
                         </div>
                     </div>
-                </div>
-            </main>
-
-            <BottomNav />
-            
         </div>
     );
 }

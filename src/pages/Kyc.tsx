@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import BottomNav from '../components/BottomNav';
 
 export default function Kyc() {
     const navigate = useNavigate();
@@ -10,18 +8,7 @@ export default function Kyc() {
     const [isCameraOpen, setIsCameraOpen] = useState(false);
     
     return (
-        <div className="deep-mesh-bg text-on-surface font-body-md min-h-screen flex flex-col dark bg-background">
-             
-            {/* Sidebar Navigation Shell */}
-            <Sidebar />
-
-            {/* Top Navigation for Mobile (Optional but consistent) */}
-            
-
-            {/* Main Content Area */}
-            <main className="md:ml-64 p-4 md:p-margin-desktop pt-20 md:pt-16 pb-24 md:pb-12 min-h-screen flex flex-col max-w-[1400px] mx-auto w-full">
-                {/* Header / Status Bar */}
-                
+        <div className="p-4 md:p-margin-desktop pt-6 md:pt-8 pb-6 md:pb-12 max-w-[1400px] mx-auto w-full">
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 flex-grow">
                     {/* Left Column: Personal Form */}
@@ -177,18 +164,6 @@ export default function Kyc() {
                         </div>
                     </section>
                 </div>
-            </main>
-
-            <BottomNav />
-            
-
-            <style>{`
-                @keyframes scan {
-                    0% { top: 0; }
-                    50% { top: 100%; }
-                    100% { top: 0; }
-                }
-            `}</style>
         </div>
     );
 }

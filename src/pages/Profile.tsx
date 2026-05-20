@@ -1,22 +1,11 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import BottomNav from '../components/BottomNav';
 
 export default function Profile() {
     const navigate = useNavigate();
 
     return (
-        <div className="deep-mesh-bg text-on-surface min-h-screen flex flex-col font-body-md text-body-md dark bg-background">
-            {/* Sidebar Navigation */}
-            <Sidebar />
-
-            {/* Main Content Area */}
-            <main className="md:ml-64 min-h-screen flex flex-col pt-14 md:pt-16 pb-20 md:pb-0">
-                {/* TopNavBar */}
-                
-
-                <div className="p-4 md:p-margin-desktop flex-1 space-y-4 md:space-y-6 max-w-[1200px] mx-auto w-full mb-12">
+        <div className="flex-1 p-4 md:p-margin-desktop space-y-4 md:space-y-6 max-w-[1200px] mx-auto w-full mb-12">
                     
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-gutter">
@@ -207,11 +196,6 @@ export default function Profile() {
                             </div>
                         </section>
                     </div>
-                </div>
-            </main>
-
-            <BottomNav />
-            
         </div>
     );
 }

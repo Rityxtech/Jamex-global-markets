@@ -1,22 +1,11 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import BottomNav from '../components/BottomNav';
 
 export default function Wallet() {
   const navigate = useNavigate();
 
   return (
-    <div className="deep-mesh-bg text-on-surface min-h-screen dark bg-background">
-      {/* Sidebar Navigation */}
-      <Sidebar />
-
-      {/* Main Content Area */}
-      <main className="md:ml-64 flex flex-col min-h-screen pt-14 md:pt-16 pb-20 md:pb-0">
-        {/* TopAppBar */}
-        
-
-        <div className="p-4 md:p-margin-desktop space-y-4 md:space-y-gutter max-w-[1600px] mx-auto w-full">
+    <div className="p-4 md:p-margin-desktop space-y-4 md:space-y-gutter max-w-[1600px] mx-auto w-full">
           {/* Wallet Split Overview */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-gutter">
             {/* Main Wallet */}
@@ -195,25 +184,6 @@ export default function Wallet() {
               </div>
             </div>
           </section>
-        </div>
-
-        {/* Footer */}
-        <footer className="w-full py-6 md:py-12 px-4 md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4 border-t border-outline-variant/10 bg-surface-container-lowest mt-auto text-center md:text-left">
-          <div className="flex flex-col items-center md:items-start gap-1 md:gap-2">
-            <h4 className="text-sm md:text-headline-md font-bold text-primary">Jamex Global</h4>
-            <p className="text-[10px] md:text-sm text-on-surface-variant">© 2024 Jamex Global Markets. Institutional Wealth Management.</p>
-          </div>
-          <div className="flex flex-wrap justify-center gap-4 md:gap-6">
-            <Link to="#" className="text-[10px] md:text-sm text-on-surface-variant hover:text-on-surface transition-colors">Terms</Link>
-            <Link to="#" className="text-[10px] md:text-sm text-on-surface-variant hover:text-on-surface transition-colors">Privacy</Link>
-            <Link to="#" className="text-[10px] md:text-sm text-on-surface-variant hover:text-on-surface transition-colors">Risk</Link>
-            <Link to="#" className="text-[10px] md:text-sm text-on-surface-variant hover:text-on-surface transition-colors">Security</Link>
-          </div>
-        </footer>
-      </main>
-
-      <BottomNav />
-            
     </div>
   );
 }

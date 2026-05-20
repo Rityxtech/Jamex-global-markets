@@ -18,24 +18,22 @@ import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Loans from './pages/Loans';
 import Header from './components/Header';
+import AppLayout from './components/AppLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import { useAuthStore } from './store/authStore';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
-
   return null;
 }
 
-/** Renders the marketing Home for guests; redirects logged-in users to /dashboard */
+/** Shows Home for guests; redirects authenticated users to /dashboard */
 function RootRoute() {
   const { user, loading } = useAuthStore();
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background text-on-surface">
@@ -43,11 +41,7 @@ function RootRoute() {
       </div>
     );
   }
-
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
+  if (user) return <Navigate to="/dashboard" replace />;
   return <Home />;
 }
 
@@ -64,29 +58,31 @@ export default function App() {
       <Header />
       <Routes>
         <Route path="/" element={<RootRoute />} />
-        
-        {/* Public Routes (Only accessible if logged out) */}
+
+        {/* Public Routes (guests only) */}
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
         </Route>
 
-        {/* Protected Routes (Only accessible if logged in) */}
+        {/* Protected Routes — Sidebar & BottomNav live in AppLayout, mounted once */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/invest" element={<Invest />} />
-          <Route path="/wallet" element={<Wallet />} />
-          <Route path="/deposit" element={<Deposit />} />
-          <Route path="/withdraw" element={<Withdraw />} />
-          <Route path="/kyc" element={<Kyc />} />
-          <Route path="/referrals" element={<Referral />} />
-          <Route path="/transactions" element={<TransactionHistory />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/loans" element={<Loans />} />
-          <Route path="/confirm-investment" element={<ConfirmInvestment />} />
+          <Route element={<AppLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/invest" element={<Invest />} />
+            <Route path="/wallet" element={<Wallet />} />
+            <Route path="/deposit" element={<Deposit />} />
+            <Route path="/withdraw" element={<Withdraw />} />
+            <Route path="/kyc" element={<Kyc />} />
+            <Route path="/referrals" element={<Referral />} />
+            <Route path="/transactions" element={<TransactionHistory />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/loans" element={<Loans />} />
+            <Route path="/confirm-investment" element={<ConfirmInvestment />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

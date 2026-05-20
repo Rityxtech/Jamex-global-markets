@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import BottomNav from '../components/BottomNav';
 
 export default function Invest() {
     const navigate = useNavigate();
@@ -30,13 +28,7 @@ export default function Invest() {
     };
 
     return (
-        <div className="deep-mesh-bg text-on-surface min-h-screen flex flex-col font-body-md text-body-md dark bg-background">
-            <Sidebar />
-
-            <main className="md:ml-64 min-h-screen flex flex-col pt-14 md:pt-16 pb-20 md:pb-0">
-                
-
-                <div className="p-4 md:p-margin-desktop flex-1 space-y-4 md:space-y-6 max-w-[1600px] mx-auto w-full mb-6">
+        <div className="flex-1 p-4 md:p-margin-desktop space-y-4 md:space-y-6 max-w-[1600px] mx-auto w-full mb-6">
                     {/* Page Header */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-2 md:mb-8 gap-3 md:gap-4">
 
@@ -267,11 +259,6 @@ export default function Invest() {
                             </div>
                         </div>
                     </div>
-                </div>
-            </main>
-
-            <BottomNav />
-            
         </div>
     );
 }

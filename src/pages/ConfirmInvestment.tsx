@@ -28,11 +28,7 @@ export default function ConfirmInvestment() {
     };
 
     return (
-        <div className="deep-mesh-bg text-on-surface font-body-md min-h-screen flex flex-col dark bg-background">
-            {/* Top Navigation Anchor - Subflow Header */}
-            
-
-            <main className="pt-20 pb-24 md:pt-24 md:pb-12 px-4 md:px-margin-desktop max-w-[1200px] mx-auto w-full flex-1">
+        <div className="flex-1 px-4 md:px-margin-desktop pt-6 md:pt-8 pb-12 max-w-[1200px] mx-auto w-full">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 items-start">
                     {/* Left Column: Plan Details */}
                     <div className="lg:col-span-7 space-y-4 md:space-y-6">
@@ -257,20 +253,6 @@ export default function ConfirmInvestment() {
                         </div>
                     </div>
                 </div>
-            </main>
-
-            {/* Footer Utility */}
-            <footer className="w-full py-8 md:py-12 px-4 md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-4 border-t border-outline-variant/10 bg-surface-container-lowest mt-auto hidden md:flex">
-                <div className="flex items-center gap-2">
-                    <span className="text-xl md:text-2xl font-bold text-primary">Jamex</span>
-                    <span className="text-xs md:text-sm font-bold text-on-surface-variant mt-0.5 md:mt-1">Global Markets</span>
-                </div>
-                <p className="text-[10px] md:text-xs font-bold text-on-surface-variant text-center md:text-left">© 2024 Jamex Global Markets. Regulated Institutional Wealth Management.</p>
-                <div className="flex gap-4">
-                    <Link to="#" className="text-[10px] md:text-sm font-bold text-on-surface-variant hover:text-primary transition-colors">Security</Link>
-                    <Link to="#" className="text-[10px] md:text-sm font-bold text-on-surface-variant hover:text-primary transition-colors">Disclosures</Link>
-                </div>
-            </footer>
         </div>
     );
 }

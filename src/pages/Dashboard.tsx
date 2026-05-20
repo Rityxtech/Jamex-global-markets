@@ -31,15 +31,15 @@ export default function Dashboard() {
 
             {/* Quick Buttons */}
             <div className="grid grid-cols-3 gap-2.5 md:gap-3 lg:flex">
-              <button onClick={() => navigate('/deposit')} className="cursor-pointer lg:w-32 px-1.5 py-2 md:px-6 md:py-4 glass-card rounded-xl flex flex-col items-center justify-center gap-1 md:gap-2 hover:border-primary/50 transition-all group bg-surface-container-low/50 hover:bg-surface-container-low active:scale-95">
+              <button onClick={() => navigate('/deposit')} className="cursor-pointer lg:w-32 px-1.5 py-1.5 md:px-6 md:py-3 glass-card rounded-xl flex flex-col items-center justify-center gap-1 md:gap-2 hover:border-primary/50 transition-all group bg-surface-container-low/50 hover:bg-surface-container-low active:scale-95">
                 <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform text-[18px] md:text-[24px]">add_circle</span>
                 <span className="text-[9px] md:text-label-sm font-bold uppercase tracking-wider text-on-surface-variant group-hover:text-primary">Deposit</span>
               </button>
-              <button onClick={() => navigate('/invest')} className="cursor-pointer lg:w-32 px-1.5 py-2 md:px-6 md:py-4 bg-primary text-on-primary rounded-xl flex flex-col items-center justify-center gap-1 md:gap-2 hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-primary/20">
+              <button onClick={() => navigate('/invest')} className="cursor-pointer lg:w-32 px-1.5 py-1.5 md:px-6 md:py-3 bg-primary text-on-primary rounded-xl flex flex-col items-center justify-center gap-1 md:gap-2 hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-primary/20">
                 <span className="material-symbols-outlined text-[18px] md:text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span>
                 <span className="text-[9px] md:text-label-sm font-bold uppercase tracking-wider">Invest</span>
               </button>
-              <button onClick={() => navigate('/withdraw')} className="cursor-pointer lg:w-32 px-1.5 py-2 md:px-6 md:py-4 glass-card rounded-xl flex flex-col items-center justify-center gap-1 md:gap-2 hover:border-primary/50 transition-all group bg-surface-container-low/50 hover:bg-surface-container-low active:scale-95">
+              <button onClick={() => navigate('/withdraw')} className="cursor-pointer lg:w-32 px-1.5 py-1.5 md:px-6 md:py-3 glass-card rounded-xl flex flex-col items-center justify-center gap-1 md:gap-2 hover:border-primary/50 transition-all group bg-surface-container-low/50 hover:bg-surface-container-low active:scale-95">
                 <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform text-[18px] md:text-[24px]">payments</span>
                 <span className="text-[9px] md:text-label-sm font-bold uppercase tracking-wider text-on-surface-variant group-hover:text-primary">Withdraw</span>
               </button>

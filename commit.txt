@@ -1,5 +1,4 @@
-feat: optimize Invest tabs layout and spacing for mobile viewports
+feat: increase Live ROI Countdown height and add background sparkline
 
-- Set tabs container to use a grid of 3 equal columns on mobile, converting back to flex layout on desktop screens
-- Removed whitespace-nowrap and slightly decreased text sizing to text-[9px] on smaller mobile sizes to ensure titles do not scroll horizontally
-- Added 5px top margin on mobile viewports for the Next Payout card
+- Increased mobile overall height of Live ROI Countdown widget by configuring px-3, py-3.5 and setting a min-height parameters
+- Integrated a subtle blue background sparkline line graph inside the countdown card

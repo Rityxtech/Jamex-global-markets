@@ -30,22 +30,65 @@ export default function Invest() {
     return (
         <div className="flex-1 p-2.5 md:p-margin-desktop space-y-2.5 md:space-y-6 max-w-[1600px] mx-auto w-full mb-6">
                     {/* Page Header */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-1 md:mb-8 gap-2.5 md:gap-4">
-
-                        <div className="flex gap-2.5 md:gap-4 w-full sm:w-auto">
-                            <div className="glass-card p-2.5 md:px-6 md:py-3 rounded-xl flex flex-col flex-1 min-w-0 md:min-w-[180px] border border-outline-variant/20">
-                                <span className="text-[9px] md:text-label-sm text-on-surface-variant uppercase font-bold tracking-wider mb-0.5">Portfolio Value</span>
-                                <span className="text-sm md:text-headline-md font-bold font-tabular-nums text-on-surface">$842,500.00</span>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-1 md:mb-6 gap-2.5 md:gap-4">
+                        <div className="flex gap-2.5 md:gap-4 w-full">
+                            {/* Portfolio Value */}
+                            <div className="glass-card p-2.5 md:px-5 md:py-3.5 rounded-xl flex flex-row items-center justify-between flex-1 min-w-0 border border-outline-variant/20 relative overflow-hidden group">
+                                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-transparent pointer-events-none"></div>
+                                <div className="absolute top-0 -left-full w-1/2 h-full bg-gradient-to-r from-transparent via-primary/5 to-transparent skew-x-12 group-hover:animate-shimmer pointer-events-none"></div>
+                                <div className="relative z-10">
+                                    <span className="text-[9px] md:text-label-sm text-on-surface-variant uppercase font-bold tracking-wider mb-0.5 block">Portfolio Value</span>
+                                    <span className="text-sm sm:text-base md:text-headline-md font-bold font-tabular-nums text-on-surface">$842,500.00</span>
+                                </div>
+                                <div className="relative w-16 h-8 md:w-24 md:h-10 shrink-0">
+                                    <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                                        <defs>
+                                            <linearGradient id="sparkline-blue" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stopColor="#2563eb" stopOpacity="0.4" />
+                                                <stop offset="100%" stopColor="#2563eb" stopOpacity="0" />
+                                            </linearGradient>
+                                        </defs>
+                                        <path d="M 0 35 Q 20 20 40 28 T 80 12 T 100 5 L 100 40 L 0 40 Z" fill="url(#sparkline-blue)" />
+                                        <path d="M 0 35 Q 20 20 40 28 T 80 12 T 100 5" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" className="animate-spark-draw" />
+                                    </svg>
+                                    <span className="absolute top-[3px] right-0 flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                                    </span>
+                                </div>
                             </div>
-                            <div className="glass-card p-2.5 md:px-6 md:py-3 rounded-xl flex flex-col flex-1 min-w-0 md:min-w-[180px] border border-outline-variant/20 border-t-tertiary">
-                                <span className="text-[9px] md:text-label-sm text-tertiary/80 uppercase font-bold tracking-wider mb-0.5">Total Profit</span>
-                                <span className="text-sm md:text-headline-md font-bold font-tabular-nums text-tertiary">+$112,040.12</span>
+                            
+                            {/* Total Profit */}
+                            <div className="glass-card p-2.5 md:px-5 md:py-3.5 rounded-xl flex flex-row items-center justify-between flex-1 min-w-0 border border-outline-variant/20 border-t-tertiary relative overflow-hidden group">
+                                <div className="absolute inset-0 bg-gradient-to-r from-tertiary/5 via-transparent to-transparent pointer-events-none"></div>
+                                <div className="absolute top-0 -left-full w-1/2 h-full bg-gradient-to-r from-transparent via-tertiary/5 to-transparent skew-x-12 group-hover:animate-shimmer pointer-events-none"></div>
+                                <div className="relative z-10">
+                                    <span className="text-[9px] md:text-label-sm text-tertiary/80 uppercase font-bold tracking-wider mb-0.5 block">Total Profit</span>
+                                    <span className="text-sm sm:text-base md:text-headline-md font-bold font-tabular-nums text-tertiary">+$112,040.12</span>
+                                </div>
+                                <div className="relative w-16 h-8 md:w-24 md:h-10 shrink-0">
+                                    <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                                        <defs>
+                                            <linearGradient id="sparkline-green" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
+                                                <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                                            </linearGradient>
+                                        </defs>
+                                        <path d="M 0 38 Q 25 35 50 18 T 80 12 T 100 4 L 100 40 L 0 40 Z" fill="url(#sparkline-green)" />
+                                        <path d="M 0 38 Q 25 35 50 18 T 80 12 T 100 4" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" className="animate-spark-draw" />
+                                    </svg>
+                                    <span className="absolute top-[2px] right-0 flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-tertiary"></span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Quick Stats Row */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 md:gap-gutter mb-2.5 md:mb-gutter">
+                        {/* Next Payout */}
                         <div className="glass-card p-2.5 md:p-card-padding rounded-xl flex items-center justify-between group hover:border-primary/50 transition-all border border-outline-variant/20 overflow-hidden relative">
                             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none"></div>
                             <div className="relative z-10">
@@ -55,28 +98,70 @@ export default function Invest() {
                                     <span className="material-symbols-outlined text-[12px] md:text-[14px]">arrow_drop_up</span> +$420.50 Est.
                                 </p>
                             </div>
-                            <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary relative z-10">
-                                <span className="material-symbols-outlined text-[16px] md:text-[24px]">timer</span>
+                            <div className="relative w-16 h-10 md:w-20 md:h-12 z-10 flex items-center justify-end gap-2">
+                                <svg className="w-14 h-8 md:w-16 md:h-10 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 100 40" preserveAspectRatio="none">
+                                    <defs>
+                                        <linearGradient id="sparkline-payout" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#2563eb" stopOpacity="0.3" />
+                                            <stop offset="100%" stopColor="#2563eb" stopOpacity="0" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M 0 25 Q 10 35 20 20 T 40 30 T 60 15 T 80 25 T 100 10 L 100 40 L 0 40 Z" fill="url(#sparkline-payout)" />
+                                    <path d="M 0 25 Q 10 35 20 20 T 40 30 T 60 15 T 80 25 T 100 10" fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" />
+                                </svg>
+                                <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                                    <span className="material-symbols-outlined text-[16px]">timer</span>
+                                </div>
                             </div>
                         </div>
-                        <div className="glass-card p-2.5 md:p-card-padding rounded-xl flex items-center justify-between group hover:border-primary/50 transition-all border border-outline-variant/20">
+                        
+                        {/* ROI to Date */}
+                        <div className="glass-card p-2.5 md:p-card-padding rounded-xl flex items-center justify-between group hover:border-primary/50 transition-all border border-outline-variant/20 overflow-hidden relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-tertiary/5 to-transparent pointer-events-none"></div>
                             <div>
                                 <p className="text-[9px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-0.5 md:mb-1">ROI to Date</p>
                                 <p className="text-lg sm:text-xl md:text-headline-md font-bold font-tabular-nums text-on-surface tracking-tight">14.85%</p>
                                 <p className="text-[9px] md:text-label-sm font-medium text-on-surface-variant/70 mt-1">Across 12 months</p>
                             </div>
-                            <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-tertiary/10 border border-tertiary/20 flex items-center justify-center text-tertiary">
-                                <span className="material-symbols-outlined text-[16px] md:text-[24px]">trending_up</span>
+                            <div className="relative w-16 h-10 md:w-20 md:h-12 z-10 flex items-center justify-end gap-2">
+                                <svg className="w-14 h-8 md:w-16 md:h-10 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 100 40" preserveAspectRatio="none">
+                                    <defs>
+                                        <linearGradient id="sparkline-roi" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
+                                            <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M 0 38 Q 20 30 40 35 T 70 20 T 100 8 L 100 40 L 0 40 Z" fill="url(#sparkline-roi)" />
+                                    <path d="M 0 38 Q 20 30 40 35 T 70 20 T 100 8" fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" />
+                                </svg>
+                                <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-tertiary/10 border border-tertiary/20 flex items-center justify-center text-tertiary shrink-0">
+                                    <span className="material-symbols-outlined text-[16px]">trending_up</span>
+                                </div>
                             </div>
                         </div>
-                        <div className="glass-card p-2.5 md:p-card-padding rounded-xl flex items-center justify-between group hover:border-primary/50 transition-all border border-outline-variant/20">
+
+                        {/* Active Plans */}
+                        <div className="glass-card p-2.5 md:p-card-padding rounded-xl flex items-center justify-between group hover:border-primary/50 transition-all border border-outline-variant/20 overflow-hidden relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-secondary-container/5 to-transparent pointer-events-none"></div>
                             <div>
                                 <p className="text-[9px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-0.5 md:mb-1">Active Plans</p>
                                 <p className="text-lg sm:text-xl md:text-headline-md font-bold font-tabular-nums text-on-surface tracking-tight">04</p>
                                 <p className="text-[9px] md:text-label-sm font-medium text-on-surface-variant/70 mt-1">Diversified in 3 sectors</p>
                             </div>
-                            <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-secondary-container/20 border border-secondary/20 flex items-center justify-center text-secondary">
-                                <span className="material-symbols-outlined text-[16px] md:text-[24px]">layers</span>
+                            <div className="relative w-16 h-10 md:w-20 md:h-12 z-10 flex items-center justify-end gap-2">
+                                <svg className="w-14 h-8 md:w-16 md:h-10 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 100 40" preserveAspectRatio="none">
+                                    <defs>
+                                        <linearGradient id="sparkline-plans" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3" />
+                                            <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M 0 35 L 25 35 L 25 25 L 50 25 L 50 15 L 75 15 L 75 8 L 100 8 L 100 40 L 0 40 Z" fill="url(#sparkline-plans)" />
+                                    <path d="M 0 35 L 25 35 L 25 25 L 50 25 L 50 15 L 75 15 L 75 8 L 100 8" fill="none" stroke="#8b5cf6" strokeWidth="1.5" strokeLinecap="round" />
+                                </svg>
+                                <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-secondary-container/20 border border-secondary/20 flex items-center justify-center text-secondary shrink-0">
+                                    <span className="material-symbols-outlined text-[16px]">layers</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -259,6 +344,23 @@ export default function Invest() {
                             </div>
                         </div>
                     </div>
+            <style>{`
+                @keyframes spark-draw {
+                    from { stroke-dashoffset: 150; }
+                    to { stroke-dashoffset: 0; }
+                }
+                .animate-spark-draw {
+                    stroke-dasharray: 150;
+                    stroke-dashoffset: 150;
+                    animation: spark-draw 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                }
+                @keyframes shimmer {
+                    100% { left: 150%; }
+                }
+                .animate-shimmer {
+                    animation: shimmer 1.8s ease-in-out infinite;
+                }
+            `}</style>
         </div>
     );
 }

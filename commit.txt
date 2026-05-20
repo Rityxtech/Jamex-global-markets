@@ -1,5 +1,5 @@
-feat: optimize Wallet page mobile layout and layout densities
+feat: optimize Invest tabs layout and spacing for mobile viewports
 
-- Restricted mobile view paddings and margins to a maximum of 10px (p-2.5, gap-2.5, space-y-2.5) for a high-density mobile interface
-- Scaled down font sizing of large USD dollar amounts (e.g. from text-3xl to text-xl) on mobile viewports
-- Resized card headers, asset selector buttons, and transaction table rows for mobile layouts
+- Set tabs container to use a grid of 3 equal columns on mobile, converting back to flex layout on desktop screens
+- Removed whitespace-nowrap and slightly decreased text sizing to text-[9px] on smaller mobile sizes to ensure titles do not scroll horizontally
+- Added 5px top margin on mobile viewports for the Next Payout card

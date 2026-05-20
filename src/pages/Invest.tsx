@@ -89,7 +89,7 @@ export default function Invest() {
                     {/* Quick Stats Row */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 md:gap-gutter mb-2.5 md:mb-gutter">
                         {/* Next Payout */}
-                        <div className="glass-card p-2.5 md:p-card-padding rounded-xl flex items-center justify-between group hover:border-primary/50 transition-all border border-outline-variant/20 overflow-hidden relative">
+                        <div className="mt-[5px] sm:mt-0 glass-card p-2.5 md:p-card-padding rounded-xl flex items-center justify-between group hover:border-primary/50 transition-all border border-outline-variant/20 overflow-hidden relative">
                             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none"></div>
                             <div className="relative z-10">
                                 <p className="text-[9px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-0.5 md:mb-1">Next Payout</p>
@@ -255,10 +255,10 @@ export default function Invest() {
 
                     {/* Tabs Container */}
                     <div className="w-full mt-2.5 md:mt-0">
-                        <div className="flex gap-2.5 md:gap-8 border-b border-outline-variant/20 mb-2.5 md:mb-6 overflow-x-auto scrollbar-hide pb-1">
-                            <button className="pb-2 md:pb-4 text-[10px] sm:text-[11px] md:text-label-md font-bold text-primary border-b-2 border-primary whitespace-nowrap uppercase tracking-wider">Active Contracts</button>
-                            <button className="pb-2 md:pb-4 text-[10px] sm:text-[11px] md:text-label-md font-bold text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap uppercase tracking-wider">Performance History</button>
-                            <button className="pb-2 md:pb-4 text-[10px] sm:text-[11px] md:text-label-md font-bold text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap uppercase tracking-wider">Risk Disclosures</button>
+                        <div className="grid grid-cols-3 gap-1.5 md:flex md:gap-8 border-b border-outline-variant/20 mb-2.5 md:mb-6 pb-1">
+                            <button className="pb-2 md:pb-4 text-[9px] xs:text-[10px] sm:text-[11px] md:text-label-md font-bold text-primary border-b-2 border-primary uppercase tracking-wider text-center flex items-center justify-center min-h-[32px] md:min-h-0 leading-tight">Active Contracts</button>
+                            <button className="pb-2 md:pb-4 text-[9px] xs:text-[10px] sm:text-[11px] md:text-label-md font-bold text-on-surface-variant hover:text-on-surface transition-colors uppercase tracking-wider text-center flex items-center justify-center min-h-[32px] md:min-h-0 leading-tight">Performance History</button>
+                            <button className="pb-2 md:pb-4 text-[9px] xs:text-[10px] sm:text-[11px] md:text-label-md font-bold text-on-surface-variant hover:text-on-surface transition-colors uppercase tracking-wider text-center flex items-center justify-center min-h-[32px] md:min-h-0 leading-tight">Risk Disclosures</button>
                         </div>
 
                         {/* Active Contracts Ledger */}

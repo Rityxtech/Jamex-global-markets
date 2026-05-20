@@ -30,69 +30,67 @@ export default function Withdraw() {
     };
 
     return (
-        <div className="flex-1 p-4 md:p-margin-desktop space-y-4 md:space-y-6 max-w-[1200px] mx-auto w-full mb-6">
-
-
+        <div className="flex-1 p-2.5 md:p-margin-desktop space-y-2.5 md:space-y-6 max-w-[1200px] mx-auto w-full mb-6">
                     {/* Bento Layout Content */}
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 md:gap-6">
                         {/* Left Column: Withdrawal Form */}
-                        <div className="lg:col-span-7 space-y-3 md:space-y-6">
+                        <div className="lg:col-span-7 space-y-2.5 md:space-y-6">
                             {/* Wallet Overview Card */}
                             <div className="glass-card rounded-xl overflow-hidden shadow-xl border border-outline-variant/20">
-                                <div className="bg-surface-container-high/40 px-4 md:px-5 py-3 border-b border-outline-variant/10 flex items-center justify-between">
+                                <div className="bg-surface-container-high/40 px-2.5 py-2 md:px-5 md:py-3.5 border-b border-outline-variant/10 flex items-center justify-between">
                                     <span className="text-[10px] md:text-label-md font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
                                         <span className="material-symbols-outlined text-[16px] md:text-[20px]">account_balance_wallet</span>
                                         Balance Overview
                                     </span>
                                     <span className="text-[9px] md:text-label-sm text-on-surface-variant font-bold">Real-time valuation</span>
                                 </div>
-                                <div className="grid grid-cols-2 divide-x divide-outline-variant/10 p-4 md:p-5">
-                                    <div className="pr-3 md:pr-4">
+                                <div className="grid grid-cols-2 divide-x divide-outline-variant/10 p-2.5 md:p-5">
+                                    <div className="pr-2.5 md:pr-4">
                                         <p className="text-[9px] md:text-label-sm text-on-surface-variant mb-1 font-bold uppercase tracking-wider">Main Account</p>
-                                        <p className="text-lg md:text-2xl font-mono text-on-surface font-bold tracking-tight">$1,248,590.00</p>
+                                        <p className="text-sm sm:text-lg md:text-2xl font-mono text-on-surface font-bold tracking-tight">$1,248,590.00</p>
                                     </div>
-                                    <div className="pl-3 md:pl-6">
+                                    <div className="pl-2.5 md:pl-6">
                                         <p className="text-[9px] md:text-label-sm text-on-surface-variant mb-1 font-bold uppercase tracking-wider">Profit Wallet</p>
-                                        <p className="text-lg md:text-2xl font-mono text-tertiary font-bold tracking-tight">$342,120.45</p>
+                                        <p className="text-sm sm:text-lg md:text-2xl font-mono text-tertiary font-bold tracking-tight">$342,120.45</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Withdrawal Configuration */}
-                            <div className="glass-card rounded-xl p-4 md:p-5 space-y-4 md:space-y-6 border border-outline-variant/20">
+                            <div className="glass-card rounded-xl p-2.5 md:p-5 space-y-2.5 md:space-y-6 border border-outline-variant/20">
                                 <div className="space-y-2 md:space-y-4">
                                     <label className="block text-[10px] md:text-label-md font-bold text-on-surface uppercase tracking-wider">Source Account</label>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                                        <button className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-primary/10 border border-primary/50 ring-1 ring-primary/20 shadow-sm transition-all">
-                                            <span className="text-primary font-bold text-sm md:text-base">Main Account</span>
-                                            <span className="material-symbols-outlined text-primary text-[20px] md:text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 md:gap-4">
+                                        <button className="flex items-center justify-between p-2.5 md:p-4 rounded-lg bg-primary/10 border border-primary/50 ring-1 ring-primary/20 shadow-sm transition-all">
+                                            <span className="text-primary font-bold text-xs md:text-base">Main Account</span>
+                                            <span className="material-symbols-outlined text-primary text-[18px] md:text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                                         </button>
-                                        <button className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-surface-container-low border border-outline-variant/50 hover:border-primary/50 transition-all">
-                                            <span className="text-on-surface-variant font-bold text-sm md:text-base">Profit Wallet</span>
-                                            <div className="w-5 h-5 md:w-6 md:h-6 rounded-full border border-outline-variant/50"></div>
+                                        <button className="flex items-center justify-between p-2.5 md:p-4 rounded-lg bg-surface-container-low border border-outline-variant/50 hover:border-primary/50 transition-all">
+                                            <span className="text-on-surface-variant font-bold text-xs md:text-base">Profit Wallet</span>
+                                            <div className="w-4 h-4 md:w-6 md:h-6 rounded-full border border-outline-variant/50"></div>
                                         </button>
                                     </div>
                                 </div>
 
-                                <div className="space-y-2 md:space-y-4 pt-2 md:pt-0">
+                                <div className="space-y-2 md:space-y-4 pt-1 md:pt-0">
                                     <div className="flex justify-between items-end">
                                         <label className="block text-[10px] md:text-label-md font-bold text-on-surface uppercase tracking-wider">Amount to Withdraw</label>
                                         <span className="text-[9px] md:text-xs text-on-surface-variant font-bold">Available: $1,248,590.00</span>
                                     </div>
                                     <div className="relative group">
-                                        <input className="w-full bg-surface-container-lowest border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_10px_rgba(37,99,235,0.2)] focus:outline-none rounded-lg px-3 py-3 md:px-4 md:py-4 text-xl md:text-3xl font-mono text-on-surface transition-all font-bold" placeholder="0.00" type="number"/>
-                                        <button className="absolute right-3 top-1/2 -translate-y-1/2 px-2.5 py-1 md:px-3 md:py-1 bg-primary/10 text-primary text-[10px] md:text-xs rounded border border-primary/20 hover:bg-primary hover:text-on-primary transition-all font-bold tracking-wider">MAX</button>
-                                        <span className="absolute left-3 -top-2 bg-surface-container-lowest px-1 md:px-2 text-[8px] md:text-[10px] text-primary uppercase tracking-widest font-bold">USD Equivalent</span>
+                                        <input className="w-full bg-surface-container-lowest border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_10px_rgba(37,99,235,0.2)] focus:outline-none rounded-lg px-2.5 py-2 md:px-4 md:py-3.5 text-lg md:text-3xl font-mono text-on-surface transition-all font-bold" placeholder="0.00" type="number"/>
+                                        <button className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 px-2.5 py-1 md:px-3 md:py-1 bg-primary/10 text-primary text-[10px] md:text-xs rounded border border-primary/20 hover:bg-primary hover:text-on-primary transition-all font-bold tracking-wider">MAX</button>
+                                        <span className="absolute left-2.5 -top-2 bg-surface-container-lowest px-1 md:px-2 text-[8px] md:text-[10px] text-primary uppercase tracking-widest font-bold">USD Equivalent</span>
                                     </div>
                                 </div>
 
-                                <div className="space-y-2 md:space-y-4 pt-2 md:pt-0">
+                                <div className="space-y-2 md:space-y-4 pt-1 md:pt-0">
                                     <label className="block text-[10px] md:text-label-md font-bold text-on-surface uppercase tracking-wider">Destination Wallet</label>
                                     <div className="relative">
-                                        <input className="w-full bg-surface-container-lowest border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_10px_rgba(37,99,235,0.2)] focus:outline-none rounded-lg pl-10 pr-3 py-3 md:pl-12 md:pr-4 md:py-4 text-sm md:text-body-md font-mono font-medium text-on-surface transition-all" placeholder="Enter wallet address (e.g. 0x...)" type="text"/>
-                                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px] md:text-[24px]">account_balance_wallet</span>
+                                        <input className="w-full bg-surface-container-lowest border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_10px_rgba(37,99,235,0.2)] focus:outline-none rounded-lg pl-9 pr-2.5 py-2 md:pl-12 md:pr-4 md:py-3.5 text-xs md:text-body-md font-mono font-medium text-on-surface transition-all" placeholder="Enter wallet address (e.g. 0x...)" type="text"/>
+                                        <span className="material-symbols-outlined absolute left-2.5 md:left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px] md:text-[24px]">account_balance_wallet</span>
                                     </div>
-                                    <div className="flex items-start gap-2 md:gap-3 p-2.5 md:p-3 bg-error/10 border border-error/20 rounded-lg mt-2 md:mt-3">
+                                    <div className="flex items-start gap-2 md:gap-3 p-2 md:p-3 bg-error/10 border border-error/20 rounded-lg mt-2 md:mt-3">
                                         <span className="material-symbols-outlined text-error text-[16px] md:text-[20px] shrink-0 mt-0.5">warning</span>
                                         <p className="text-[9px] md:text-xs leading-tight text-error/90 font-bold">Ensure the destination address is accurate. Transfers to incorrect addresses are irreversible and result in permanent loss.</p>
                                     </div>
@@ -101,21 +99,21 @@ export default function Withdraw() {
                         </div>
 
                         {/* Right Column: Security & Summary */}
-                        <div className="lg:col-span-5 space-y-3 md:space-y-6">
+                        <div className="lg:col-span-5 space-y-2.5 md:space-y-6">
                             {/* 2FA / OTP Verification */}
-                            <div className="glass-card rounded-xl p-4 md:p-5 space-y-4 md:space-y-6 relative overflow-hidden border border-primary/20 shadow-[0_0_20px_rgba(37,99,235,0.05)]">
+                            <div className="glass-card rounded-xl p-2.5 md:p-5 space-y-2.5 md:space-y-6 relative overflow-hidden border border-primary/20 shadow-[0_0_20px_rgba(37,99,235,0.05)]">
                                 <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-primary/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none"></div>
                                 <div className="relative z-10">
-                                    <h2 className="text-lg md:text-2xl font-bold text-on-surface mb-1 md:mb-2 tracking-tight">Security Clearance</h2>
+                                    <h2 className="text-base md:text-2xl font-bold text-on-surface mb-1 md:mb-2 tracking-tight">Security Clearance</h2>
                                     <p className="text-[10px] md:text-sm text-on-surface-variant font-medium leading-snug">A 6-digit verification code has been sent to your registered device.</p>
                                 </div>
-                                <div className="space-y-3 md:space-y-4 relative z-10">
+                                <div className="space-y-2.5 md:space-y-4 relative z-10">
                                     <div className="flex justify-between gap-1.5 md:gap-2">
                                         {[0, 1, 2, 3, 4, 5].map((index) => (
                                             <input 
                                                 key={index}
                                                 id={`otp-${index}`}
-                                                className="w-10 sm:w-12 h-12 sm:h-14 bg-surface-container-highest border border-outline-variant/50 rounded-lg text-center text-lg md:text-xl font-bold focus:border-primary focus:ring-1 focus:ring-primary outline-none text-on-surface transition-all" 
+                                                className="w-9 sm:w-12 h-10 sm:h-14 bg-surface-container-highest border border-outline-variant/50 rounded-lg text-center text-sm md:text-xl font-bold focus:border-primary focus:ring-1 focus:ring-primary outline-none text-on-surface transition-all" 
                                                 maxLength={1} 
                                                 type="text"
                                                 onChange={(e) => handleOtpChange(e, index)}
@@ -126,12 +124,12 @@ export default function Withdraw() {
                                     <button className="w-full text-[10px] md:text-xs font-bold text-primary hover:underline transition-all">Resend OTP (Available in 42s)</button>
                                 </div>
                                 
-                                <div className="pt-4 md:pt-6 border-t border-outline-variant/10 space-y-3 md:space-y-4 relative z-10">
-                                    <div className="flex justify-between text-[11px] md:text-sm font-bold items-center">
+                                <div className="pt-2.5 md:pt-6 border-t border-outline-variant/10 space-y-2.5 md:space-y-4 relative z-10">
+                                    <div className="flex justify-between text-[10px] md:text-sm font-bold items-center">
                                         <span className="text-on-surface-variant uppercase tracking-wider">Processing Fee (0.12%)</span>
                                         <span className="text-on-surface font-mono">$1,498.30</span>
                                     </div>
-                                    <div className="flex justify-between text-base md:text-xl font-bold items-center">
+                                    <div className="flex justify-between text-sm md:text-xl font-bold items-center">
                                         <span className="text-on-surface uppercase tracking-wider">Net Disbursement</span>
                                         <span className="text-primary font-mono tracking-tight">$1,247,091.70</span>
                                     </div>
@@ -139,7 +137,7 @@ export default function Withdraw() {
                                     <button 
                                         onClick={handleWithdraw}
                                         disabled={isWithdrawing || isWithdrawn}
-                                        className={`w-full py-3.5 md:py-4 ${isWithdrawing ? 'bg-primary/50 text-white' : isWithdrawn ? 'bg-tertiary text-on-tertiary shadow-[0_0_15px_rgba(78,222,163,0.3)]' : 'bg-primary text-on-primary hover:brightness-110 active:scale-[0.98] shadow-sm shadow-primary/20'} font-bold text-[11px] md:text-sm uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 group mt-2`}
+                                        className={`w-full py-2.5 md:py-4 ${isWithdrawing ? 'bg-primary/50 text-white' : isWithdrawn ? 'bg-tertiary text-on-tertiary shadow-[0_0_15px_rgba(78,222,163,0.3)]' : 'bg-primary text-on-primary hover:brightness-110 active:scale-[0.98] shadow-sm shadow-primary/20'} font-bold text-[10px] md:text-sm uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 group mt-2`}
                                     >
                                         {isWithdrawing ? (
                                             <>
@@ -165,9 +163,9 @@ export default function Withdraw() {
                             </div>
                             
                             {/* Security Badge Card */}
-                            <div className="bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 md:p-4 flex items-center gap-3 md:gap-4">
-                                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-tertiary/10 border border-tertiary/20 flex items-center justify-center shrink-0">
-                                    <span className="material-symbols-outlined text-tertiary text-[20px] md:text-[24px]">verified</span>
+                            <div className="bg-surface-container-low border border-outline-variant/30 rounded-xl p-2.5 md:p-4 flex items-center gap-2.5 md:gap-4">
+                                <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-tertiary/10 border border-tertiary/20 flex items-center justify-center shrink-0">
+                                    <span className="material-symbols-outlined text-tertiary text-[18px] md:text-[24px]">verified</span>
                                 </div>
                                 <div>
                                     <h3 className="text-xs md:text-sm font-bold text-on-surface mb-0.5">Global Insurance Coverage</h3>
@@ -178,8 +176,8 @@ export default function Withdraw() {
                     </div>
 
                     {/* Withdrawal History Section */}
-                    <div className="glass-card rounded-xl overflow-hidden mt-4 md:mt-8 border border-outline-variant/20">
-                        <div className="bg-surface-container-high/40 px-4 py-3 md:px-5 md:py-4 flex flex-wrap items-center justify-between gap-2 border-b border-outline-variant/10">
+                    <div className="glass-card rounded-xl overflow-hidden mt-2.5 md:mt-8 border border-outline-variant/20">
+                        <div className="bg-surface-container-high/40 px-2.5 py-2 md:px-5 md:py-4 flex flex-wrap items-center justify-between gap-2 border-b border-outline-variant/10">
                             <h2 className="text-[11px] md:text-sm font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
                                 <span className="material-symbols-outlined text-[16px] md:text-[20px]">history</span>
                                 Withdrawal History
@@ -197,74 +195,74 @@ export default function Withdraw() {
                             <table className="w-full text-left min-w-[700px]">
                                 <thead>
                                     <tr className="bg-surface-container-highest/20 text-[9px] md:text-[11px] text-on-surface-variant uppercase tracking-widest font-bold border-b border-outline-variant/10">
-                                        <th className="px-4 py-2.5 md:px-5 md:py-3">Date / ID</th>
-                                        <th className="px-4 py-2.5 md:px-5 md:py-3">Destination</th>
-                                        <th className="px-4 py-2.5 md:px-5 md:py-3">Asset</th>
-                                        <th className="px-4 py-2.5 md:px-5 md:py-3 text-right">Amount (USD)</th>
-                                        <th className="px-4 py-2.5 md:px-5 md:py-3 text-center">Status</th>
-                                        <th className="px-4 py-2.5 md:px-5 md:py-3 text-right">Action</th>
+                                        <th className="px-2.5 py-2 md:px-5 md:py-3">Date / ID</th>
+                                        <th className="px-2.5 py-2 md:px-5 md:py-3">Destination</th>
+                                        <th className="px-2.5 py-2 md:px-5 md:py-3">Asset</th>
+                                        <th className="px-2.5 py-2 md:px-5 md:py-3 text-right">Amount (USD)</th>
+                                        <th className="px-2.5 py-2 md:px-5 md:py-3 text-center">Status</th>
+                                        <th className="px-2.5 py-2 md:px-5 md:py-3 text-right">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-outline-variant/5">
                                     {/* Completed Transaction */}
                                     <tr className="hover:bg-white/5 transition-colors group">
-                                        <td className="px-4 py-3 md:px-5 md:py-4">
+                                        <td className="px-2.5 py-2 md:px-5 md:py-4">
                                             <p className="text-on-surface text-[11px] md:text-sm font-mono font-bold">Oct 12, 2024</p>
                                             <p className="text-[9px] md:text-[10px] text-on-surface-variant font-mono mt-0.5">TXN-4920391203</p>
                                         </td>
-                                        <td className="px-4 py-3 md:px-5 md:py-4">
+                                        <td className="px-2.5 py-2 md:px-5 md:py-4">
                                             <div className="flex items-center gap-1.5 md:gap-2">
                                                 <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-[9px] md:text-[10px] text-on-surface font-mono font-bold border border-outline-variant/30">0x</div>
                                                 <span className="text-[10px] md:text-xs text-on-surface-variant font-mono font-bold">0x71C...492a</span>
                                             </div>
                                         </td>
-                                        <td className="px-4 py-3 md:px-5 md:py-4">
+                                        <td className="px-2.5 py-2 md:px-5 md:py-4">
                                             <div className="flex items-center gap-1.5 md:gap-2">
                                                 <span className="material-symbols-outlined text-[16px] md:text-[18px] text-on-surface-variant">monetization_on</span>
                                                 <span className="text-[11px] md:text-xs text-on-surface font-bold">USDT-ERC20</span>
                                             </div>
                                         </td>
-                                        <td className="px-4 py-3 md:px-5 md:py-4 text-on-surface font-mono text-[11px] md:text-sm font-bold text-right">
+                                        <td className="px-2.5 py-2 md:px-5 md:py-4 text-on-surface font-mono text-[11px] md:text-sm font-bold text-right">
                                             $45,000.00
                                         </td>
-                                        <td className="px-4 py-3 md:px-5 md:py-4 text-center">
+                                        <td className="px-2.5 py-2 md:px-5 md:py-4 text-center">
                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-0.5 rounded-full bg-tertiary/10 border border-tertiary/20 text-tertiary text-[9px] md:text-[10px] font-bold uppercase tracking-wider">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
                                                 Completed
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 md:px-5 md:py-4 text-right">
+                                        <td className="px-2.5 py-2 md:px-5 md:py-4 text-right">
                                             <button className="text-primary hover:text-primary/70 material-symbols-outlined text-[18px] md:text-[20px] transition-colors p-1 rounded hover:bg-surface-variant/30">receipt_long</button>
                                         </td>
                                     </tr>
                                     {/* Processing Transaction */}
                                     <tr className="hover:bg-white/5 transition-colors group">
-                                        <td className="px-4 py-3 md:px-5 md:py-4">
+                                        <td className="px-2.5 py-2 md:px-5 md:py-4">
                                             <p className="text-on-surface text-[11px] md:text-sm font-mono font-bold">Oct 14, 2024</p>
                                             <p className="text-[9px] md:text-[10px] text-on-surface-variant font-mono mt-0.5">TXN-4920391552</p>
                                         </td>
-                                        <td className="px-4 py-3 md:px-5 md:py-4">
+                                        <td className="px-2.5 py-2 md:px-5 md:py-4">
                                             <div className="flex items-center gap-1.5 md:gap-2">
                                                 <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-[9px] md:text-[10px] text-on-surface font-mono font-bold border border-outline-variant/30">0x</div>
                                                 <span className="text-[10px] md:text-xs text-on-surface-variant font-mono font-bold">0x99A...119c</span>
                                             </div>
                                         </td>
-                                        <td className="px-4 py-3 md:px-5 md:py-4">
+                                        <td className="px-2.5 py-2 md:px-5 md:py-4">
                                             <div className="flex items-center gap-1.5 md:gap-2">
                                                 <span className="material-symbols-outlined text-[16px] md:text-[18px] text-on-surface-variant">currency_bitcoin</span>
                                                 <span className="text-[11px] md:text-xs text-on-surface font-bold">BTC (Core)</span>
                                             </div>
                                         </td>
-                                        <td className="px-4 py-3 md:px-5 md:py-4 text-on-surface font-mono text-[11px] md:text-sm font-bold text-right">
+                                        <td className="px-2.5 py-2 md:px-5 md:py-4 text-on-surface font-mono text-[11px] md:text-sm font-bold text-right">
                                             $212,400.00
                                         </td>
-                                        <td className="px-4 py-3 md:px-5 md:py-4 text-center">
+                                        <td className="px-2.5 py-2 md:px-5 md:py-4 text-center">
                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] md:text-[10px] font-bold uppercase tracking-wider">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
                                                 Processing
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 md:px-5 md:py-4 text-right">
+                                        <td className="px-2.5 py-2 md:px-5 md:py-4 text-right">
                                             <button className="text-primary hover:text-primary/70 material-symbols-outlined text-[18px] md:text-[20px] transition-colors p-1 rounded hover:bg-surface-variant/30">receipt_long</button>
                                         </td>
                                     </tr>

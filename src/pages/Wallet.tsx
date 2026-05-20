@@ -9,7 +9,7 @@ export default function Wallet() {
           {/* Wallet Split Overview */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 md:gap-gutter">
             {/* Main Wallet */}
-            <div className="glass-panel rounded-xl overflow-hidden border border-outline-variant/20 relative group/main min-h-[140px] md:min-h-[180px] flex flex-col justify-between">
+            <div className="glass-panel rounded-xl overflow-hidden border border-outline-variant/20 relative group/main min-h-[112px] md:min-h-[180px] flex flex-col justify-between">
               {/* Glow background and Shimmer */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-surface-container-low/50 to-surface-container-low opacity-60"></div>
               <div className="absolute top-0 -left-full w-1/2 h-full bg-gradient-to-r from-transparent via-primary/5 to-transparent skew-x-12 group-hover/main:animate-shimmer pointer-events-none"></div>
@@ -38,7 +38,7 @@ export default function Wallet() {
               </div>
 
               {/* Header */}
-              <div className="bg-surface-container-high/40 px-2.5 py-2.5 md:px-card-padding md:py-3.5 border-b border-outline-variant/10 flex justify-between items-center relative z-10">
+              <div className="bg-surface-container-high/40 px-2 py-1.5 md:px-card-padding md:py-3.5 border-b border-outline-variant/10 flex justify-between items-center relative z-10">
                 <span className="text-[11px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
                   Main Wallet Balance
@@ -47,7 +47,7 @@ export default function Wallet() {
               </div>
 
               {/* Content */}
-              <div className="p-3 md:p-card-padding flex-1 flex flex-col justify-between relative z-10">
+              <div className="p-2 md:p-card-padding flex-1 flex flex-col justify-between relative z-10">
                 <div className="space-y-1">
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl sm:text-3xl md:text-display-md font-extrabold text-on-surface tracking-tight font-tabular-nums group-hover/main:text-primary transition-colors">245,680.00</span>
@@ -56,7 +56,7 @@ export default function Wallet() {
                   <p className="text-xs md:text-sm text-on-surface-variant/90 font-semibold leading-relaxed">Available for instant spot trading, margin, and copy allocation.</p>
                 </div>
                 
-                <div className="mt-2.5 flex items-center justify-between border-t border-outline-variant/5 pt-2">
+                <div className="mt-1.5 flex items-center justify-between border-t border-outline-variant/5 pt-1">
                   <div className="flex items-center gap-1.5 text-tertiary text-[10px] md:text-label-sm font-bold">
                     <span className="material-symbols-outlined text-[14px] md:text-[16px]">trending_up</span>
                     <span>+1.24% today</span>
@@ -67,7 +67,7 @@ export default function Wallet() {
             </div>
 
             {/* Profit Wallet */}
-            <div className="glass-panel rounded-xl overflow-hidden border border-primary/30 relative group/profit min-h-[140px] md:min-h-[180px] flex flex-col justify-between">
+            <div className="glass-panel rounded-xl overflow-hidden border border-primary/30 relative group/profit min-h-[112px] md:min-h-[180px] flex flex-col justify-between">
               {/* Glow background and Shimmer */}
               <div className="absolute inset-0 bg-gradient-to-br from-tertiary/10 via-surface-container-low/50 to-surface-container-low opacity-60"></div>
               <div className="absolute top-0 -left-full w-1/2 h-full bg-gradient-to-r from-transparent via-primary/5 to-transparent skew-x-12 group-hover/profit:animate-shimmer pointer-events-none"></div>
@@ -96,7 +96,7 @@ export default function Wallet() {
               </div>
 
               {/* Header */}
-              <div className="bg-primary-container/10 px-2.5 py-2.5 md:px-card-padding md:py-3.5 border-b border-outline-variant/10 flex justify-between items-center relative z-10">
+              <div className="bg-primary-container/10 px-2 py-1.5 md:px-card-padding md:py-3.5 border-b border-outline-variant/10 flex justify-between items-center relative z-10">
                 <span className="text-[11px] md:text-label-sm font-bold text-tertiary uppercase tracking-wider flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-tertiary animate-ping"></span>
                   Profit Wallet Balance
@@ -105,7 +105,7 @@ export default function Wallet() {
               </div>
 
               {/* Content */}
-              <div className="p-3 md:p-card-padding flex-1 flex flex-col justify-between relative z-10">
+              <div className="p-2 md:p-card-padding flex-1 flex flex-col justify-between relative z-10">
                 <div className="space-y-1">
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl sm:text-3xl md:text-display-md font-extrabold text-on-surface tracking-tight font-tabular-nums group-hover/profit:text-tertiary transition-colors">12,430.50</span>
@@ -114,7 +114,7 @@ export default function Wallet() {
                   <p className="text-xs md:text-sm text-on-surface-variant/90 font-semibold leading-relaxed">Accumulated yield payments. Ready to compound or withdraw.</p>
                 </div>
                 
-                <div className="mt-2.5 flex items-center justify-between border-t border-outline-variant/5 pt-2">
+                <div className="mt-1.5 flex items-center justify-between border-t border-outline-variant/5 pt-1">
                   <div className="flex items-center gap-2 text-on-surface-variant text-[10px] md:text-label-sm font-semibold">
                     <span className="w-1 h-1 rounded-full bg-outline-variant"></span>
                     <span>Locked for withdrawal: $0.00</span>
@@ -129,23 +129,23 @@ export default function Wallet() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 md:gap-gutter">
             {/* Deposit Interface */}
             <div className="glass-panel rounded-xl flex flex-col border border-outline-variant/20">
-              <div className="bg-surface-container-high/40 px-2.5 py-2 md:px-card-padding md:py-3.5 border-b border-outline-variant/10">
+              <div className="bg-surface-container-high/40 px-2 py-1.5 md:px-card-padding md:py-3.5 border-b border-outline-variant/10">
                 <h3 className="text-sm md:text-label-md text-on-surface font-bold tracking-wide">Deposit Funds</h3>
               </div>
-              <div className="p-2.5 md:p-card-padding flex flex-col md:flex-row gap-2.5 md:gap-6">
-                <div className="space-y-2.5 md:space-y-4 flex-1">
+              <div className="p-2 md:p-card-padding flex flex-col md:flex-row gap-2 md:gap-6">
+                <div className="space-y-1.5 md:space-y-4 flex-1">
                   <div>
                     <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant mb-1.5 md:mb-2 block uppercase tracking-wide">Select Asset</label>
-                    <div className="grid grid-cols-3 gap-2.5">
-                      <button className="cursor-pointer border border-primary bg-primary/10 rounded-lg py-2 flex flex-col items-center gap-1 transition-all">
+                    <div className="grid grid-cols-3 gap-2">
+                      <button className="cursor-pointer border border-primary bg-primary/10 rounded-lg py-1.5 flex flex-col items-center gap-1 transition-all">
                         <img alt="BTC" className="w-5 h-5 md:w-6 md:h-6" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWSzDqxX9xuzk5baLDM7Fh5VpFBPjITgGKoYNxbhWRmSP1t41iVePsTLxrVKPEoxEuAPFo5Q54jIjidBRnzogkTMyeek-i0BNBcVA-FvoWrAHAVCjle50noKAFUzhlUUrKpeV2DygAHcaNnPvGctTUxkSt_ruHuvCkLbRVFY3dUiHxzH-mt5Sms6CqRZsVaDMUa0TsV22Aw5hBIONnPSq0h4L-xu951VMAx_JikDapcoNftx8OemuyjosX_kB80NIBOUmY8IjRf4Kf" />
                         <span className="text-[10px] md:text-label-sm font-bold">BTC</span>
                       </button>
-                      <button className="cursor-pointer border border-outline-variant hover:border-primary rounded-lg py-2 flex flex-col items-center gap-1 transition-all bg-surface-container-low">
+                      <button className="cursor-pointer border border-outline-variant hover:border-primary rounded-lg py-1.5 flex flex-col items-center gap-1 transition-all bg-surface-container-low">
                         <img alt="ETH" className="w-5 h-5 md:w-6 md:h-6" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvmpvf1JkYXofTYNBRdN5Mfv7TfGAQtedeyZlPi6O32733-Qz32fC4cJguX2h9nAop_wo9u_6DUyjSigS7K0SacCWNCuz7HFwYYhdSWAS61KoTfrNfJ7vjbOygUjnEysJJKkIGOHDhUlTI9feiKyyxo8x4VZowppUlOwYdTOXmIVS6sXUPcO_V1ViVzHcIZxPRdV_xlj_PRD6Zg7lz42VTFnC-UD7Z5OUh2XNkb7YxESrzZ7T-VYwQcWokcCTQpzPZ0DG1Ux-dvk07" />
                         <span className="text-[10px] md:text-label-sm font-bold">ETH</span>
                       </button>
-                      <button className="cursor-pointer border border-outline-variant hover:border-primary rounded-lg py-2 flex flex-col items-center gap-1 transition-all bg-surface-container-low">
+                      <button className="cursor-pointer border border-outline-variant hover:border-primary rounded-lg py-1.5 flex flex-col items-center gap-1 transition-all bg-surface-container-low">
                         <img alt="USDT" className="w-5 h-5 md:w-6 md:h-6" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkdr_eIehC8H090wsE1OaYFTqDALeFegJpnxFrs6kyPcI82wrcUWoDPJLr3HivsXHiPNKeixPTPJLxhraPSPquFLuhdERigsw8Dv_zwVNMEvD5SqTIdcg7sgmVBDFY15Kh1DOGO5IPM9kz238OCU7HPYCcfx2g2vsTkbk_5zjD1TxggVN5clx9laiW2nnBeLwxxQW5C7RQDLs5vGuBkVmxStrCuAGalKHbu0R0ibbZyYaP1NcIi3Dy6dQXeq7cpLUCOnddW5lXkeq_" />
                         <span className="text-[10px] md:text-label-sm font-bold">USDT</span>
                       </button>
@@ -155,16 +155,16 @@ export default function Wallet() {
                     <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant mb-1.5 md:mb-2 block uppercase tracking-wide">TXID Hash Submission</label>
                     <input className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-3 py-2 text-sm md:text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Enter transaction hash..." type="text" />
                   </div>
-                  <button className="cursor-pointer w-full bg-primary text-on-primary py-2.5 rounded-lg text-sm md:text-label-md font-bold hover:brightness-110 active:scale-[0.98] transition-all mt-2 shadow-sm shadow-primary/20">
+                  <button className="cursor-pointer w-full bg-primary text-on-primary py-2.5 rounded-lg text-sm md:text-label-md font-bold hover:brightness-110 active:scale-[0.98] transition-all mt-1 shadow-sm shadow-primary/20">
                     Confirm Deposit
                   </button>
                 </div>
-                <div className="flex flex-col items-center justify-center p-2 md:p-4 bg-surface-container-lowest rounded-xl border border-dashed border-outline-variant mt-2.5 md:mt-0">
+                <div className="flex flex-col items-center justify-center p-1.5 md:p-4 bg-surface-container-lowest rounded-xl border border-dashed border-outline-variant mt-1.5 md:mt-0">
                   <div className="bg-white p-2 rounded-lg shadow-sm">
                     <img alt="Deposit Address QR" className="w-20 h-20 md:w-24 md:h-24" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD834f1i3JEie417y4hzdtSZlk40EJjVMNRAxRQgT7RU5JaUri3sfIUacqRQb24oFUp-DWiUsvnpN14mWFFzocJtHYcbhWmE2G6O83h-fVGOL2qQ-GxvqeRwkgXn-fGCv0a2lbW4L4bHKyFNen8ooS6lz59nnlAvLvSbchLNob-UGp7VApWB9A9ZZ6eBuT7HL3bF1zfqaqQWffxXUZv70-inGXWDSCSAfH1lVMT8e0zew4nuMY8y4gLyzl4a9cT3b7PEyzoBXpxODVc" />
                   </div>
-                  <p className="text-[10px] md:text-xs font-tabular-nums text-on-surface-variant mt-3 break-all text-center max-w-[140px] bg-surface-container-highest px-2 py-1 rounded">bc1qxy2kgdy6jrsqz7v...</p>
-                  <button className="cursor-pointer mt-2 text-primary text-[10px] md:text-label-sm font-bold hover:underline">Copy Address</button>
+                  <p className="text-[10px] md:text-xs font-tabular-nums text-on-surface-variant mt-2 break-all text-center max-w-[140px] bg-surface-container-highest px-2 py-1 rounded">bc1qxy2kgdy6jrsqz7v...</p>
+                  <button className="cursor-pointer mt-1.5 text-primary text-[10px] md:text-label-sm font-bold hover:underline">Copy Address</button>
                 </div>
               </div>
             </div>

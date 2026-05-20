@@ -168,44 +168,6 @@ export default function Invest() {
 
                     {/* Analytics Grid: Bento Layout */}
                     <div className="grid grid-cols-12 gap-2.5 md:gap-gutter mb-2.5 md:mb-gutter">
-                        {/* Profit Growth Chart */}
-                        <div className="col-span-12 lg:col-span-8 glass-card rounded-xl overflow-hidden flex flex-col min-h-[240px] md:h-[400px] border border-outline-variant/20">
-                            <div className="px-2.5 py-2 md:px-6 md:py-4 border-b border-outline-variant/10 flex flex-wrap justify-between items-center gap-2.5 bg-surface-container-high/40">
-                                <h3 className="font-bold text-[10px] sm:text-[11px] md:text-label-md text-on-surface flex items-center gap-1.5 md:gap-2 uppercase tracking-wide">
-                                    <span className="material-symbols-outlined text-primary text-[16px] md:text-[20px]">show_chart</span>
-                                    Profit Growth Analysis
-                                </h3>
-                                <div className="flex gap-1 bg-surface-container-highest/30 p-1 rounded-lg">
-                                    <button className="px-2 py-0.5 rounded bg-primary text-on-primary text-[9px] md:text-label-sm font-bold shadow-sm">1M</button>
-                                    <button className="px-2 py-0.5 rounded hover:bg-surface-variant/50 text-on-surface-variant text-[9px] md:text-label-sm font-bold transition-colors">6M</button>
-                                    <button className="px-2 py-0.5 rounded hover:bg-surface-variant/50 text-on-surface-variant text-[9px] md:text-label-sm font-bold transition-colors">1Y</button>
-                                </div>
-                            </div>
-                            <div className="flex-1 p-2.5 md:p-6 relative flex items-end min-h-[180px]">
-                                {/* SVG Chart Mockup */}
-                                <svg className="absolute inset-0 w-full h-full pointer-events-none p-2 md:p-8" preserveAspectRatio="none" viewBox="0 0 800 300">
-                                    <defs>
-                                        <linearGradient id="chartGradientInv" x1="0" x2="0" y1="0" y2="1">
-                                            <stop offset="0%" stopColor="#2563eb" stopOpacity="0.4"></stop>
-                                            <stop offset="100%" stopColor="#2563eb" stopOpacity="0"></stop>
-                                        </linearGradient>
-                                    </defs>
-                                    <line stroke="#374151" strokeDasharray="4" strokeWidth="0.5" x1="0" x2="800" y1="50" y2="50"></line>
-                                    <line stroke="#374151" strokeDasharray="4" strokeWidth="0.5" x1="0" x2="800" y1="150" y2="150"></line>
-                                    <line stroke="#374151" strokeDasharray="4" strokeWidth="0.5" x1="0" x2="800" y1="250" y2="250"></line>
-                                    <path d="M0 280 Q 100 260 200 240 T 400 180 T 600 100 T 800 40 L 800 300 L 0 300 Z" fill="url(#chartGradientInv)"></path>
-                                    <path className="drop-shadow-[0_0_8px_rgba(37,99,235,0.6)]" d="M0 280 Q 100 260 200 240 T 400 180 T 600 100 T 800 40" fill="none" stroke="#2563eb" strokeWidth="3" strokeLinecap="round"></path>
-                                    <circle cx="200" cy="240" fill="#2563eb" r="4" stroke="#ffffff" strokeWidth="1.5"></circle>
-                                    <circle cx="600" cy="100" fill="#2563eb" r="4" stroke="#ffffff" strokeWidth="1.5"></circle>
-                                    <circle cx="800" cy="40" fill="#2563eb" r="5" stroke="#ffffff" strokeWidth="2"></circle>
-                                </svg>
-                                <div className="absolute top-4 right-4 md:top-20 md:right-40 glass-card p-1.5 md:p-3 rounded-lg shadow-xl border border-primary/30 backdrop-blur-md">
-                                    <p className="text-[8px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Jun 12, 2024</p>
-                                    <p className="text-[10px] md:text-label-md font-bold text-tertiary">+$12,450.00 Profit</p>
-                                </div>
-                            </div>
-                        </div>
-
                         {/* Profit Calculator Widget */}
                         <div className="col-span-12 lg:col-span-4 glass-card rounded-xl overflow-hidden flex flex-col md:h-[400px] border border-outline-variant/20">
                             <div className="px-2.5 py-2 md:px-6 md:py-4 border-b border-outline-variant/10 bg-surface-container-high/40">
@@ -249,6 +211,44 @@ export default function Invest() {
                             </div>
                             <div className="p-2.5 pt-0 md:p-6 md:pt-0">
                                 <button className="w-full py-2.5 bg-primary text-on-primary font-bold text-[10px] md:text-sm uppercase tracking-wider rounded-xl hover:brightness-110 active:scale-[0.98] transition-all shadow-sm shadow-primary/20">Initiate Contract</button>
+                            </div>
+                        </div>
+
+                        {/* Profit Growth Chart */}
+                        <div className="col-span-12 lg:col-span-8 glass-card rounded-xl overflow-hidden flex flex-col min-h-[240px] md:h-[400px] border border-outline-variant/20">
+                            <div className="px-2.5 py-2 md:px-6 md:py-4 border-b border-outline-variant/10 flex flex-wrap justify-between items-center gap-2.5 bg-surface-container-high/40">
+                                <h3 className="font-bold text-[10px] sm:text-[11px] md:text-label-md text-on-surface flex items-center gap-1.5 md:gap-2 uppercase tracking-wide">
+                                    <span className="material-symbols-outlined text-primary text-[16px] md:text-[20px]">show_chart</span>
+                                    Profit Growth Analysis
+                                </h3>
+                                <div className="flex gap-1 bg-surface-container-highest/30 p-1 rounded-lg">
+                                    <button className="px-2 py-0.5 rounded bg-primary text-on-primary text-[9px] md:text-label-sm font-bold shadow-sm">1M</button>
+                                    <button className="px-2 py-0.5 rounded hover:bg-surface-variant/50 text-on-surface-variant text-[9px] md:text-label-sm font-bold transition-colors">6M</button>
+                                    <button className="px-2 py-0.5 rounded hover:bg-surface-variant/50 text-on-surface-variant text-[9px] md:text-label-sm font-bold transition-colors">1Y</button>
+                                </div>
+                            </div>
+                            <div className="flex-1 p-2.5 md:p-6 relative flex items-end min-h-[180px]">
+                                {/* SVG Chart Mockup */}
+                                <svg className="absolute inset-0 w-full h-full pointer-events-none p-2 md:p-8" preserveAspectRatio="none" viewBox="0 0 800 300">
+                                    <defs>
+                                        <linearGradient id="chartGradientInv" x1="0" x2="0" y1="0" y2="1">
+                                            <stop offset="0%" stopColor="#2563eb" stopOpacity="0.4"></stop>
+                                            <stop offset="100%" stopColor="#2563eb" stopOpacity="0"></stop>
+                                        </linearGradient>
+                                    </defs>
+                                    <line stroke="#374151" strokeDasharray="4" strokeWidth="0.5" x1="0" x2="800" y1="50" y2="50"></line>
+                                    <line stroke="#374151" strokeDasharray="4" strokeWidth="0.5" x1="0" x2="800" y1="150" y2="150"></line>
+                                    <line stroke="#374151" strokeDasharray="4" strokeWidth="0.5" x1="0" x2="800" y1="250" y2="250"></line>
+                                    <path d="M0 280 Q 100 260 200 240 T 400 180 T 600 100 T 800 40 L 800 300 L 0 300 Z" fill="url(#chartGradientInv)"></path>
+                                    <path className="drop-shadow-[0_0_8px_rgba(37,99,235,0.6)]" d="M0 280 Q 100 260 200 240 T 400 180 T 600 100 T 800 40" fill="none" stroke="#2563eb" strokeWidth="3" strokeLinecap="round"></path>
+                                    <circle cx="200" cy="240" fill="#2563eb" r="4" stroke="#ffffff" strokeWidth="1.5"></circle>
+                                    <circle cx="600" cy="100" fill="#2563eb" r="4" stroke="#ffffff" strokeWidth="1.5"></circle>
+                                    <circle cx="800" cy="40" fill="#2563eb" r="5" stroke="#ffffff" strokeWidth="2"></circle>
+                                </svg>
+                                <div className="absolute top-4 right-4 md:top-20 md:right-40 glass-card p-1.5 md:p-3 rounded-lg shadow-xl border border-primary/30 backdrop-blur-md">
+                                    <p className="text-[8px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Jun 12, 2024</p>
+                                    <p className="text-[10px] md:text-label-md font-bold text-tertiary">+$12,450.00 Profit</p>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -203,7 +203,7 @@ export default function Deposit() {
                                 </div>
                             </section>
                             
-                            <section className="glass-card rounded-xl p-2.5 md:p-5 bg-primary/5 border border-primary/20">
+                            <section className="hidden md:block glass-card rounded-xl p-2.5 md:p-5 bg-primary/5 border border-primary/20">
                                 <h3 className="text-[11px] md:text-sm font-bold text-primary mb-1.5 md:mb-2 uppercase tracking-wide">OTC Support Desk</h3>
                                 <p className="text-[10px] md:text-xs font-medium text-on-surface-variant leading-relaxed mb-2.5 md:mb-4">Assistance available for high-volume OTC deposits or corporate fund transfers.</p>
                                 <button className="w-full py-2.5 md:py-3 border border-primary/50 text-primary rounded-lg font-bold text-[10px] md:text-xs uppercase tracking-wider hover:bg-primary hover:text-on-primary transition-all">
@@ -211,7 +211,7 @@ export default function Deposit() {
                                 </button>
                             </section>
                             
-                            <div className="glass-card rounded-xl p-2.5 md:p-5 overflow-hidden relative border border-outline-variant/20 flex items-center gap-3 md:gap-4">
+                            <div className="hidden md:flex glass-card rounded-xl p-2.5 md:p-5 overflow-hidden relative border border-outline-variant/20 items-center gap-3 md:gap-4">
                                 <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-surface-container-highest border border-outline-variant/30 flex items-center justify-center shrink-0">
                                     <span className="material-symbols-outlined text-on-surface-variant text-[18px] md:text-[24px]">security</span>
                                 </div>

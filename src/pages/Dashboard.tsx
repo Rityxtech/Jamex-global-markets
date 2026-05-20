@@ -10,11 +10,25 @@ export default function Dashboard() {
           {/* Quick Actions & ROI Timer */}
           <div className="flex flex-col lg:flex-row gap-2.5 md:gap-gutter">
             {/* ROI Timer Widget */}
-            <div className="glass-card flex-1 p-2.5 md:p-card-padding flex flex-row items-center justify-between rounded-xl group relative overflow-hidden">
+            <div className="glass-card flex-1 px-3 py-3.5 md:p-card-padding flex flex-row items-center justify-between rounded-xl group relative overflow-hidden min-h-[76px] md:min-h-[96px]">
               {/* Shifting background glow */}
               <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 pointer-events-none animate-pulse"></div>
               {/* Scanline sweep effect */}
               <div className="absolute top-0 bottom-0 w-[2px] bg-gradient-to-b from-transparent via-primary/30 to-transparent animate-scan pointer-events-none"></div>
+
+              {/* Background Chart Sparkline */}
+              <div className="absolute inset-x-0 bottom-0 top-1/2 opacity-25 pointer-events-none z-0">
+                <svg className="w-full h-full" viewBox="0 0 400 60" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="roi-spark-glow" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#2563eb" stopOpacity="0.2" />
+                      <stop offset="100%" stopColor="#2563eb" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M 0 50 Q 50 45 100 48 T 200 25 T 300 35 T 400 15 L 400 60 L 0 60 Z" fill="url(#roi-spark-glow)" />
+                  <path d="M 0 50 Q 50 45 100 48 T 200 25 T 300 35 T 400 15" fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" className="animate-spark-draw" />
+                </svg>
+              </div>
 
               <div className="flex items-center gap-2.5 md:gap-4 relative z-10">
                 <div className="w-8 h-8 md:w-12 md:h-12 rounded-full border border-primary/30 bg-primary/10 flex items-center justify-center relative overflow-hidden group-hover:border-primary/60 transition-colors">

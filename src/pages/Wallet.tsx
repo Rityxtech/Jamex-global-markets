@@ -9,76 +9,117 @@ export default function Wallet() {
           {/* Wallet Split Overview */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 md:gap-gutter">
             {/* Main Wallet */}
-            <div className="glass-panel rounded-xl overflow-hidden border border-outline-variant/20 relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-transparent pointer-events-none"></div>
-              <div className="absolute top-0 -left-full w-1/2 h-full bg-gradient-to-r from-transparent via-primary/5 to-transparent skew-x-12 group-hover:animate-shimmer pointer-events-none"></div>
-              <div className="bg-surface-container-high/40 px-2.5 py-2 md:px-card-padding md:py-3.5 border-b border-outline-variant/10 flex justify-between items-center relative z-10">
-                <span className="text-[11px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Main Wallet</span>
+            <div className="glass-panel rounded-xl overflow-hidden border border-outline-variant/20 relative group/main min-h-[140px] md:min-h-[180px] flex flex-col justify-between">
+              {/* Glow background and Shimmer */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-surface-container-low/50 to-surface-container-low opacity-60"></div>
+              <div className="absolute top-0 -left-full w-1/2 h-full bg-gradient-to-r from-transparent via-primary/5 to-transparent skew-x-12 group-hover/main:animate-shimmer pointer-events-none"></div>
+              
+              {/* Sparkline background across the bottom */}
+              <div className="absolute inset-x-0 bottom-0 h-[60%] opacity-20 pointer-events-none">
+                <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="mainSparkGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#2563eb" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="#2563eb" stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+                  <path 
+                    d="M0,35 Q15,30 30,20 T60,25 T90,5 T100,2" 
+                    fill="none" 
+                    stroke="#2563eb" 
+                    strokeWidth="1.5" 
+                    className="animate-spark-draw"
+                  />
+                  <path 
+                    d="M0,35 Q15,30 30,20 T60,25 T90,5 T100,2 L100,40 L0,40 Z" 
+                    fill="url(#mainSparkGrad)"
+                  />
+                </svg>
+              </div>
+
+              {/* Header */}
+              <div className="bg-surface-container-high/40 px-2.5 py-2.5 md:px-card-padding md:py-3.5 border-b border-outline-variant/10 flex justify-between items-center relative z-10">
+                <span className="text-[11px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+                  Main Wallet Balance
+                </span>
                 <span className="material-symbols-outlined text-primary text-[18px] md:text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>account_balance_wallet</span>
               </div>
-              <div className="p-2.5 md:p-card-padding flex flex-row items-center justify-between relative z-10">
-                <div className="space-y-1 md:space-y-2">
+
+              {/* Content */}
+              <div className="p-3 md:p-card-padding flex-1 flex flex-col justify-between relative z-10">
+                <div className="space-y-1">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-xl sm:text-2xl md:text-display-lg font-bold text-on-surface tracking-tight font-tabular-nums">245,680.00</span>
-                    <span className="text-lg md:text-headline-md font-bold text-primary/70">USD</span>
+                    <span className="text-2xl sm:text-3xl md:text-display-md font-extrabold text-on-surface tracking-tight font-tabular-nums group-hover/main:text-primary transition-colors">245,680.00</span>
+                    <span className="text-sm md:text-headline-sm font-bold text-primary/75">USD</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-tertiary">
-                    <span className="material-symbols-outlined text-[14px] md:text-[16px]">trending_up</span>
-                    <span className="text-[10px] md:text-label-sm font-bold">+1.24% today</span>
-                  </div>
+                  <p className="text-xs md:text-sm text-on-surface-variant/90 font-semibold leading-relaxed">Available for instant spot trading, margin, and copy allocation.</p>
                 </div>
-                <div className="w-24 h-12 md:w-32 md:h-16 shrink-0 relative">
-                  <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="wallet-spark-blue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#2563eb" stopOpacity="0.3" />
-                        <stop offset="100%" stopColor="#2563eb" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    <path d="M 0 35 Q 20 30 40 32 T 80 15 T 100 8 L 100 40 L 0 40 Z" fill="url(#wallet-spark-blue)" />
-                    <path d="M 0 35 Q 20 30 40 32 T 80 15 T 100 8" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" className="animate-spark-draw" />
-                  </svg>
-                  <span className="absolute top-[6px] right-0 flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                  </span>
+                
+                <div className="mt-2.5 flex items-center justify-between border-t border-outline-variant/5 pt-2">
+                  <div className="flex items-center gap-1.5 text-tertiary text-[10px] md:text-label-sm font-bold">
+                    <span className="material-symbols-outlined text-[14px] md:text-[16px]">trending_up</span>
+                    <span>+1.24% today</span>
+                  </div>
+                  <span className="text-[8px] md:text-[9px] font-mono text-on-surface-variant/60">ID: WM-9402-MAIN</span>
                 </div>
               </div>
             </div>
 
             {/* Profit Wallet */}
-            <div className="glass-panel rounded-xl overflow-hidden border border-primary/30 relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none"></div>
-              <div className="absolute top-0 -left-full w-1/2 h-full bg-gradient-to-r from-transparent via-primary/5 to-transparent skew-x-12 group-hover:animate-shimmer pointer-events-none"></div>
-              <div className="bg-primary-container/10 px-2.5 py-2 md:px-card-padding md:py-3.5 border-b border-outline-variant/10 flex justify-between items-center relative z-10">
-                <span className="text-[11px] md:text-label-sm font-bold text-primary uppercase tracking-wider">Profit Wallet</span>
+            <div className="glass-panel rounded-xl overflow-hidden border border-primary/30 relative group/profit min-h-[140px] md:min-h-[180px] flex flex-col justify-between">
+              {/* Glow background and Shimmer */}
+              <div className="absolute inset-0 bg-gradient-to-br from-tertiary/10 via-surface-container-low/50 to-surface-container-low opacity-60"></div>
+              <div className="absolute top-0 -left-full w-1/2 h-full bg-gradient-to-r from-transparent via-primary/5 to-transparent skew-x-12 group-hover/profit:animate-shimmer pointer-events-none"></div>
+              
+              {/* Sparkline background across the bottom */}
+              <div className="absolute inset-x-0 bottom-0 h-[60%] opacity-20 pointer-events-none">
+                <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="profitSparkGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+                  <path 
+                    d="M0,38 Q25,35 50,18 T80,20 T100,5" 
+                    fill="none" 
+                    stroke="#10b981" 
+                    strokeWidth="1.5" 
+                    className="animate-spark-draw"
+                  />
+                  <path 
+                    d="M0,38 Q25,35 50,18 T80,20 T100,5 L100,40 L0,40 Z" 
+                    fill="url(#profitSparkGrad)"
+                  />
+                </svg>
+              </div>
+
+              {/* Header */}
+              <div className="bg-primary-container/10 px-2.5 py-2.5 md:px-card-padding md:py-3.5 border-b border-outline-variant/10 flex justify-between items-center relative z-10">
+                <span className="text-[11px] md:text-label-sm font-bold text-tertiary uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-tertiary animate-ping"></span>
+                  Profit Wallet Balance
+                </span>
                 <span className="material-symbols-outlined text-tertiary text-[18px] md:text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>payments</span>
               </div>
-              <div className="p-2.5 md:p-card-padding flex flex-row items-center justify-between relative z-10">
-                <div className="space-y-1 md:space-y-2">
+
+              {/* Content */}
+              <div className="p-3 md:p-card-padding flex-1 flex flex-col justify-between relative z-10">
+                <div className="space-y-1">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-xl sm:text-2xl md:text-display-lg font-bold text-on-surface tracking-tight font-tabular-nums">12,430.50</span>
-                    <span className="text-lg md:text-headline-md font-bold text-tertiary/70">USD</span>
+                    <span className="text-2xl sm:text-3xl md:text-display-md font-extrabold text-on-surface tracking-tight font-tabular-nums group-hover/profit:text-tertiary transition-colors">12,430.50</span>
+                    <span className="text-sm md:text-headline-sm font-bold text-tertiary/75">USD</span>
                   </div>
-                  <div className="flex items-center gap-2 text-on-surface-variant">
-                    <span className="text-[10px] md:text-label-sm font-bold">Locked for withdrawal: $0.00</span>
-                  </div>
+                  <p className="text-xs md:text-sm text-on-surface-variant/90 font-semibold leading-relaxed">Accumulated yield payments. Ready to compound or withdraw.</p>
                 </div>
-                <div className="w-24 h-12 md:w-32 md:h-16 shrink-0 relative">
-                  <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="wallet-spark-green" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
-                        <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    <path d="M 0 38 Q 25 35 50 18 T 80 20 T 100 5 L 100 40 L 0 40 Z" fill="url(#wallet-spark-green)" />
-                    <path d="M 0 38 Q 25 35 50 18 T 80 20 T 100 5" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" className="animate-spark-draw" />
-                  </svg>
-                  <span className="absolute top-[3px] right-0 flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-tertiary"></span>
-                  </span>
+                
+                <div className="mt-2.5 flex items-center justify-between border-t border-outline-variant/5 pt-2">
+                  <div className="flex items-center gap-2 text-on-surface-variant text-[10px] md:text-label-sm font-semibold">
+                    <span className="w-1 h-1 rounded-full bg-outline-variant"></span>
+                    <span>Locked for withdrawal: $0.00</span>
+                  </div>
+                  <span className="text-[8px] md:text-[9px] font-mono text-on-surface-variant/60">ID: WP-4902-YLD</span>
                 </div>
               </div>
             </div>

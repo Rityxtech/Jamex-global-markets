@@ -1,0 +1,5 @@
+feat: optimize Wallet page mobile layout and layout densities
+
+- Restricted mobile view paddings and margins to a maximum of 10px (p-2.5, gap-2.5, space-y-2.5) for a high-density mobile interface
+- Scaled down font sizing of large USD dollar amounts (e.g. from text-3xl to text-xl) on mobile viewports
+- Resized card headers, asset selector buttons, and transaction table rows for mobile layouts

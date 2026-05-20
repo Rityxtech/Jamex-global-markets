@@ -35,23 +35,99 @@ export default function Withdraw() {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 md:gap-6">
                         {/* Left Column: Withdrawal Form */}
                         <div className="lg:col-span-7 space-y-2.5 md:space-y-6">
-                            {/* Wallet Overview Card */}
-                            <div className="glass-card rounded-xl overflow-hidden shadow-xl border border-outline-variant/20">
-                                <div className="bg-surface-container-high/40 px-2.5 py-2 md:px-5 md:py-3.5 border-b border-outline-variant/10 flex items-center justify-between">
+                            {/* Wallet Overview Card with Premium Sparklines and Animations */}
+                            <div className="glass-card rounded-xl overflow-hidden shadow-xl border border-outline-variant/20 relative group/balance">
+                                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-tertiary/5 opacity-40"></div>
+                                <div className="bg-surface-container-high/40 px-2.5 py-2 md:px-5 md:py-3.5 border-b border-outline-variant/10 flex items-center justify-between relative z-10">
                                     <span className="text-[10px] md:text-label-md font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
-                                        <span className="material-symbols-outlined text-[16px] md:text-[20px]">account_balance_wallet</span>
+                                        <span className="material-symbols-outlined text-[16px] md:text-[20px] animate-pulse">account_balance_wallet</span>
                                         Balance Overview
                                     </span>
-                                    <span className="text-[9px] md:text-label-sm text-on-surface-variant font-bold">Real-time valuation</span>
+                                    <span className="text-[8px] md:text-label-sm text-tertiary bg-tertiary/10 border border-tertiary/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-tertiary animate-ping"></span>
+                                        Live Valuation
+                                    </span>
                                 </div>
-                                <div className="grid grid-cols-2 divide-x divide-outline-variant/10 p-2.5 md:p-5">
-                                    <div className="pr-2.5 md:pr-4">
-                                        <p className="text-[9px] md:text-label-sm text-on-surface-variant mb-1 font-bold uppercase tracking-wider">Main Account</p>
-                                        <p className="text-sm sm:text-lg md:text-2xl font-mono text-on-surface font-bold tracking-tight">$1,248,590.00</p>
+                                
+                                <div className="grid grid-cols-2 divide-x divide-outline-variant/10 relative z-10">
+                                    {/* Main Account Column */}
+                                    <div className="p-3 md:p-5 relative overflow-hidden group/main">
+                                        {/* Sparkline background */}
+                                        <div className="absolute inset-0 opacity-15 pointer-events-none -bottom-1">
+                                            <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                                                <defs>
+                                                    <linearGradient id="mainGrad" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
+                                                        <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
+                                                    </linearGradient>
+                                                </defs>
+                                                <path 
+                                                    d="M0,35 Q15,30 30,20 T60,25 T90,5 T100,2" 
+                                                    fill="none" 
+                                                    stroke="#3b82f6" 
+                                                    strokeWidth="1.5" 
+                                                    className="animate-withdraw-draw"
+                                                />
+                                                <path 
+                                                    d="M0,35 Q15,30 30,20 T60,25 T90,5 T100,2 L100,40 L0,40 Z" 
+                                                    fill="url(#mainGrad)"
+                                                />
+                                            </svg>
+                                        </div>
+                                        
+                                        <div className="relative z-10 flex flex-col justify-between h-full">
+                                            <div>
+                                                <p className="text-[9px] md:text-label-sm text-on-surface-variant mb-1 font-bold uppercase tracking-wider flex items-center gap-1">
+                                                    <span className="w-1 h-1 rounded-full bg-primary"></span>
+                                                    Main Account
+                                                </p>
+                                                <p className="text-sm sm:text-lg md:text-2xl font-mono text-on-surface font-extrabold tracking-tight group-hover/main:text-primary transition-colors">$1,248,590.00</p>
+                                            </div>
+                                            <div className="mt-2.5 flex items-center gap-1 text-[8px] md:text-[10px] text-primary/80 font-bold uppercase">
+                                                <span className="material-symbols-outlined text-[10px] md:text-[12px] font-bold">trending_up</span>
+                                                +4.82% weekly
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="pl-2.5 md:pl-6">
-                                        <p className="text-[9px] md:text-label-sm text-on-surface-variant mb-1 font-bold uppercase tracking-wider">Profit Wallet</p>
-                                        <p className="text-sm sm:text-lg md:text-2xl font-mono text-tertiary font-bold tracking-tight">$342,120.45</p>
+
+                                    {/* Profit Wallet Column */}
+                                    <div className="p-3 md:p-5 relative overflow-hidden group/profit">
+                                        {/* Sparkline background */}
+                                        <div className="absolute inset-0 opacity-15 pointer-events-none -bottom-1">
+                                            <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                                                <defs>
+                                                    <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
+                                                        <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                                                    </linearGradient>
+                                                </defs>
+                                                <path 
+                                                    d="M0,38 Q20,35 40,15 T70,18 T90,2 T100,0" 
+                                                    fill="none" 
+                                                    stroke="#10b981" 
+                                                    strokeWidth="1.5" 
+                                                    className="animate-withdraw-draw"
+                                                />
+                                                <path 
+                                                    d="M0,38 Q20,35 40,15 T70,18 T90,2 T100,0 L100,40 L0,40 Z" 
+                                                    fill="url(#profitGrad)"
+                                                />
+                                            </svg>
+                                        </div>
+                                        
+                                        <div className="relative z-10 flex flex-col justify-between h-full">
+                                            <div>
+                                                <p className="text-[9px] md:text-label-sm text-on-surface-variant mb-1 font-bold uppercase tracking-wider flex items-center gap-1">
+                                                    <span className="w-1 h-1 rounded-full bg-tertiary"></span>
+                                                    Profit Wallet
+                                                </p>
+                                                <p className="text-sm sm:text-lg md:text-2xl font-mono text-tertiary font-extrabold tracking-tight group-hover/profit:text-tertiary/80 transition-colors">$342,120.45</p>
+                                            </div>
+                                            <div className="mt-2.5 flex items-center gap-1 text-[8px] md:text-[10px] text-tertiary/80 font-bold uppercase">
+                                                <span className="material-symbols-outlined text-[10px] md:text-[12px] font-bold">payments</span>
+                                                Daily yield payout
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -95,15 +171,44 @@ export default function Withdraw() {
                                         <p className="text-[9px] md:text-xs leading-tight text-error/90 font-bold">Ensure the destination address is accurate. Transfers to incorrect addresses are irreversible and result in permanent loss.</p>
                                     </div>
                                 </div>
+
+                                {/* Mobile-only Execute button */}
+                                <div className="md:hidden pt-4 border-t border-outline-variant/10">
+                                    <button 
+                                        onClick={handleWithdraw}
+                                        disabled={isWithdrawing || isWithdrawn}
+                                        className={`w-full py-3.5 ${isWithdrawing ? 'bg-primary/50 text-white' : isWithdrawn ? 'bg-tertiary text-on-tertiary shadow-[0_0_15px_rgba(78,222,163,0.3)]' : 'bg-primary text-on-primary hover:brightness-110 active:scale-[0.98] shadow-sm shadow-primary/20'} font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 group`}
+                                    >
+                                        {isWithdrawing ? (
+                                            <>
+                                                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Verifying...
+                                            </>
+                                        ) : isWithdrawn ? (
+                                            <>
+                                                <span className="material-symbols-outlined text-[18px]">verified</span>
+                                                Request Transmitted
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">lock_person</span>
+                                                Execute Withdrawal
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
                             </div>
                         </div>
-
-                        {/* Right Column: Security & Summary */}
-                        <div className="lg:col-span-5 space-y-2.5 md:space-y-6">
-                            {/* 2FA / OTP Verification */}
-                            <div className="glass-card rounded-xl p-2.5 md:p-5 space-y-2.5 md:space-y-6 relative overflow-hidden border border-primary/20 shadow-[0_0_20px_rgba(37,99,235,0.05)]">
-                                <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-primary/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none"></div>
-                                <div className="relative z-10">
+ 
+                         {/* Right Column: Security & Summary */}
+                         <div className="lg:col-span-5 space-y-2.5 md:space-y-6">
+                             {/* 2FA / OTP Verification */}
+                             <div className="hidden md:block glass-card rounded-xl p-2.5 md:p-5 space-y-2.5 md:space-y-6 relative overflow-hidden border border-primary/20 shadow-[0_0_20px_rgba(37,99,235,0.05)]">
+                                 <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-primary/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none"></div>
+                                 <div className="relative z-10">
                                     <h2 className="text-base md:text-2xl font-bold text-on-surface mb-1 md:mb-2 tracking-tight">Security Clearance</h2>
                                     <p className="text-[10px] md:text-sm text-on-surface-variant font-medium leading-snug">A 6-digit verification code has been sent to your registered device.</p>
                                 </div>
@@ -270,6 +375,17 @@ export default function Withdraw() {
                             </table>
                         </div>
                     </div>
+                    <style>{`
+                        @keyframes withdraw-draw {
+                            from { stroke-dashoffset: 100; }
+                            to { stroke-dashoffset: 0; }
+                        }
+                        .animate-withdraw-draw {
+                            stroke-dasharray: 100;
+                            stroke-dashoffset: 100;
+                            animation: withdraw-draw 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                        }
+                    `}</style>
         </div>
     );
 }

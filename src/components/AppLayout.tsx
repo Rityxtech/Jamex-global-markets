@@ -10,7 +10,7 @@ import BottomNav from './BottomNav';
  */
 export default function AppLayout() {
   return (
-    <div className="deep-mesh-bg text-on-surface selection:bg-primary/30 min-h-screen dark bg-background">
+    <div className="text-on-surface selection:bg-primary/30 min-h-screen dark">
       {/* Sidebar: fixed, always the same height = 100vh minus header */}
       <Sidebar />
 

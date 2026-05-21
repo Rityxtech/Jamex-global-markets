@@ -1,8 +1,101 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useWalletStore } from '../store/walletStore';
+import { useTransactionStore } from '../store/transactionStore';
+import { useInvestmentStore } from '../store/investmentStore';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { mainBalance, profitBalance } = useWalletStore();
+  const { transactions } = useTransactionStore();
+  const { investments } = useInvestmentStore();
+  
+  const totalNetWorth = mainBalance + profitBalance;
+  const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+
+  const activeInvestments = investments.filter(inv => inv.status === 'active');
+  const pendingInvestments = investments.filter(inv => inv.status === 'pending');
+  const activeCount = activeInvestments.length;
+  const pendingCount = pendingInvestments.length;
+
+  const nextPayoutInvestment = [...activeInvestments]
+    .filter(inv => inv.next_payout_date && new Date(inv.next_payout_date).getTime() > Date.now())
+    .sort((a, b) => new Date(a.next_payout_date!).getTime() - new Date(b.next_payout_date!).getTime())[0];
+
+  const [timeLeft, setTimeLeft] = useState('00h 00m 00s');
+
+  useEffect(() => {
+    if (!nextPayoutInvestment || !nextPayoutInvestment.next_payout_date) {
+      setTimeLeft('--h --m --s');
+      return;
+    }
+    
+    const targetDate = new Date(nextPayoutInvestment.next_payout_date).getTime();
+    
+    const updateTimer = () => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+      
+      if (distance < 0) {
+        setTimeLeft('Processing...');
+        return;
+      }
+      
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      
+      setTimeLeft(
+        `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`
+      );
+    };
+    
+    updateTimer();
+    const timer = setInterval(updateTimer, 1000);
+    return () => clearInterval(timer);
+  }, [nextPayoutInvestment]);
+
+  // Generate SVG Path dynamically based on transactions
+  let chartPath = "M0,350 Q100,340 200,280 T400,220 T600,150 T800,100 T1000,50";
+  let chartPoints = [];
+  
+  if (transactions.length > 0) {
+    const chronological = [...transactions].reverse();
+    let runningBalance = totalNetWorth;
+    const balanceHistory = [runningBalance];
+    
+    for (let i = 0; i < Math.min(chronological.length, 10); i++) {
+        const tx = chronological[chronological.length - 1 - i];
+        if (tx.type === 'deposit' || tx.type === 'profit') {
+            runningBalance -= tx.amount;
+        } else {
+            runningBalance += tx.amount;
+        }
+        balanceHistory.unshift(Math.max(0, runningBalance));
+    }
+    
+    if (balanceHistory.length < 2) {
+        balanceHistory.unshift(balanceHistory[0] * 0.9);
+    }
+    
+    const maxBal = Math.max(...balanceHistory) * 1.1 || 1;
+    
+    chartPoints = balanceHistory.map((val, idx) => {
+        const x = (idx / (balanceHistory.length - 1)) * 1000;
+        const y = 350 - ((val / maxBal) * 300);
+        return {x, y};
+    });
+    
+    chartPath = `M${chartPoints[0].x},${chartPoints[0].y}`;
+    for (let i = 1; i < chartPoints.length; i++) {
+        const prev = chartPoints[i-1];
+        const curr = chartPoints[i];
+        const cx = (prev.x + curr.x) / 2;
+        chartPath += ` C${cx},${prev.y} ${cx},${curr.y} ${curr.x},${curr.y}`;
+    }
+  } else {
+    chartPath = "M0,350 L1000,350";
+  }
 
   return (
     <div className="flex-1 p-2.5 md:p-margin-desktop space-y-2.5 md:space-y-6 max-w-[1600px] w-full mx-auto">
@@ -43,13 +136,15 @@ export default function Dashboard() {
                     <p className="text-[9px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider md:tracking-widest">Live ROI Countdown</p>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-sm sm:text-lg md:text-[28px] font-tabular-nums text-primary font-bold tracking-tight">04h 22m 15s</span>
+                    <span className="text-sm sm:text-lg md:text-[28px] font-tabular-nums text-primary font-bold tracking-tight">{timeLeft}</span>
                   </div>
                 </div>
               </div>
               <div className="flex flex-col items-end relative z-10">
                 <p className="text-[9px] md:text-label-sm font-bold text-on-surface-variant">Est. Payout</p>
-                <p className="text-xs sm:text-base md:text-[24px] font-tabular-nums text-tertiary font-bold animate-pulse">+$1,402.50</p>
+                <p className="text-xs sm:text-base md:text-[24px] font-tabular-nums text-tertiary font-bold animate-pulse">
+                  {nextPayoutInvestment ? `+${formatCurrency(nextPayoutInvestment.expected_roi)}` : '--'}
+                </p>
               </div>
             </div>
 
@@ -79,7 +174,7 @@ export default function Dashboard() {
               <div className="flex justify-between items-start mb-1 md:mb-4 relative z-10">
                 <div>
                   <p className="text-[9px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Total Net Worth</p>
-                  <h3 className="text-lg sm:text-xl md:text-[32px] font-bold text-on-surface mt-0.5 md:mt-1 leading-tight tracking-tight">$2,842,900.00</h3>
+                  <h3 className="text-lg sm:text-xl md:text-[32px] font-bold text-on-surface mt-0.5 md:mt-1 leading-tight tracking-tight">{formatCurrency(totalNetWorth)}</h3>
                 </div>
                 <div className="bg-surface-container-highest p-1 md:p-2 rounded-lg border border-outline-variant/30 shrink-0">
                   <span className="material-symbols-outlined text-primary text-[16px] md:text-[24px]">account_balance</span>
@@ -115,7 +210,7 @@ export default function Dashboard() {
               <div className="flex justify-between items-start mb-1 md:mb-4 relative z-10">
                 <div>
                   <p className="text-[9px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Active Investments</p>
-                  <h3 className="text-lg sm:text-xl md:text-[32px] font-bold text-on-surface mt-0.5 md:mt-1 leading-tight tracking-tight">14</h3>
+                  <h3 className="text-lg sm:text-xl md:text-[32px] font-bold text-on-surface mt-0.5 md:mt-1 leading-tight tracking-tight">{activeCount}</h3>
                 </div>
                 <div className="bg-surface-container-highest p-1 md:p-2 rounded-lg border border-outline-variant/30 shrink-0">
                   <span className="material-symbols-outlined text-primary text-[16px] md:text-[24px]">analytics</span>
@@ -123,10 +218,10 @@ export default function Dashboard() {
               </div>
               <div className="flex items-center justify-between gap-1.5 md:gap-2 relative z-10 mt-auto">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-on-surface text-[9px] md:text-label-sm font-medium">3 Pending</span>
+                  <span className="text-on-surface text-[9px] md:text-label-sm font-medium">{pendingCount} Pending</span>
                   <div className="flex -space-x-1.5">
-                    <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-primary-container border-2 border-surface"></div>
-                    <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-secondary-container border-2 border-surface"></div>
+                    {pendingCount > 0 && <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-primary-container border-2 border-surface"></div>}
+                    {pendingCount > 1 && <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-secondary-container border-2 border-surface"></div>}
                   </div>
                 </div>
                 <div className="w-16 h-8 md:w-20 md:h-10 shrink-0">
@@ -151,7 +246,7 @@ export default function Dashboard() {
               <div className="flex justify-between items-start mb-1 md:mb-4 relative z-10">
                 <div>
                   <p className="text-[9px] md:text-label-sm font-bold text-tertiary/80 uppercase tracking-wider">Total Profit</p>
-                  <h3 className="text-lg sm:text-xl md:text-[32px] font-bold text-tertiary mt-0.5 md:mt-1 leading-tight tracking-tight">+$412,850.22</h3>
+                  <h3 className="text-lg sm:text-xl md:text-[32px] font-bold text-tertiary mt-0.5 md:mt-1 leading-tight tracking-tight">{formatCurrency(profitBalance)}</h3>
                 </div>
                 <div className="bg-tertiary/10 p-1 md:p-2 rounded-lg border border-tertiary/20 shrink-0">
                   <span className="material-symbols-outlined text-tertiary text-[16px] md:text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>payments</span>
@@ -204,14 +299,20 @@ export default function Dashboard() {
                     <stop offset="100%" stopColor="#2563eb" stopOpacity="0"></stop>
                   </linearGradient>
                 </defs>
-                <path d="M0,350 Q100,340 200,280 T400,220 T600,150 T800,100 T1000,50 V400 H0 Z" fill="url(#chartGradientMain)" className="animate-fade-in"></path>
-                <path className="drop-shadow-[0_0_8px_rgba(37,99,235,0.6)] animate-chart-draw" d="M0,350 Q100,340 200,280 T400,220 T600,150 T800,100 T1000,50" fill="none" stroke="#2563eb" strokeLinecap="round" strokeWidth="4"></path>
+                <path d={`${chartPath} V400 H0 Z`} fill="url(#chartGradientMain)" className="animate-fade-in"></path>
+                <path className="drop-shadow-[0_0_8px_rgba(37,99,235,0.6)] animate-chart-draw" d={chartPath} fill="none" stroke="#2563eb" strokeLinecap="round" strokeWidth="4"></path>
                 {/* Data Points */}
-                <circle cx="200" cy="280" fill="#2563eb" r="4"></circle>
-                <circle cx="400" cy="220" fill="#2563eb" r="4"></circle>
-                <circle cx="600" cy="150" fill="#2563eb" r="4"></circle>
-                <circle cx="800" cy="100" fill="#2563eb" r="4"></circle>
-                <circle cx="1000" cy="50" fill="#b4c5ff" r="6" stroke="#2563eb" strokeWidth="2"></circle>
+                {chartPoints.length > 0 ? chartPoints.map((p, i) => (
+                    <circle key={i} cx={p.x} cy={p.y} fill={i === chartPoints.length - 1 ? "#b4c5ff" : "#2563eb"} r={i === chartPoints.length - 1 ? "6" : "4"} stroke={i === chartPoints.length - 1 ? "#2563eb" : "none"} strokeWidth={i === chartPoints.length - 1 ? "2" : "0"}></circle>
+                )) : (
+                  <>
+                    <circle cx="200" cy="280" fill="#2563eb" r="4"></circle>
+                    <circle cx="400" cy="220" fill="#2563eb" r="4"></circle>
+                    <circle cx="600" cy="150" fill="#2563eb" r="4"></circle>
+                    <circle cx="800" cy="100" fill="#2563eb" r="4"></circle>
+                    <circle cx="1000" cy="50" fill="#b4c5ff" r="6" stroke="#2563eb" strokeWidth="2"></circle>
+                  </>
+                )}
               </svg>
               {/* Y Axis Labels (Hidden on very small screens, visible on md+) */}
               <div className="absolute left-2 md:left-6 top-4 md:top-12 bottom-4 md:bottom-12 flex flex-col justify-between text-[8px] md:text-label-sm font-bold text-outline/40 pointer-events-none">
@@ -231,56 +332,41 @@ export default function Dashboard() {
               <button onClick={() => navigate('/transactions')} className="text-primary text-[10px] sm:text-[11px] md:text-label-sm font-bold hover:underline cursor-pointer tracking-wide">View All</button>
             </div>
             <div className="flex flex-col divide-y divide-outline-variant/10 bg-surface/30">
-              {/* Transaction Item 1 */}
-              <div className="flex items-center p-2.5 md:p-4 justify-between hover:bg-white/5 transition-colors group cursor-pointer">
-                <div className="flex items-center gap-2.5 md:gap-4">
-                  <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-tertiary/10 border border-tertiary/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <span className="material-symbols-outlined text-tertiary text-[14px] md:text-[20px]">call_received</span>
-                  </div>
-                  <div>
-                    <p className="text-xs sm:text-sm md:text-base font-bold text-on-surface leading-tight mb-0.5">Institutional Yield Payout</p>
-                    <p className="text-[9px] sm:text-[10px] md:text-xs text-on-surface-variant opacity-80">Fixed Income • BTC-ALPHA</p>
-                  </div>
+              {transactions.length === 0 ? (
+                <div className="p-4 md:p-6 text-center text-on-surface-variant font-medium text-xs md:text-sm">
+                  No recent activities found.
                 </div>
-                <div className="text-right">
-                  <p className="text-xs sm:text-sm md:text-base font-bold font-tabular-nums text-tertiary leading-tight mb-0.5">+$12,400.00</p>
-                  <p className="text-[8px] sm:text-[9px] md:text-xs text-on-surface-variant opacity-70">Today, 09:41 AM</p>
-                </div>
-              </div>
-              
-              {/* Transaction Item 2 */}
-              <div className="flex items-center p-2.5 md:p-4 justify-between hover:bg-white/5 transition-colors group cursor-pointer">
-                <div className="flex items-center gap-2.5 md:gap-4">
-                  <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <span className="material-symbols-outlined text-primary text-[14px] md:text-[20px]">trending_up</span>
+              ) : (
+                transactions.slice(0, 3).map((tx) => (
+                  <div key={tx.id} className="flex items-center p-2.5 md:p-4 justify-between hover:bg-white/5 transition-colors group cursor-pointer">
+                    <div className="flex items-center gap-2.5 md:gap-4">
+                      <div className={`w-7 h-7 md:w-10 md:h-10 rounded-full border flex items-center justify-center group-hover:scale-105 transition-transform ${
+                        tx.type === 'deposit' || tx.type === 'profit' ? 'bg-tertiary/10 border-tertiary/20' : 'bg-primary/10 border-primary/20'
+                      }`}>
+                        <span className={`material-symbols-outlined text-[14px] md:text-[20px] ${
+                          tx.type === 'deposit' || tx.type === 'profit' ? 'text-tertiary' : 'text-primary'
+                        }`}>
+                          {tx.type === 'deposit' || tx.type === 'profit' ? 'call_received' : 'call_made'}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-xs sm:text-sm md:text-base font-bold text-on-surface leading-tight mb-0.5 capitalize">{tx.type}</p>
+                        <p className="text-[9px] sm:text-[10px] md:text-xs text-on-surface-variant opacity-80 uppercase">{tx.asset}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className={`text-xs sm:text-sm md:text-base font-bold font-tabular-nums leading-tight mb-0.5 ${
+                        tx.type === 'deposit' || tx.type === 'profit' ? 'text-tertiary' : 'text-on-surface'
+                      }`}>
+                        {tx.type === 'deposit' || tx.type === 'profit' ? '+' : '-'}{formatCurrency(tx.amount)}
+                      </p>
+                      <p className="text-[8px] sm:text-[9px] md:text-xs text-on-surface-variant opacity-70">
+                        {new Date(tx.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs sm:text-sm md:text-base font-bold text-on-surface leading-tight mb-0.5">Asset Acquisition</p>
-                    <p className="text-[9px] sm:text-[10px] md:text-xs text-on-surface-variant opacity-80">Equities • Global Tech</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs sm:text-sm md:text-base font-bold font-tabular-nums text-on-surface leading-tight mb-0.5">-$250,000.00</p>
-                  <p className="text-[8px] sm:text-[9px] md:text-xs text-on-surface-variant opacity-70">Yesterday</p>
-                </div>
-              </div>
-
-              {/* Transaction Item 3 */}
-              <div className="flex items-center p-2.5 md:p-4 justify-between hover:bg-white/5 transition-colors group cursor-pointer">
-                <div className="flex items-center gap-2.5 md:gap-4">
-                  <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-tertiary/10 border border-tertiary/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <span className="material-symbols-outlined text-tertiary text-[14px] md:text-[20px]">call_received</span>
-                  </div>
-                  <div>
-                    <p className="text-xs sm:text-sm md:text-base font-bold text-on-surface leading-tight mb-0.5">VC Dividend</p>
-                    <p className="text-[9px] sm:text-[10px] md:text-xs text-on-surface-variant opacity-80">Private Equity • Series C</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs sm:text-sm md:text-base font-bold font-tabular-nums text-tertiary leading-tight mb-0.5">+$5,820.15</p>
-                  <p className="text-[8px] sm:text-[9px] md:text-xs text-on-surface-variant opacity-70">Nov 14, 2024</p>
-                </div>
-              </div>
+                ))
+              )}
             </div>
           </div>
           <style>{`

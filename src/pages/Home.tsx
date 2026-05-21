@@ -1,11 +1,22 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useMarketStore } from '../store/marketStore';
 
 export default function Home() {
   const navigate = useNavigate();
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const { tickers } = useMarketStore();
+  
+  const btc = tickers['BTCUSDT'];
+  const eth = tickers['ETHUSDT'];
+  
+  const formatPrice = (val: number | undefined, fallback: string) => {
+    if (val === undefined) return fallback;
+    return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
+  };
 
   return (
-    <div className="deep-mesh-bg text-on-surface font-body-md selection:bg-primary/30 min-h-screen dark">
+    <div className="text-on-surface font-body-md selection:bg-primary/30 min-h-screen dark">
       
 
       <main className="pt-16">
@@ -57,13 +68,13 @@ export default function Home() {
           <div className="landing-ticker-move flex items-center gap-12 whitespace-nowrap px-8">
             <div className="flex items-center gap-2">
               <span className="text-label-sm font-label-sm text-on-surface">BTC/USD</span>
-              <span className="text-tabular-nums text-tertiary font-tabular-nums">64,231.50</span>
-              <span className="material-symbols-outlined text-[14px] text-tertiary" data-icon="north_east">north_east</span>
+              <span className={`text-tabular-nums font-tabular-nums ${btc?.change24h < 0 ? 'text-error' : 'text-tertiary'}`}>{formatPrice(btc?.price, '64,231.50')}</span>
+              <span className={`material-symbols-outlined text-[14px] ${btc?.change24h < 0 ? 'text-error' : 'text-tertiary'}`}>{btc?.change24h < 0 ? 'south_east' : 'north_east'}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-label-sm font-label-sm text-on-surface">ETH/USD</span>
-              <span className="text-tabular-nums text-tertiary font-tabular-nums">3,452.12</span>
-              <span className="material-symbols-outlined text-[14px] text-tertiary" data-icon="north_east">north_east</span>
+              <span className={`text-tabular-nums font-tabular-nums ${eth?.change24h < 0 ? 'text-error' : 'text-tertiary'}`}>{formatPrice(eth?.price, '3,452.12')}</span>
+              <span className={`material-symbols-outlined text-[14px] ${eth?.change24h < 0 ? 'text-error' : 'text-tertiary'}`}>{eth?.change24h < 0 ? 'south_east' : 'north_east'}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-label-sm font-label-sm text-on-surface">XAU/USD</span>
@@ -78,13 +89,13 @@ export default function Home() {
             {/* Duplicate for infinite loop effect */}
             <div className="flex items-center gap-2">
               <span className="text-label-sm font-label-sm text-on-surface">BTC/USD</span>
-              <span className="text-tabular-nums text-tertiary font-tabular-nums">64,231.50</span>
-              <span className="material-symbols-outlined text-[14px] text-tertiary" data-icon="north_east">north_east</span>
+              <span className={`text-tabular-nums font-tabular-nums ${btc?.change24h < 0 ? 'text-error' : 'text-tertiary'}`}>{formatPrice(btc?.price, '64,231.50')}</span>
+              <span className={`material-symbols-outlined text-[14px] ${btc?.change24h < 0 ? 'text-error' : 'text-tertiary'}`}>{btc?.change24h < 0 ? 'south_east' : 'north_east'}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-label-sm font-label-sm text-on-surface">ETH/USD</span>
-              <span className="text-tabular-nums text-tertiary font-tabular-nums">3,452.12</span>
-              <span className="material-symbols-outlined text-[14px] text-tertiary" data-icon="north_east">north_east</span>
+              <span className={`text-tabular-nums font-tabular-nums ${eth?.change24h < 0 ? 'text-error' : 'text-tertiary'}`}>{formatPrice(eth?.price, '3,452.12')}</span>
+              <span className={`material-symbols-outlined text-[14px] ${eth?.change24h < 0 ? 'text-error' : 'text-tertiary'}`}>{eth?.change24h < 0 ? 'south_east' : 'north_east'}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-label-sm font-label-sm text-on-surface">XAU/USD</span>

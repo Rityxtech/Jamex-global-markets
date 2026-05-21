@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 
 export default function Header() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   
   const { user } = useAuthStore();
@@ -18,12 +19,17 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Do not render Header on auth pages
+  if (location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/forgot-password' || location.pathname === '/reset-password') {
+    return null;
+  }
+
   return (
     <header 
       className={`fixed top-0 right-0 left-0 z-[60] transition-all duration-300 ${
         scrolled 
-          ? 'bg-white/80 backdrop-blur-xl shadow-[0_4px_30px_rgba(37,99,235,0.1)] border-b border-white/40' 
-          : 'bg-white/60 backdrop-blur-md border-b border-white/20'
+          ? 'bg-gray-900 shadow-md border-b-2 border-[#10B981]' 
+          : 'bg-gray-800 border-b-2 border-[#10B981]'
       } h-14 md:h-16 flex items-center justify-between px-4 md:px-8`}
     >
       {/* Background glow effect for bright premium feel */}
@@ -35,7 +41,7 @@ export default function Header() {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2563eb] to-[#b4c5ff] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
             <span className="material-symbols-outlined text-white text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>public</span>
           </div>
-          <span className="text-base md:text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#0d1322] to-[#2563eb] tracking-tight">
+          <span className="text-base md:text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300 tracking-tight">
             <span className="md:hidden">Jamex</span>
             <span className="hidden md:inline">Jamex Global</span>
           </span>
@@ -56,10 +62,10 @@ export default function Header() {
       {/* CENTER: Navigation Links (Logged Out Desktop) */}
       {!isLoggedIn && (
         <nav className="hidden md:flex items-center gap-8 relative z-10">
-          <Link to="/" className="text-sm font-bold text-[#2563eb] border-b-2 border-[#2563eb] py-1">Home</Link>
-          <a href="#" className="text-sm font-semibold text-gray-600 hover:text-[#2563eb] transition-colors py-1">Markets</a>
-          <a href="#" className="text-sm font-semibold text-gray-600 hover:text-[#2563eb] transition-colors py-1">Wealth</a>
-          <a href="#" className="text-sm font-semibold text-gray-600 hover:text-[#2563eb] transition-colors py-1">Company</a>
+          <Link to="/" className="text-sm font-bold text-white border-b-2 border-white py-1">Home</Link>
+          <a href="#" className="text-sm font-semibold text-gray-300 hover:text-white transition-colors py-1">Markets</a>
+          <a href="#" className="text-sm font-semibold text-gray-300 hover:text-white transition-colors py-1">Wealth</a>
+          <a href="#" className="text-sm font-semibold text-gray-300 hover:text-white transition-colors py-1">Company</a>
         </nav>
       )}
 
@@ -67,7 +73,7 @@ export default function Header() {
       <div className="flex items-center gap-4 relative z-10">
         {!isLoggedIn ? (
           <div className="flex items-center gap-1 sm:gap-3">
-            <Link to="/login" className="px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-[#0d1322] hover:text-[#2563eb] transition-colors">
+            <Link to="/login" className="px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white hover:text-gray-300 transition-colors">
               Sign In
             </Link>
             <Link to="/register" className="px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold bg-[#2563eb] text-white rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 transition-all">

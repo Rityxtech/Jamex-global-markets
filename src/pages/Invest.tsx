@@ -1,8 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useWalletStore } from '../store/walletStore';
+import { useInvestmentStore } from '../store/investmentStore';
 
 export default function Invest() {
     const navigate = useNavigate();
+    const { mainBalance, profitBalance } = useWalletStore();
+    const { investments } = useInvestmentStore();
+
+    const totalNetWorth = mainBalance + profitBalance;
+    const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+
+    const activeInvestments = investments.filter(inv => inv.status === 'active');
+    const activeCount = activeInvestments.length;
+
+    const totalInvested = investments.reduce((acc, inv) => acc + inv.amount, 0);
+    const roiToDate = totalInvested > 0 ? ((profitBalance / totalInvested) * 100).toFixed(2) : '0.00';
 
     const [amount, setAmount] = useState(10000);
     const [tier, setTier] = useState(0.025); // default Institutional
@@ -11,20 +24,45 @@ export default function Invest() {
     const yearlyRoi = amount * tier * 365;
 
     // Timer logic
-    const [seconds, setSeconds] = useState(51725);
-    
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setSeconds(prev => (prev > 0 ? prev - 1 : 86400));
-        }, 1000);
-        return () => clearInterval(interval);
-    }, []);
+    const nextPayoutInvestment = [...activeInvestments]
+        .filter(inv => inv.next_payout_date && new Date(inv.next_payout_date).getTime() > Date.now())
+        .sort((a, b) => new Date(a.next_payout_date!).getTime() - new Date(b.next_payout_date!).getTime())[0];
 
-    const formatTime = (s: number) => {
-        const h = Math.floor(s / 3600);
-        const m = Math.floor((s % 3600) / 60);
-        const sec = s % 60;
-        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    const [timeLeft, setTimeLeft] = useState('--h --m --s');
+
+    useEffect(() => {
+        if (!nextPayoutInvestment || !nextPayoutInvestment.next_payout_date) {
+            setTimeLeft('--h --m --s');
+            return;
+        }
+        
+        const targetDate = new Date(nextPayoutInvestment.next_payout_date).getTime();
+        
+        const updateTimer = () => {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+            
+            if (distance < 0) {
+                setTimeLeft('Processing...');
+                return;
+            }
+            
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            setTimeLeft(
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+            );
+        };
+        
+        updateTimer();
+        const timer = setInterval(updateTimer, 1000);
+        return () => clearInterval(timer);
+    }, [nextPayoutInvestment]);
+
+    const handleInitiateContract = () => {
+        navigate('/confirm-investment');
     };
 
     return (
@@ -38,7 +76,7 @@ export default function Invest() {
                                 <div className="absolute top-0 -left-full w-1/2 h-full bg-gradient-to-r from-transparent via-primary/5 to-transparent skew-x-12 group-hover:animate-shimmer pointer-events-none"></div>
                                 <div className="relative z-10">
                                     <span className="text-[9px] md:text-label-sm text-on-surface-variant uppercase font-bold tracking-wider mb-0.5 block">Portfolio Value</span>
-                                    <span className="text-sm sm:text-base md:text-headline-md font-bold font-tabular-nums text-on-surface">$842,500.00</span>
+                                    <span className="text-sm sm:text-base md:text-headline-md font-bold font-tabular-nums text-on-surface">{formatCurrency(totalNetWorth)}</span>
                                 </div>
                                 <div className="relative w-16 h-8 md:w-24 md:h-10 shrink-0">
                                     <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
@@ -64,7 +102,7 @@ export default function Invest() {
                                 <div className="absolute top-0 -left-full w-1/2 h-full bg-gradient-to-r from-transparent via-tertiary/5 to-transparent skew-x-12 group-hover:animate-shimmer pointer-events-none"></div>
                                 <div className="relative z-10">
                                     <span className="text-[9px] md:text-label-sm text-tertiary/80 uppercase font-bold tracking-wider mb-0.5 block">Total Profit</span>
-                                    <span className="text-sm sm:text-base md:text-headline-md font-bold font-tabular-nums text-tertiary">+$112,040.12</span>
+                                    <span className="text-sm sm:text-base md:text-headline-md font-bold font-tabular-nums text-tertiary">+{formatCurrency(profitBalance)}</span>
                                 </div>
                                 <div className="relative w-16 h-8 md:w-24 md:h-10 shrink-0">
                                     <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
@@ -93,9 +131,9 @@ export default function Invest() {
                             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none"></div>
                             <div className="relative z-10">
                                 <p className="text-[9px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-0.5 md:mb-1">Next Payout</p>
-                                <p className="text-lg sm:text-xl md:text-headline-md font-bold font-tabular-nums text-primary tracking-tight">{formatTime(seconds)}</p>
+                                <p className="text-lg sm:text-xl md:text-headline-md font-bold font-tabular-nums text-primary tracking-tight">{timeLeft}</p>
                                 <p className="text-[9px] md:text-label-sm font-bold text-tertiary mt-1 flex items-center gap-0.5">
-                                    <span className="material-symbols-outlined text-[12px] md:text-[14px]">arrow_drop_up</span> +$420.50 Est.
+                                    <span className="material-symbols-outlined text-[12px] md:text-[14px]">arrow_drop_up</span> {nextPayoutInvestment ? `+${formatCurrency(nextPayoutInvestment.expected_roi)}` : '--'} Est.
                                 </p>
                             </div>
                             <div className="relative w-16 h-10 md:w-20 md:h-12 z-10 flex items-center justify-end gap-2">
@@ -120,8 +158,8 @@ export default function Invest() {
                             <div className="absolute inset-0 bg-gradient-to-r from-tertiary/5 to-transparent pointer-events-none"></div>
                             <div>
                                 <p className="text-[9px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-0.5 md:mb-1">ROI to Date</p>
-                                <p className="text-lg sm:text-xl md:text-headline-md font-bold font-tabular-nums text-on-surface tracking-tight">14.85%</p>
-                                <p className="text-[9px] md:text-label-sm font-medium text-on-surface-variant/70 mt-1">Across 12 months</p>
+                                <p className="text-lg sm:text-xl md:text-headline-md font-bold font-tabular-nums text-on-surface tracking-tight">{roiToDate}%</p>
+                                <p className="text-[9px] md:text-label-sm font-medium text-on-surface-variant/70 mt-1">Across all contracts</p>
                             </div>
                             <div className="relative w-16 h-10 md:w-20 md:h-12 z-10 flex items-center justify-end gap-2">
                                 <svg className="w-14 h-8 md:w-16 md:h-10 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 100 40" preserveAspectRatio="none">
@@ -145,8 +183,8 @@ export default function Invest() {
                             <div className="absolute inset-0 bg-gradient-to-r from-secondary-container/5 to-transparent pointer-events-none"></div>
                             <div>
                                 <p className="text-[9px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-0.5 md:mb-1">Active Plans</p>
-                                <p className="text-lg sm:text-xl md:text-headline-md font-bold font-tabular-nums text-on-surface tracking-tight">04</p>
-                                <p className="text-[9px] md:text-label-sm font-medium text-on-surface-variant/70 mt-1">Diversified in 3 sectors</p>
+                                <p className="text-lg sm:text-xl md:text-headline-md font-bold font-tabular-nums text-on-surface tracking-tight">{activeCount.toString().padStart(2, '0')}</p>
+                                <p className="text-[9px] md:text-label-sm font-medium text-on-surface-variant/70 mt-1">Generating Yield</p>
                             </div>
                             <div className="relative w-16 h-10 md:w-20 md:h-12 z-10 flex items-center justify-end gap-2">
                                 <svg className="w-14 h-8 md:w-16 md:h-10 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 100 40" preserveAspectRatio="none">
@@ -210,7 +248,7 @@ export default function Invest() {
                                 </div>
                             </div>
                             <div className="p-2.5 pt-0 md:p-6 md:pt-0">
-                                <button className="w-full py-2.5 bg-primary text-on-primary font-bold text-[10px] md:text-sm uppercase tracking-wider rounded-xl hover:brightness-110 active:scale-[0.98] transition-all shadow-sm shadow-primary/20">Initiate Contract</button>
+                                <button onClick={handleInitiateContract} className="w-full py-2.5 bg-primary text-on-primary font-bold text-[10px] md:text-sm uppercase tracking-wider rounded-xl hover:brightness-110 active:scale-[0.98] transition-all shadow-sm shadow-primary/20">Initiate Contract</button>
                             </div>
                         </div>
 
@@ -247,7 +285,7 @@ export default function Invest() {
                                 </svg>
                                 <div className="absolute top-4 right-4 md:top-20 md:right-40 glass-card p-1.5 md:p-3 rounded-lg shadow-xl border border-primary/30 backdrop-blur-md">
                                     <p className="text-[8px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Jun 12, 2024</p>
-                                    <p className="text-[10px] md:text-label-md font-bold text-tertiary">+$12,450.00 Profit</p>
+                                    <p className="text-[10px] md:text-label-md font-bold text-tertiary">+{formatCurrency(profitBalance)} Profit</p>
                                 </div>
                             </div>
                         </div>
@@ -275,70 +313,57 @@ export default function Invest() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-outline-variant/5 text-xs md:text-sm">
-                                        <tr className="hover:bg-white/5 transition-colors group">
-                                            <td className="px-2.5 py-2 md:px-6 md:py-4">
-                                                <div className="flex items-center gap-2 md:gap-3">
-                                                    <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
-                                                        <span className="material-symbols-outlined text-[14px] md:text-[18px]">account_balance</span>
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-bold text-on-surface text-[10px] sm:text-[11px] md:text-sm">JMX-ALPHA-92</p>
-                                                        <p className="text-[8px] sm:text-[9px] font-bold text-on-surface-variant uppercase tracking-wider mt-0.5">Inst. Arbitrage</p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-2.5 py-2 md:px-6 md:py-4 font-tabular-nums font-bold text-on-surface text-[10px] sm:text-[11px] md:text-sm">$250,000.00</td>
-                                            <td className="px-2.5 py-2 md:px-6 md:py-4">
-                                                <span className="text-tertiary font-tabular-nums font-bold text-[10px] sm:text-[11px] md:text-sm">+$6,250.00</span>
-                                                <p className="text-[8px] sm:text-[9px] font-bold text-on-surface-variant uppercase tracking-wider mt-0.5">2.5% Daily</p>
-                                            </td>
-                                            <td className="px-2.5 py-2 md:px-6 md:py-4">
-                                                <div className="w-20 sm:w-24 md:w-40">
-                                                    <div className="flex justify-between text-[8px] sm:text-[9px] font-bold uppercase tracking-wider mb-1">
-                                                        <span className="text-on-surface-variant">Day 45/90</span>
-                                                        <span className="text-on-surface">50%</span>
-                                                    </div>
-                                                    <div className="h-1 md:h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden border border-outline-variant/10">
-                                                        <div className="h-full bg-primary rounded-full shadow-[0_0_5px_rgba(37,99,235,0.6)]" style={{width: '50%'}}></div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-2.5 py-2 md:px-6 md:py-4 text-right">
-                                                <button className="px-2 py-1 md:px-4 md:py-1.5 rounded-lg border border-outline-variant/50 bg-surface-container-low hover:border-primary hover:text-primary transition-all text-[8px] sm:text-[9px] md:text-[11px] font-bold uppercase tracking-wider">Manage</button>
-                                            </td>
-                                        </tr>
-                                        <tr className="hover:bg-white/5 transition-colors group">
-                                            <td className="px-2.5 py-2 md:px-6 md:py-4">
-                                                <div className="flex items-center gap-2 md:gap-3">
-                                                    <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
-                                                        <span className="material-symbols-outlined text-[14px] md:text-[18px]">currency_bitcoin</span>
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-bold text-on-surface text-[10px] sm:text-[11px] md:text-sm">JMX-DELTA-11</p>
-                                                        <p className="text-[8px] sm:text-[9px] font-bold text-on-surface-variant uppercase tracking-wider mt-0.5">Crypto Market</p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-2.5 py-2 md:px-6 md:py-4 font-tabular-nums font-bold text-on-surface text-[10px] sm:text-[11px] md:text-sm">$120,000.00</td>
-                                            <td className="px-2.5 py-2 md:px-6 md:py-4">
-                                                <span className="text-tertiary font-tabular-nums font-bold text-[10px] sm:text-[11px] md:text-sm">+$5,760.00</span>
-                                                <p className="text-[8px] sm:text-[9px] font-bold text-on-surface-variant uppercase tracking-wider mt-0.5">4.8% Daily</p>
-                                            </td>
-                                            <td className="px-2.5 py-2 md:px-6 md:py-4">
-                                                <div className="w-20 sm:w-24 md:w-40">
-                                                    <div className="flex justify-between text-[8px] sm:text-[9px] font-bold uppercase tracking-wider mb-1">
-                                                        <span className="text-on-surface-variant">Day 12/30</span>
-                                                        <span className="text-on-surface">40%</span>
-                                                    </div>
-                                                    <div className="h-1 md:h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden border border-outline-variant/10">
-                                                        <div className="h-full bg-primary rounded-full shadow-[0_0_5px_rgba(37,99,235,0.6)]" style={{width: '40%'}}></div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-2.5 py-2 md:px-6 md:py-4 text-right">
-                                                <button className="px-2 py-1 md:px-4 md:py-1.5 rounded-lg border border-outline-variant/50 bg-surface-container-low hover:border-primary hover:text-primary transition-all text-[8px] sm:text-[9px] md:text-[11px] font-bold uppercase tracking-wider">Manage</button>
-                                            </td>
-                                        </tr>
+                                        {activeInvestments.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={5} className="px-2.5 py-4 text-center text-on-surface-variant text-sm font-medium">
+                                                    No active contracts found.
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            activeInvestments.map(inv => {
+                                                const start = new Date(inv.created_at).getTime();
+                                                const now = Date.now();
+                                                const totalDays = 365; // Standard mock duration
+                                                const durationMs = totalDays * 24 * 60 * 60 * 1000;
+                                                let progress = Math.min(100, Math.max(0, ((now - start) / durationMs) * 100));
+                                                const daysPassed = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+                                                
+                                                return (
+                                                    <tr key={inv.id} className="hover:bg-white/5 transition-colors group">
+                                                        <td className="px-2.5 py-2 md:px-6 md:py-4">
+                                                            <div className="flex items-center gap-2 md:gap-3">
+                                                                <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+                                                                    <span className="material-symbols-outlined text-[14px] md:text-[18px]">account_balance</span>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="font-bold text-on-surface text-[10px] sm:text-[11px] md:text-sm">JMX-{inv.id.substring(0, 5).toUpperCase()}</p>
+                                                                    <p className="text-[8px] sm:text-[9px] font-bold text-on-surface-variant uppercase tracking-wider mt-0.5">{inv.plan_name}</p>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-2.5 py-2 md:px-6 md:py-4 font-tabular-nums font-bold text-on-surface text-[10px] sm:text-[11px] md:text-sm">{formatCurrency(inv.amount)}</td>
+                                                        <td className="px-2.5 py-2 md:px-6 md:py-4">
+                                                            <span className="text-tertiary font-tabular-nums font-bold text-[10px] sm:text-[11px] md:text-sm">+{formatCurrency(inv.expected_roi)}</span>
+                                                            <p className="text-[8px] sm:text-[9px] font-bold text-on-surface-variant uppercase tracking-wider mt-0.5">Est. Daily Yield</p>
+                                                        </td>
+                                                        <td className="px-2.5 py-2 md:px-6 md:py-4">
+                                                            <div className="w-20 sm:w-24 md:w-40">
+                                                                <div className="flex justify-between text-[8px] sm:text-[9px] font-bold uppercase tracking-wider mb-1">
+                                                                    <span className="text-on-surface-variant">Day {daysPassed}/{totalDays}</span>
+                                                                    <span className="text-on-surface">{Math.floor(progress)}%</span>
+                                                                </div>
+                                                                <div className="h-1 md:h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden border border-outline-variant/10">
+                                                                    <div className="h-full bg-primary rounded-full shadow-[0_0_5px_rgba(37,99,235,0.6)]" style={{width: `${progress}%`}}></div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-2.5 py-2 md:px-6 md:py-4 text-right">
+                                                            <button onClick={() => navigate('/confirm-investment')} className="px-2 py-1 md:px-4 md:py-1.5 rounded-lg border border-outline-variant/50 bg-surface-container-low hover:border-primary hover:text-primary transition-all text-[8px] sm:text-[9px] md:text-[11px] font-bold uppercase tracking-wider cursor-pointer">Manage</button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })
+                                        )}
                                     </tbody>
                                 </table>
                             </div>

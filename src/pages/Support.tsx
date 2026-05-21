@@ -26,11 +26,11 @@ export default function Support() {
                                     <form className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-4">
                                         <div className="md:col-span-2 space-y-1">
                                             <label className="block text-[8px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Subject</label>
-                                            <input className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2 py-1.5 md:px-4 md:py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs md:text-base font-medium" placeholder="Briefly describe the issue" type="text" />
+                                            <input className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2 py-2.5 md:px-4 md:py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs md:text-base font-medium" placeholder="Briefly describe the issue" type="text" />
                                         </div>
                                         <div className="space-y-1">
                                             <label className="block text-[8px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Category</label>
-                                            <select className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2 py-1.5 md:px-4 md:py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs md:text-base font-medium">
+                                            <select className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2 py-2.5 md:px-4 md:py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs md:text-base font-medium">
                                                 <option>Trading API & Connectivity</option>
                                                 <option>Settlement & Clearing</option>
                                                 <option>Account Security</option>
@@ -56,11 +56,11 @@ export default function Support() {
                                         </div>
                                         <div className="md:col-span-2 space-y-1">
                                             <label className="block text-[8px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Message Details</label>
-                                            <textarea className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2 py-1.5 md:px-4 md:py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs md:text-base font-medium resize-none" placeholder="Provide detailed information..." rows={3}></textarea>
+                                            <textarea className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2 py-2.5 md:px-4 md:py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs md:text-base font-medium resize-none" placeholder="Provide detailed information..." rows={3}></textarea>
                                         </div>
                                         <div className="md:col-span-2 flex flex-col-reverse sm:flex-row justify-end gap-2 md:gap-3 mt-1">
-                                            <button className="w-full sm:w-auto px-3 py-1.5 md:px-6 md:py-2.5 rounded-lg border border-outline-variant/50 bg-surface-container-low text-on-surface-variant hover:text-on-surface transition-all text-[9px] md:text-label-md font-bold uppercase tracking-wider" type="button">Cancel</button>
-                                            <button className="w-full sm:w-auto px-3 py-1.5 md:px-8 md:py-2.5 rounded-lg bg-primary text-on-primary hover:brightness-110 active:scale-95 transition-all text-[9px] md:text-label-md font-bold uppercase tracking-wider shadow-sm shadow-primary/20" type="submit">Submit Ticket</button>
+                                            <button className="w-full sm:w-auto px-4 py-2.5 md:px-6 md:py-2.5 rounded-lg border border-outline-variant/50 bg-surface-container-low text-on-surface-variant hover:text-on-surface transition-all text-[9px] md:text-label-md font-bold uppercase tracking-wider" type="button">Cancel</button>
+                                            <button className="w-full sm:w-auto px-4 py-2.5 md:px-8 md:py-2.5 rounded-lg bg-primary text-on-primary hover:brightness-110 active:scale-95 transition-all text-[9px] md:text-label-md font-bold uppercase tracking-wider shadow-sm shadow-primary/20" type="submit">Submit Ticket</button>
                                         </div>
                                     </form>
                                 </div>

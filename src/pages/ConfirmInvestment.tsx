@@ -28,7 +28,7 @@ export default function ConfirmInvestment() {
     };
 
     return (
-        <div className="flex-1 px-4 md:px-margin-desktop pt-6 md:pt-8 pb-12 max-w-[1200px] mx-auto w-full">
+        <div className="flex-1 px-4 md:px-margin-desktop pt-6 md:pt-8 pb-12 max-w-[1600px] mx-auto w-full">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 items-start">
                     {/* Left Column: Plan Details */}
                     <div className="lg:col-span-7 space-y-4 md:space-y-6">

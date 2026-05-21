@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Invest from './pages/Invest';
+import Plans from './pages/Plans';
 import Wallet from './pages/Wallet';
 import Deposit from './pages/Deposit';
 import Withdraw from './pages/Withdraw';
@@ -10,6 +11,7 @@ import ConfirmInvestment from './pages/ConfirmInvestment';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Kyc from './pages/Kyc';
 import Referral from './pages/Referral';
 import TransactionHistory from './pages/TransactionHistory';
@@ -22,6 +24,7 @@ import AppLayout from './components/AppLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import { useAuthStore } from './store/authStore';
+import { useMarketStore } from './store/marketStore';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -47,10 +50,13 @@ function RootRoute() {
 
 export default function App() {
   const { initialize } = useAuthStore();
+  const { connect, disconnect } = useMarketStore();
 
   useEffect(() => {
     initialize();
-  }, [initialize]);
+    connect();
+    return () => disconnect();
+  }, [initialize, connect, disconnect]);
 
   return (
     <BrowserRouter basename="/Jamex-global-markets">
@@ -64,6 +70,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Route>
 
         {/* Protected Routes — Sidebar & BottomNav live in AppLayout, mounted once */}
@@ -71,6 +78,7 @@ export default function App() {
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/invest" element={<Invest />} />
+            <Route path="/plans" element={<Plans />} />
             <Route path="/wallet" element={<Wallet />} />
             <Route path="/deposit" element={<Deposit />} />
             <Route path="/withdraw" element={<Withdraw />} />

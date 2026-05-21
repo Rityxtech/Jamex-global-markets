@@ -42,7 +42,7 @@ export default function Sidebar() {
         if (isActive) {
             return `${baseClass} bg-primary/10 text-primary font-bold border border-primary/20 shadow-sm shadow-primary/5`;
         }
-        return `${baseClass} text-on-surface-variant hover:bg-surface-variant/30 hover:text-on-surface font-medium border border-transparent`;
+        return `${baseClass} text-gray-400 hover:bg-white/5 hover:text-white font-medium border border-transparent`;
     };
 
     const getIconStyle = (path: string) => {
@@ -60,7 +60,7 @@ export default function Sidebar() {
             )}
 
             {/* Sidebar */}
-            <aside className={`fixed left-0 top-14 md:top-16 h-[calc(100vh-56px)] md:h-[calc(100vh-64px)] w-64 bg-surface-container dark:bg-surface-container border-r border-outline-variant/20 flex flex-col pt-3 pb-1 md:pb-4 z-50 transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 shadow-2xl md:shadow-none`}>
+            <aside className={`fixed left-0 top-14 md:top-16 h-[calc(100vh-56px)] md:h-[calc(100vh-64px)] w-64 bg-gray-900 border-r border-gray-800 flex flex-col pt-3 pb-1 md:pb-4 z-50 transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 shadow-2xl md:shadow-none`}>
                 
                 {/* Premium Profile & Quick Actions Section */}
                 <div className="px-3 mb-2">
@@ -88,12 +88,12 @@ export default function Sidebar() {
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-1.5">
-                                        <p className="text-[14px] font-bold text-on-surface truncate leading-tight group-hover:text-primary transition-colors">
+                                        <p className="text-[14px] font-bold text-white truncate leading-tight group-hover:text-primary transition-colors">
                                             {user?.user_metadata?.full_name || 'Verified User'}
                                         </p>
                                         <span className="material-symbols-outlined text-primary text-[14px] shrink-0 drop-shadow-[0_0_4px_rgba(37,99,235,0.4)]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                                     </div>
-                                    <p className="text-[11px] text-on-surface-variant truncate font-medium">
+                                    <p className="text-[11px] text-gray-400 truncate font-medium">
                                         {user?.email || 'user@example.com'}
                                     </p>
                                 </div>
@@ -111,7 +111,7 @@ export default function Sidebar() {
                                         Withdraw
                                     </button>
                                 </div>
-                                <button onClick={() => { setIsMobileMenuOpen(false); navigate('/invest'); }} className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-primary hover:opacity-90 text-on-primary transition-all text-[11px] font-bold shadow-md shadow-primary/30 active:scale-95">
+                                <button onClick={() => { setIsMobileMenuOpen(false); navigate('/plans'); }} className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-primary hover:opacity-90 text-on-primary transition-all text-[11px] font-bold shadow-md shadow-primary/30 active:scale-95">
                                     <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span>
                                     Invest Now
                                 </button>
@@ -123,7 +123,7 @@ export default function Sidebar() {
                 <nav className="flex-1 overflow-y-auto px-4 space-y-2 scrollbar-hide pb-2">
                     {/* OVERVIEW SECTION */}
                     <div>
-                        <h3 className="px-4 text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest mb-0.5">Overview</h3>
+                        <h3 className="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Overview</h3>
                         <div className="space-y-0">
                             <Link to="/dashboard" className={getLinkClass("/dashboard")}>
                                 <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/dashboard")}>dashboard</span>
@@ -134,8 +134,12 @@ export default function Sidebar() {
 
                     {/* PORTFOLIO SECTION */}
                     <div>
-                        <h3 className="px-4 text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest mb-0.5">Portfolio</h3>
+                        <h3 className="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Portfolio</h3>
                         <div className="space-y-0">
+                            <Link to="/plans" className={getLinkClass("/plans")}>
+                                <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/plans")}>diamond</span>
+                                <span className="text-sm">Premium Plans</span>
+                            </Link>
                             <Link to="/invest" className={getLinkClass("/invest")}>
                                 <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/invest")}>trending_up</span>
                                 <span className="text-sm">My Investments</span>
@@ -153,7 +157,7 @@ export default function Sidebar() {
 
                     {/* TRANSACTIONS SECTION */}
                     <div className="hidden md:block">
-                        <h3 className="px-4 text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest mb-0.5">Transfers</h3>
+                        <h3 className="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Transfers</h3>
                         <div className="space-y-0">
                             <Link to="/transactions" className={getLinkClass("/transactions")}>
                                 <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/transactions")}>receipt_long</span>
@@ -164,7 +168,7 @@ export default function Sidebar() {
 
                     {/* ACCOUNT SECTION */}
                     <div>
-                        <h3 className="px-4 text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest mb-0.5">Account</h3>
+                        <h3 className="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Account</h3>
                         <div className="space-y-0">
                             <Link to="/kyc" className={getLinkClass("/kyc")}>
                                 <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/kyc")}>verified_user</span>

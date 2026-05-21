@@ -1,8 +1,14 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useWalletStore } from '../store/walletStore';
+import { useTransactionStore } from '../store/transactionStore';
 
 export default function Wallet() {
   const navigate = useNavigate();
+  const { mainBalance, profitBalance } = useWalletStore();
+  const { transactions } = useTransactionStore();
+
+  const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
 
   return (
     <div className="p-2.5 md:p-margin-desktop space-y-2.5 md:space-y-gutter max-w-[1600px] mx-auto w-full">
@@ -50,8 +56,7 @@ export default function Wallet() {
               <div className="p-2 md:p-card-padding flex-1 flex flex-col justify-between relative z-10">
                 <div className="space-y-1">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl sm:text-3xl md:text-display-md font-extrabold text-on-surface tracking-tight font-tabular-nums group-hover/main:text-primary transition-colors">245,680.00</span>
-                    <span className="text-sm md:text-headline-sm font-bold text-primary/75">USD</span>
+                    <span className="text-2xl sm:text-3xl md:text-display-md font-extrabold text-on-surface tracking-tight font-tabular-nums group-hover/main:text-primary transition-colors">{formatCurrency(mainBalance)}</span>
                   </div>
                   <p className="text-xs md:text-sm text-on-surface-variant/90 font-semibold leading-relaxed">Available for instant spot trading, margin, and copy allocation.</p>
                 </div>
@@ -108,8 +113,7 @@ export default function Wallet() {
               <div className="p-2 md:p-card-padding flex-1 flex flex-col justify-between relative z-10">
                 <div className="space-y-1">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl sm:text-3xl md:text-display-md font-extrabold text-on-surface tracking-tight font-tabular-nums group-hover/profit:text-tertiary transition-colors">12,430.50</span>
-                    <span className="text-sm md:text-headline-sm font-bold text-tertiary/75">USD</span>
+                    <span className="text-2xl sm:text-3xl md:text-display-md font-extrabold text-on-surface tracking-tight font-tabular-nums group-hover/profit:text-tertiary transition-colors">{formatCurrency(profitBalance)}</span>
                   </div>
                   <p className="text-xs md:text-sm text-on-surface-variant/90 font-semibold leading-relaxed">Accumulated yield payments. Ready to compound or withdraw.</p>
                 </div>
@@ -221,39 +225,47 @@ export default function Wallet() {
                   </tr>
                 </thead>
                 <tbody className="text-sm md:text-body-md divide-y divide-outline-variant/5">
-                  <tr className="hover:bg-white/5 transition-colors group">
-                    <td className="px-2.5 py-2 md:px-card-padding md:py-3 font-tabular-nums text-xs md:text-sm text-on-surface-variant">#TX-882941-BM</td>
-                    <td className="px-2.5 py-2 md:px-card-padding md:py-3 text-xs md:text-sm text-on-surface-variant">Oct 24, 2023 14:22</td>
-                    <td className="px-2.5 py-2 md:px-card-padding md:py-3">
-                      <div className="flex items-center gap-1.5 md:gap-2">
-                        <span className="material-symbols-outlined text-primary text-[14px] md:text-sm">download</span>
-                        <span className="text-xs md:text-sm font-medium text-on-surface">Deposit</span>
-                      </div>
-                    </td>
-                    <td className="px-2.5 py-2 md:px-card-padding md:py-3 text-right font-tabular-nums font-bold text-tertiary text-xs md:text-sm">+15,000.00 USD</td>
-                    <td className="px-2.5 py-2 md:px-card-padding md:py-3 text-center">
-                      <span className="bg-tertiary-container/20 text-tertiary px-1.5 py-0.5 rounded text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-tertiary/20">Completed</span>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-white/5 transition-colors group">
-                    <td className="px-2.5 py-2 md:px-card-padding md:py-3 font-tabular-nums text-xs md:text-sm text-on-surface-variant">#TX-882935-BM</td>
-                    <td className="px-2.5 py-2 md:px-card-padding md:py-3 text-xs md:text-sm text-on-surface-variant">Oct 23, 2023 09:15</td>
-                    <td className="px-2.5 py-2 md:px-card-padding md:py-3">
-                      <div className="flex items-center gap-1.5 md:gap-2">
-                        <span className="material-symbols-outlined text-error text-[14px] md:text-sm">upload</span>
-                        <span className="text-xs md:text-sm font-medium text-on-surface">Withdrawal</span>
-                      </div>
-                    </td>
-                    <td className="px-2.5 py-2 md:px-card-padding md:py-3 text-right font-tabular-nums font-bold text-error text-xs md:text-sm">-2,450.00 USD</td>
-                    <td className="px-2.5 py-2 md:px-card-padding md:py-3 text-center">
-                      <span className="bg-secondary-container/20 text-secondary px-1.5 py-0.5 rounded text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-secondary/20">Pending</span>
-                    </td>
-                  </tr>
+                  {transactions.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-2.5 py-4 md:px-card-padding md:py-8 text-center text-on-surface-variant font-medium text-xs md:text-sm">
+                        No transactions found.
+                      </td>
+                    </tr>
+                  ) : (
+                    transactions.slice(0, 5).map((tx) => (
+                      <tr key={tx.id} className="hover:bg-white/5 transition-colors group">
+                        <td className="px-2.5 py-2 md:px-card-padding md:py-3 font-tabular-nums text-xs md:text-sm text-on-surface-variant">#TX-{tx.id.substring(0, 8).toUpperCase()}</td>
+                        <td className="px-2.5 py-2 md:px-card-padding md:py-3 text-xs md:text-sm text-on-surface-variant">{new Date(tx.created_at).toLocaleString()}</td>
+                        <td className="px-2.5 py-2 md:px-card-padding md:py-3">
+                          <div className="flex items-center gap-1.5 md:gap-2">
+                            <span className={`material-symbols-outlined text-[14px] md:text-sm ${
+                              tx.type === 'deposit' || tx.type === 'profit' ? 'text-tertiary' : 'text-primary'
+                            }`}>{tx.type === 'deposit' || tx.type === 'profit' ? 'download' : 'upload'}</span>
+                            <span className="text-xs md:text-sm font-medium text-on-surface capitalize">{tx.type}</span>
+                          </div>
+                        </td>
+                        <td className={`px-2.5 py-2 md:px-card-padding md:py-3 text-right font-tabular-nums font-bold text-xs md:text-sm ${
+                          tx.type === 'deposit' || tx.type === 'profit' ? 'text-tertiary' : 'text-on-surface'
+                        }`}>
+                          {tx.type === 'deposit' || tx.type === 'profit' ? '+' : '-'}{formatCurrency(tx.amount)} {tx.asset}
+                        </td>
+                        <td className="px-2.5 py-2 md:px-card-padding md:py-3 text-center">
+                          {tx.status === 'completed' ? (
+                            <span className="bg-tertiary-container/20 text-tertiary px-1.5 py-0.5 rounded text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-tertiary/20">Completed</span>
+                          ) : tx.status === 'failed' ? (
+                            <span className="bg-error-container/20 text-error px-1.5 py-0.5 rounded text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-error/20">Failed</span>
+                          ) : (
+                            <span className="bg-primary-container/20 text-primary px-1.5 py-0.5 rounded text-[9px] md:text-[10px] font-bold uppercase tracking-wider border border-primary/20">Pending</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
             <div className="px-2.5 py-2 md:px-card-padding md:py-3 bg-surface-container-lowest/50 border-t border-outline-variant/10 flex justify-between items-center">
-              <span className="text-[10px] md:text-xs text-on-surface-variant">Showing 2 of 128 transactions</span>
+              <span className="text-[10px] md:text-xs text-on-surface-variant">Showing {Math.min(transactions.length, 5)} of {transactions.length} transactions</span>
               <div className="flex gap-1 md:gap-2">
                 <button className="cursor-pointer p-0.5 md:p-1 hover:bg-surface-variant/30 rounded border border-outline-variant/30 disabled:opacity-50 transition-colors" disabled>
                   <span className="material-symbols-outlined text-[16px] md:text-sm">chevron_left</span>

@@ -5,7 +5,7 @@ export default function Profile() {
     const navigate = useNavigate();
 
     return (
-        <div className="flex-1 p-4 md:p-margin-desktop space-y-4 md:space-y-6 max-w-[1200px] mx-auto w-full mb-12">
+        <div className="flex-1 p-4 md:p-margin-desktop space-y-4 md:space-y-6 max-w-[1600px] mx-auto w-full mb-12">
                     
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-gutter">

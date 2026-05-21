@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useWalletStore } from '../store/walletStore';
+import { useTransactionStore } from '../store/transactionStore';
 
 export default function Withdraw() {
     const navigate = useNavigate();
+    const { mainBalance, profitBalance } = useWalletStore();
+    const { transactions } = useTransactionStore();
+    const [selectedAccount, setSelectedAccount] = useState<'main' | 'profit'>('main');
     const [isWithdrawing, setIsWithdrawing] = useState(false);
     const [isWithdrawn, setIsWithdrawn] = useState(false);
+
+    const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
 
     const handleWithdraw = () => {
         setIsWithdrawing(true);
@@ -30,7 +37,7 @@ export default function Withdraw() {
     };
 
     return (
-        <div className="flex-1 p-2.5 md:p-margin-desktop space-y-2.5 md:space-y-6 max-w-[1200px] mx-auto w-full mb-6">
+        <div className="flex-1 p-2.5 md:p-margin-desktop space-y-2.5 md:space-y-6 max-w-[1600px] mx-auto w-full mb-6">
                     {/* Bento Layout Content */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 md:gap-6">
                         {/* Left Column: Withdrawal Form */}
@@ -81,7 +88,7 @@ export default function Withdraw() {
                                                     <span className="w-1 h-1 rounded-full bg-primary"></span>
                                                     Main Account
                                                 </p>
-                                                <p className="text-sm sm:text-lg md:text-2xl font-mono text-on-surface font-extrabold tracking-tight group-hover/main:text-primary transition-colors">$1,248,590.00</p>
+                                                <p className="text-sm sm:text-lg md:text-2xl font-mono text-on-surface font-extrabold tracking-tight group-hover/main:text-primary transition-colors">{formatCurrency(mainBalance)}</p>
                                             </div>
                                             <div className="mt-2.5 flex items-center gap-1 text-[8px] md:text-[10px] text-primary/80 font-bold uppercase">
                                                 <span className="material-symbols-outlined text-[10px] md:text-[12px] font-bold">trending_up</span>
@@ -121,7 +128,7 @@ export default function Withdraw() {
                                                     <span className="w-1 h-1 rounded-full bg-tertiary"></span>
                                                     Profit Wallet
                                                 </p>
-                                                <p className="text-sm sm:text-lg md:text-2xl font-mono text-tertiary font-extrabold tracking-tight group-hover/profit:text-tertiary/80 transition-colors">$342,120.45</p>
+                                                <p className="text-sm sm:text-lg md:text-2xl font-mono text-tertiary font-extrabold tracking-tight group-hover/profit:text-tertiary/80 transition-colors">{formatCurrency(profitBalance)}</p>
                                             </div>
                                             <div className="mt-2.5 flex items-center gap-1 text-[8px] md:text-[10px] text-tertiary/80 font-bold uppercase">
                                                 <span className="material-symbols-outlined text-[10px] md:text-[12px] font-bold">payments</span>
@@ -137,13 +144,25 @@ export default function Withdraw() {
                                 <div className="space-y-2 md:space-y-4">
                                     <label className="block text-[10px] md:text-label-md font-bold text-on-surface uppercase tracking-wider">Source Account</label>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 md:gap-4">
-                                        <button className="flex items-center justify-between p-2.5 md:p-4 rounded-lg bg-primary/10 border border-primary/50 ring-1 ring-primary/20 shadow-sm transition-all">
-                                            <span className="text-primary font-bold text-xs md:text-base">Main Account</span>
-                                            <span className="material-symbols-outlined text-primary text-[18px] md:text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                                        <button 
+                                            onClick={() => setSelectedAccount('main')}
+                                            className={`flex items-center justify-between p-2.5 md:p-4 rounded-lg transition-all ${selectedAccount === 'main' ? 'bg-primary/10 border border-primary/50 ring-1 ring-primary/20 shadow-sm' : 'bg-surface-container-low border border-outline-variant/50 hover:border-primary/50'}`}>
+                                            <span className={`${selectedAccount === 'main' ? 'text-primary' : 'text-on-surface-variant'} font-bold text-xs md:text-base`}>Main Account</span>
+                                            {selectedAccount === 'main' ? (
+                                                <span className="material-symbols-outlined text-primary text-[18px] md:text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                                            ) : (
+                                                <div className="w-4 h-4 md:w-6 md:h-6 rounded-full border border-outline-variant/50"></div>
+                                            )}
                                         </button>
-                                        <button className="flex items-center justify-between p-2.5 md:p-4 rounded-lg bg-surface-container-low border border-outline-variant/50 hover:border-primary/50 transition-all">
-                                            <span className="text-on-surface-variant font-bold text-xs md:text-base">Profit Wallet</span>
-                                            <div className="w-4 h-4 md:w-6 md:h-6 rounded-full border border-outline-variant/50"></div>
+                                        <button 
+                                            onClick={() => setSelectedAccount('profit')}
+                                            className={`flex items-center justify-between p-2.5 md:p-4 rounded-lg transition-all ${selectedAccount === 'profit' ? 'bg-tertiary/10 border border-tertiary/50 ring-1 ring-tertiary/20 shadow-sm' : 'bg-surface-container-low border border-outline-variant/50 hover:border-primary/50'}`}>
+                                            <span className={`${selectedAccount === 'profit' ? 'text-tertiary' : 'text-on-surface-variant'} font-bold text-xs md:text-base`}>Profit Wallet</span>
+                                            {selectedAccount === 'profit' ? (
+                                                <span className="material-symbols-outlined text-tertiary text-[18px] md:text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                                            ) : (
+                                                <div className="w-4 h-4 md:w-6 md:h-6 rounded-full border border-outline-variant/50"></div>
+                                            )}
                                         </button>
                                     </div>
                                 </div>
@@ -151,7 +170,7 @@ export default function Withdraw() {
                                 <div className="space-y-2 md:space-y-4 pt-1 md:pt-0">
                                     <div className="flex justify-between items-end">
                                         <label className="block text-[10px] md:text-label-md font-bold text-on-surface uppercase tracking-wider">Amount to Withdraw</label>
-                                        <span className="text-[9px] md:text-xs text-on-surface-variant font-bold">Available: $1,248,590.00</span>
+                                        <span className="text-[9px] md:text-xs text-on-surface-variant font-bold">Available: {formatCurrency(selectedAccount === 'main' ? mainBalance : profitBalance)}</span>
                                     </div>
                                     <div className="relative group">
                                         <input className="w-full bg-surface-container-lowest border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_10px_rgba(37,99,235,0.2)] focus:outline-none rounded-lg px-2.5 py-2 md:px-4 md:py-3.5 text-lg md:text-3xl font-mono text-on-surface transition-all font-bold" placeholder="0.00" type="number"/>
@@ -309,68 +328,58 @@ export default function Withdraw() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-outline-variant/5">
-                                    {/* Completed Transaction */}
-                                    <tr className="hover:bg-white/5 transition-colors group">
-                                        <td className="px-2.5 py-2 md:px-5 md:py-4">
-                                            <p className="text-on-surface text-[11px] md:text-sm font-mono font-bold">Oct 12, 2024</p>
-                                            <p className="text-[9px] md:text-[10px] text-on-surface-variant font-mono mt-0.5">TXN-4920391203</p>
-                                        </td>
-                                        <td className="px-2.5 py-2 md:px-5 md:py-4">
-                                            <div className="flex items-center gap-1.5 md:gap-2">
-                                                <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-[9px] md:text-[10px] text-on-surface font-mono font-bold border border-outline-variant/30">0x</div>
-                                                <span className="text-[10px] md:text-xs text-on-surface-variant font-mono font-bold">0x71C...492a</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-2.5 py-2 md:px-5 md:py-4">
-                                            <div className="flex items-center gap-1.5 md:gap-2">
-                                                <span className="material-symbols-outlined text-[16px] md:text-[18px] text-on-surface-variant">monetization_on</span>
-                                                <span className="text-[11px] md:text-xs text-on-surface font-bold">USDT-ERC20</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-2.5 py-2 md:px-5 md:py-4 text-on-surface font-mono text-[11px] md:text-sm font-bold text-right">
-                                            $45,000.00
-                                        </td>
-                                        <td className="px-2.5 py-2 md:px-5 md:py-4 text-center">
-                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-0.5 rounded-full bg-tertiary/10 border border-tertiary/20 text-tertiary text-[9px] md:text-[10px] font-bold uppercase tracking-wider">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
-                                                Completed
-                                            </span>
-                                        </td>
-                                        <td className="px-2.5 py-2 md:px-5 md:py-4 text-right">
-                                            <button className="text-primary hover:text-primary/70 material-symbols-outlined text-[18px] md:text-[20px] transition-colors p-1 rounded hover:bg-surface-variant/30">receipt_long</button>
-                                        </td>
-                                    </tr>
-                                    {/* Processing Transaction */}
-                                    <tr className="hover:bg-white/5 transition-colors group">
-                                        <td className="px-2.5 py-2 md:px-5 md:py-4">
-                                            <p className="text-on-surface text-[11px] md:text-sm font-mono font-bold">Oct 14, 2024</p>
-                                            <p className="text-[9px] md:text-[10px] text-on-surface-variant font-mono mt-0.5">TXN-4920391552</p>
-                                        </td>
-                                        <td className="px-2.5 py-2 md:px-5 md:py-4">
-                                            <div className="flex items-center gap-1.5 md:gap-2">
-                                                <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-[9px] md:text-[10px] text-on-surface font-mono font-bold border border-outline-variant/30">0x</div>
-                                                <span className="text-[10px] md:text-xs text-on-surface-variant font-mono font-bold">0x99A...119c</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-2.5 py-2 md:px-5 md:py-4">
-                                            <div className="flex items-center gap-1.5 md:gap-2">
-                                                <span className="material-symbols-outlined text-[16px] md:text-[18px] text-on-surface-variant">currency_bitcoin</span>
-                                                <span className="text-[11px] md:text-xs text-on-surface font-bold">BTC (Core)</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-2.5 py-2 md:px-5 md:py-4 text-on-surface font-mono text-[11px] md:text-sm font-bold text-right">
-                                            $212,400.00
-                                        </td>
-                                        <td className="px-2.5 py-2 md:px-5 md:py-4 text-center">
-                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] md:text-[10px] font-bold uppercase tracking-wider">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                                                Processing
-                                            </span>
-                                        </td>
-                                        <td className="px-2.5 py-2 md:px-5 md:py-4 text-right">
-                                            <button className="text-primary hover:text-primary/70 material-symbols-outlined text-[18px] md:text-[20px] transition-colors p-1 rounded hover:bg-surface-variant/30">receipt_long</button>
-                                        </td>
-                                    </tr>
+                                    {transactions.filter(tx => tx.type === 'withdrawal').length === 0 ? (
+                                        <tr>
+                                            <td colSpan={6} className="px-2.5 py-4 md:px-5 md:py-8 text-center text-on-surface-variant font-medium text-xs md:text-sm">
+                                                No withdrawal history found.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        transactions.filter(tx => tx.type === 'withdrawal').map((tx) => (
+                                            <tr key={tx.id} className="hover:bg-white/5 transition-colors group">
+                                                <td className="px-2.5 py-2 md:px-5 md:py-4">
+                                                    <p className="text-on-surface text-[11px] md:text-sm font-mono font-bold">{new Date(tx.created_at).toLocaleDateString()}</p>
+                                                    <p className="text-[9px] md:text-[10px] text-on-surface-variant font-mono mt-0.5">TXN-{tx.id.substring(0, 8).toUpperCase()}</p>
+                                                </td>
+                                                <td className="px-2.5 py-2 md:px-5 md:py-4">
+                                                    <div className="flex items-center gap-1.5 md:gap-2">
+                                                        <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-[9px] md:text-[10px] text-on-surface font-mono font-bold border border-outline-variant/30">0x</div>
+                                                        <span className="text-[10px] md:text-xs text-on-surface-variant font-mono font-bold">{tx.destination_address ? `${tx.destination_address.substring(0, 5)}...${tx.destination_address.substring(tx.destination_address.length - 4)}` : 'N/A'}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-2.5 py-2 md:px-5 md:py-4">
+                                                    <div className="flex items-center gap-1.5 md:gap-2">
+                                                        <span className="material-symbols-outlined text-[16px] md:text-[18px] text-on-surface-variant">monetization_on</span>
+                                                        <span className="text-[11px] md:text-xs text-on-surface font-bold">{tx.asset || 'USD'}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-2.5 py-2 md:px-5 md:py-4 text-on-surface font-mono text-[11px] md:text-sm font-bold text-right">
+                                                    {formatCurrency(tx.amount)}
+                                                </td>
+                                                <td className="px-2.5 py-2 md:px-5 md:py-4 text-center">
+                                                    {tx.status === 'completed' ? (
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-0.5 rounded-full bg-tertiary/10 border border-tertiary/20 text-tertiary text-[9px] md:text-[10px] font-bold uppercase tracking-wider">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                                                            Completed
+                                                        </span>
+                                                    ) : tx.status === 'failed' ? (
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-0.5 rounded-full bg-error/10 border border-error/20 text-error text-[9px] md:text-[10px] font-bold uppercase tracking-wider">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                                            Failed
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] md:text-[10px] font-bold uppercase tracking-wider">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                                                            Processing
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-2.5 py-2 md:px-5 md:py-4 text-right">
+                                                    <button className="text-primary hover:text-primary/70 material-symbols-outlined text-[18px] md:text-[20px] transition-colors p-1 rounded hover:bg-surface-variant/30">receipt_long</button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
                                 </tbody>
                             </table>
                         </div>

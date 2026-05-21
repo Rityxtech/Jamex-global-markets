@@ -7,22 +7,22 @@ export default function Settings() {
     const [dateFormat, setDateFormat] = useState('MM/DD/YYYY');
 
     return (
-        <div className="flex-1 p-2.5 md:p-margin-desktop space-y-2.5 md:space-y-6 max-w-[1200px] mx-auto w-full mb-6">
+        <div className="flex-1 p-2.5 md:p-margin-desktop space-y-2.5 md:space-y-6 max-w-[1600px] mx-auto w-full mb-6">
                     
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 md:gap-gutter">
                         {/* Security Section */}
                         <section className="lg:col-span-2 space-y-2.5 md:space-y-gutter">
                             <div className="glass-card rounded-xl overflow-hidden border border-outline-variant/20">
-                                <div className="bg-surface-container-high/40 px-2.5 py-2 md:px-card-padding md:py-3 border-b border-outline-variant/10">
+                                <div className="bg-surface-container-high/40 px-2.5 py-1.5 md:px-card-padding md:py-3 border-b border-outline-variant/10">
                                     <h2 className="text-[10px] md:text-label-md font-bold text-primary flex items-center gap-1.5 md:gap-2 uppercase tracking-wide">
                                         <span className="material-symbols-outlined text-[14px] md:text-[20px]">security</span>
                                         Security & Authentication
                                     </h2>
                                 </div>
-                                <div className="p-2.5 md:p-card-padding space-y-3.5 md:space-y-6">
+                                <div className="px-2.5 py-1.5 md:p-card-padding space-y-2 md:space-y-6">
                                     {/* 2FA Toggle */}
-                                    <div className="flex items-center justify-between py-1.5 border-b border-outline-variant/10 pb-3">
+                                    <div className="flex items-center justify-between py-1 md:py-1.5 border-b border-outline-variant/10 pb-2 md:pb-3">
                                         <div>
                                             <p className="text-xs md:text-body-md font-bold text-on-surface mb-0.5">Two-Factor Authentication (2FA)</p>
                                             <p className="text-[8px] md:text-label-sm font-medium text-on-surface-variant">Protect your account with an extra layer of security.</p>
@@ -41,19 +41,19 @@ export default function Settings() {
                                     </div>
                                     
                                     {/* Password Change */}
-                                    <div className="space-y-2.5 md:space-y-4">
+                                    <div className="space-y-1.5 md:space-y-4">
                                         <p className="text-xs md:text-body-md font-bold text-on-surface">Change Password</p>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-4">
-                                            <div className="space-y-1">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 md:gap-4">
+                                            <div className="space-y-0.5 md:space-y-1">
                                                 <label className="text-[8px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Current Password</label>
-                                                <input className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2.5 py-1.5 md:px-4 md:py-2.5 text-xs md:text-base text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="••••••••" type="password" />
+                                                <input className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2.5 py-1 md:px-4 md:py-2.5 text-xs md:text-base text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="••••••••" type="password" />
                                             </div>
-                                            <div className="space-y-1">
+                                            <div className="space-y-0.5 md:space-y-1">
                                                 <label className="text-[8px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">New Password</label>
-                                                <input className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2.5 py-1.5 md:px-4 md:py-2.5 text-xs md:text-base text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="••••••••" type="password" />
+                                                <input className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2.5 py-1 md:px-4 md:py-2.5 text-xs md:text-base text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="••••••••" type="password" />
                                             </div>
                                         </div>
-                                        <button className="w-full md:w-auto bg-primary text-on-primary px-3 py-2 md:px-6 md:py-2.5 rounded-lg text-[9px] md:text-label-md font-bold uppercase tracking-wider hover:brightness-110 transition-all active:scale-95 shadow-sm shadow-primary/20 mt-1 md:mt-2">Update Password</button>
+                                        <button className="w-full md:w-auto bg-primary text-on-primary px-3 py-1.5 md:px-6 md:py-2.5 rounded-lg text-[9px] md:text-label-md font-bold uppercase tracking-wider hover:brightness-110 transition-all active:scale-95 shadow-sm shadow-primary/20 mt-1 md:mt-2">Update Password</button>
                                     </div>
                                 </div>
                             </div>
@@ -100,40 +100,40 @@ export default function Settings() {
                         {/* Preferences Sidebar */}
                         <aside className="space-y-2.5 md:space-y-gutter">
                             <div className="glass-card rounded-xl overflow-hidden border border-outline-variant/20">
-                                <div className="bg-surface-container-high/40 px-2.5 py-2 md:px-card-padding md:py-3 border-b border-outline-variant/10">
+                                <div className="bg-surface-container-high/40 px-2.5 py-1.5 md:px-card-padding md:py-3 border-b border-outline-variant/10">
                                     <h2 className="text-[10px] md:text-label-md font-bold text-primary flex items-center gap-1.5 md:gap-2 uppercase tracking-wide">
                                         <span className="material-symbols-outlined text-[14px] md:text-[20px]">tune</span>
                                         Display Preferences
                                     </h2>
                                 </div>
-                                <div className="p-2.5 md:p-card-padding space-y-3.5 md:space-y-6">
-                                    <div className="space-y-1">
+                                <div className="px-2.5 py-1.5 md:p-card-padding space-y-2 md:space-y-6">
+                                    <div className="space-y-0.5 md:space-y-1">
                                         <label className="text-[8px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Base Currency</label>
-                                        <select className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2.5 py-1.5 md:px-4 md:py-2.5 text-xs md:text-base font-medium text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                                        <select className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2.5 py-1 md:px-4 md:py-2.5 text-xs md:text-base font-medium text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
                                             <option>USD - US Dollar</option>
                                             <option>EUR - Euro</option>
                                             <option>GBP - British Pound</option>
                                         </select>
                                     </div>
-                                    <div className="space-y-1">
+                                    <div className="space-y-0.5 md:space-y-1">
                                         <label className="text-[8px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Timezone</label>
-                                        <select className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2.5 py-1.5 md:px-4 md:py-2.5 text-xs md:text-base font-medium text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                                        <select className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2.5 py-1 md:px-4 md:py-2.5 text-xs md:text-base font-medium text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
                                             <option>(GMT -05:00) Eastern Time</option>
                                             <option>(GMT +00:00) UTC / London</option>
                                             <option>(GMT +08:00) HKT / Hong Kong</option>
                                         </select>
                                     </div>
-                                    <div className="space-y-1">
+                                    <div className="space-y-0.5 md:space-y-1">
                                         <label className="text-[8px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Date Format</label>
                                         <div className="flex gap-2">
                                             <button 
                                                 onClick={() => setDateFormat('MM/DD/YYYY')}
-                                                className={`flex-1 py-1.5 text-[8px] md:text-label-sm font-bold uppercase tracking-wider rounded-lg transition-colors ${dateFormat === 'MM/DD/YYYY' ? 'border border-primary text-primary bg-primary/10 shadow-sm' : 'border border-outline-variant/50 bg-surface-container-low text-on-surface-variant hover:border-primary/50'}`}>
+                                                className={`flex-1 py-1 md:py-1.5 text-[8px] md:text-label-sm font-bold uppercase tracking-wider rounded-lg transition-colors ${dateFormat === 'MM/DD/YYYY' ? 'border border-primary text-primary bg-primary/10 shadow-sm' : 'border border-outline-variant/50 bg-surface-container-low text-on-surface-variant hover:border-primary/50'}`}>
                                                 MM/DD/YYYY
                                             </button>
                                             <button 
                                                 onClick={() => setDateFormat('DD/MM/YYYY')}
-                                                className={`flex-1 py-1.5 text-[8px] md:text-label-sm font-bold uppercase tracking-wider rounded-lg transition-colors ${dateFormat === 'DD/MM/YYYY' ? 'border border-primary text-primary bg-primary/10 shadow-sm' : 'border border-outline-variant/50 bg-surface-container-low text-on-surface-variant hover:border-primary/50'}`}>
+                                                className={`flex-1 py-1 md:py-1.5 text-[8px] md:text-label-sm font-bold uppercase tracking-wider rounded-lg transition-colors ${dateFormat === 'DD/MM/YYYY' ? 'border border-primary text-primary bg-primary/10 shadow-sm' : 'border border-outline-variant/50 bg-surface-container-low text-on-surface-variant hover:border-primary/50'}`}>
                                                 DD/MM/YYYY
                                             </button>
                                         </div>

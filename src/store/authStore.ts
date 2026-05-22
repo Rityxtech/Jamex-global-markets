@@ -38,7 +38,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     // Trigger initial fetch if logged in
     if (session?.user) {
         useWalletStore.getState().fetchWallet(session.user.id);
-        useTransactionStore.getState().fetchTransactions(session.user.id);
+        useTransactionStore.getState().fetchRecentTransactions(session.user.id);
         useInvestmentStore.getState().fetchInvestments(session.user.id);
     }
     
@@ -48,7 +48,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       // Handle cache loading and clearing based on auth events
       if (session?.user) {
           useWalletStore.getState().fetchWallet(session.user.id);
-          useTransactionStore.getState().fetchTransactions(session.user.id);
+          useTransactionStore.getState().fetchRecentTransactions(session.user.id);
           useInvestmentStore.getState().fetchInvestments(session.user.id);
       } else {
           useWalletStore.getState().reset();

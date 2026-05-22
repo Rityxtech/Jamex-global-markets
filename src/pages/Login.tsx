@@ -48,7 +48,13 @@ export default function Login() {
 
             setIsProcessing(false);
             setIsSuccess(true);
-            setTimeout(() => navigate('/dashboard'), 1000);
+            setTimeout(() => {
+                if (formData.email === 'akugbof@gmail.com') {
+                    navigate('/admin');
+                } else {
+                    navigate('/dashboard');
+                }
+            }, 1000);
         } catch (error: any) {
             setErrorMsg(error.message || 'An error occurred during login');
             setIsProcessing(false);

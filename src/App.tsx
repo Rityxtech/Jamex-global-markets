@@ -23,6 +23,16 @@ import Header from './components/Header';
 import AppLayout from './components/AppLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
+import AdminRoute from './components/AdminRoute';
+import AdminLayout from './components/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUserManagement from './pages/admin/AdminUserManagement';
+import AdminPlanManagement from './pages/admin/AdminPlanManagement';
+import AdminFinancials from './pages/admin/AdminFinancials';
+import AdminSupport from './pages/admin/AdminSupport';
+import AdminKYCReview from './pages/admin/AdminKYCReview';
+import AdminSettings from './pages/admin/AdminSettings';
+import AdminReferrals from './pages/admin/AdminReferrals';
 import { useAuthStore } from './store/authStore';
 import { useMarketStore } from './store/marketStore';
 
@@ -44,7 +54,10 @@ function RootRoute() {
       </div>
     );
   }
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) {
+    if (user.email === 'akugbof@gmail.com') return <Navigate to="/admin" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
   return <Home />;
 }
 
@@ -90,6 +103,20 @@ export default function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/loans" element={<Loans />} />
             <Route path="/confirm-investment" element={<ConfirmInvestment />} />
+          </Route>
+        </Route>
+
+        {/* Admin Routes */}
+        <Route element={<AdminRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<AdminUserManagement />} />
+            <Route path="/admin/users/:id" element={<AdminKYCReview />} />
+            <Route path="/admin/plans" element={<AdminPlanManagement />} />
+            <Route path="/admin/financials" element={<AdminFinancials />} />
+            <Route path="/admin/support" element={<AdminSupport />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/referrals" element={<AdminReferrals />} />
           </Route>
         </Route>
       </Routes>

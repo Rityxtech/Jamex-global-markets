@@ -1,9 +1,10 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 
-export default function PublicRoute() {
+export default function AdminRoute() {
   const { user, loading } = useAuthStore();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -13,10 +14,11 @@ export default function PublicRoute() {
     );
   }
 
-  if (user) {
-    if (user.email === 'akugbof@gmail.com') {
-      return <Navigate to="/admin" replace />;
-    }
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (user.email !== 'akugbof@gmail.com') {
     return <Navigate to="/dashboard" replace />;
   }
 

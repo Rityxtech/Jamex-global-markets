@@ -1,67 +1,61 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
+import { supabase } from '../lib/supabase';
+
+interface TxRow {
+    id: string;
+    type: string;
+    amount: number;
+    asset: string;
+    status: string;
+    destination_address: string | null;
+    created_at: string;
+}
+
+const TYPE_META: Record<string, { icon: string; iconColor: string; bgIconColor: string; label: string }> = {
+    deposit:    { icon: 'account_balance_wallet', iconColor: 'text-primary',   bgIconColor: 'bg-primary/10 border-primary/30',             label: 'Deposit' },
+    withdrawal: { icon: 'payments',              iconColor: 'text-secondary', bgIconColor: 'bg-secondary-container/20 border-secondary/20', label: 'Withdrawal' },
+    profit:     { icon: 'trending_up',           iconColor: 'text-tertiary',  bgIconColor: 'bg-tertiary-container/20 border-tertiary/20',   label: 'Profit' },
+    transfer:   { icon: 'swap_horiz',            iconColor: 'text-outline',   bgIconColor: 'bg-surface-variant/20 border-outline-variant/30', label: 'Transfer' },
+};
+
+const STATUS_META: Record<string, { label: string; color: string }> = {
+    completed: { label: 'Completed', color: 'bg-tertiary-container/20 text-tertiary border-tertiary/20' },
+    pending:   { label: 'Pending',   color: 'bg-secondary-container/20 text-secondary border-secondary/20' },
+    failed:    { label: 'Failed',    color: 'bg-error/10 text-error border-error/20' },
+};
+
+const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 
 export default function TransactionHistory() {
     const navigate = useNavigate();
+    const { user } = useAuthStore();
+    const [transactions, setTransactions] = useState<TxRow[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [typeFilter, setTypeFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState('all');
 
-    const transactions = [
-        {
-            date: "Oct 24, 2024",
-            time: "14:32:01 UTC",
-            refId: "#TXN-8829410",
-            category: "Trading Return",
-            icon: "trending_up",
-            iconColor: "text-tertiary",
-            bgIconColor: "bg-tertiary-container/20 border-tertiary/20",
-            method: "BTC/USD Linear",
-            amount: "+$12,450.00",
-            amountColor: "text-tertiary",
-            status: "Completed",
-            statusColor: "bg-tertiary-container/20 text-tertiary border-tertiary/20"
-        },
-        {
-            date: "Oct 23, 2024",
-            time: "09:15:45 UTC",
-            refId: "#TXN-8829395",
-            category: "Withdrawal",
-            icon: "payments",
-            iconColor: "text-secondary",
-            bgIconColor: "bg-secondary-container/20 border-secondary/20",
-            method: "Wire Transfer",
-            amount: "-$50,000.00",
-            amountColor: "text-error",
-            status: "Pending",
-            statusColor: "bg-secondary-container/20 text-secondary border-secondary/20"
-        },
-        {
-            date: "Oct 21, 2024",
-            time: "18:45:22 UTC",
-            refId: "#TXN-8829102",
-            category: "Commission",
-            icon: "group",
-            iconColor: "text-primary",
-            bgIconColor: "bg-primary-container/20 border-primary/20",
-            method: "Tier 1 Referral",
-            amount: "+$850.25",
-            amountColor: "text-tertiary",
-            status: "Completed",
-            statusColor: "bg-tertiary-container/20 text-tertiary border-tertiary/20"
-        },
-        {
-            date: "Oct 20, 2024",
-            time: "11:02:18 UTC",
-            refId: "#TXN-8828955",
-            category: "Deposit",
-            icon: "account_balance_wallet",
-            iconColor: "text-primary",
-            bgIconColor: "bg-primary/10 border-primary/30",
-            method: "USDT (ERC-20)",
-            amount: "+$250,000.00",
-            amountColor: "text-on-surface",
-            status: "Completed",
-            statusColor: "bg-tertiary-container/20 text-tertiary border-tertiary/20"
-        }
-    ];
+    useEffect(() => {
+        if (!user) return;
+        setLoading(true);
+        let q = supabase
+            .from('transactions')
+            .select('id, type, amount, asset, status, destination_address, created_at')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(100);
+        q.then(({ data }) => {
+            setTransactions((data as TxRow[]) || []);
+            setLoading(false);
+        });
+    }, [user]);
+
+    const filtered = transactions.filter(tx => {
+        if (typeFilter !== 'all' && tx.type !== typeFilter) return false;
+        if (statusFilter !== 'all' && tx.status !== statusFilter) return false;
+        return true;
+    });
 
     return (
         <div className="flex-1 p-2.5 md:p-margin-desktop space-y-2.5 md:space-y-6 max-w-[1600px] mx-auto w-full mb-6">
@@ -284,7 +278,7 @@ export default function TransactionHistory() {
                                 <span className="material-symbols-outlined text-[16px] md:text-[20px]">list_alt</span>
                                 Activity Ledger
                             </h2>
-                            <span className="text-[9px] md:text-xs font-bold text-on-surface-variant bg-surface-container-highest px-2 py-1 rounded-md border border-outline-variant/20">Showing 1-10 of 2,450 results</span>
+                            <span className="text-[9px] md:text-xs font-bold text-on-surface-variant bg-surface-container-highest px-2 py-1 rounded-md border border-outline-variant/20">{loading ? 'Loading…' : `${filtered.length} result${filtered.length !== 1 ? 's' : ''}`}</span>
                         </div>
                         <div className="hidden md:block overflow-x-auto scrollbar-hide">
                             <table className="w-full text-left min-w-[700px]">
@@ -300,74 +294,90 @@ export default function TransactionHistory() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-outline-variant/5">
-                                    {transactions.map((txn, index) => (
-                                        <tr key={index} className="hover:bg-white/5 transition-colors group">
+                                    {loading ? (
+                                        <tr><td colSpan={7} className="px-6 py-8 text-center text-outline">Loading transactions…</td></tr>
+                                    ) : filtered.length === 0 ? (
+                                        <tr><td colSpan={7} className="px-6 py-8 text-center text-on-surface-variant">No transactions found.</td></tr>
+                                    ) : filtered.map((txn) => {
+                                        const meta = TYPE_META[txn.type] || TYPE_META.transfer;
+                                        const sMeta = STATUS_META[txn.status] || STATUS_META.pending;
+                                        const isOut = txn.type === 'withdrawal';
+                                        return (
+                                        <tr key={txn.id} className="hover:bg-white/5 transition-colors group">
                                             <td className="px-4 py-3 md:px-6 md:py-4">
-                                                <p className="text-[11px] md:text-sm font-bold font-tabular-nums text-on-surface">{txn.date}</p>
-                                                <p className="text-[9px] md:text-[10px] text-on-surface-variant font-tabular-nums mt-0.5">{txn.time}</p>
+                                                <p className="text-[11px] md:text-sm font-bold font-tabular-nums text-on-surface">{new Date(txn.created_at).toLocaleDateString()}</p>
+                                                <p className="text-[9px] md:text-[10px] text-on-surface-variant font-tabular-nums mt-0.5">{new Date(txn.created_at).toLocaleTimeString()} UTC</p>
                                             </td>
                                             <td className="px-4 py-3 md:px-6 md:py-4">
-                                                <span className="text-[9px] md:text-xs font-bold font-tabular-nums text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 md:px-2 md:py-1 rounded">{txn.refId}</span>
+                                                <span className="text-[9px] md:text-xs font-bold font-tabular-nums text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 md:px-2 md:py-1 rounded">#TXN-{txn.id.substring(0,8).toUpperCase()}</span>
                                             </td>
                                             <td className="px-4 py-3 md:px-6 md:py-4">
                                                 <div className="flex items-center gap-2">
-                                                    <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full border flex items-center justify-center ${txn.bgIconColor}`}>
-                                                        <span className={`material-symbols-outlined text-[14px] md:text-[16px] ${txn.iconColor}`}>{txn.icon}</span>
+                                                    <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full border flex items-center justify-center ${meta.bgIconColor}`}>
+                                                        <span className={`material-symbols-outlined text-[14px] md:text-[16px] ${meta.iconColor}`}>{meta.icon}</span>
                                                     </div>
-                                                    <span className="text-[11px] md:text-sm font-bold text-on-surface">{txn.category}</span>
+                                                    <span className="text-[11px] md:text-sm font-bold text-on-surface capitalize">{meta.label}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-3 md:px-6 md:py-4 text-[11px] md:text-sm font-medium text-on-surface-variant">{txn.method}</td>
+                                            <td className="px-4 py-3 md:px-6 md:py-4 text-[11px] md:text-sm font-medium text-on-surface-variant uppercase">{txn.asset}</td>
                                             <td className="px-4 py-3 md:px-6 md:py-4 text-right">
-                                                <p className={`text-[11px] md:text-sm font-bold font-tabular-nums ${txn.amountColor}`}>{txn.amount}</p>
+                                                <p className={`text-[11px] md:text-sm font-bold font-tabular-nums ${isOut ? 'text-error' : 'text-tertiary'}`}>{isOut ? '-' : '+'}{fmt(txn.amount)}</p>
                                             </td>
                                             <td className="px-4 py-3 md:px-6 md:py-4 text-center">
-                                                <span className={`inline-flex items-center px-2 py-0.5 md:px-2.5 md:py-1 rounded text-[9px] md:text-[10px] font-bold uppercase tracking-wider border ${txn.statusColor}`}>{txn.status}</span>
+                                                <span className={`inline-flex items-center px-2 py-0.5 md:px-2.5 md:py-1 rounded text-[9px] md:text-[10px] font-bold uppercase tracking-wider border ${sMeta.color}`}>{sMeta.label}</span>
                                             </td>
                                             <td className="px-4 py-3 md:px-6 md:py-4 text-right">
                                                 <button className="material-symbols-outlined text-[18px] md:text-[20px] text-outline/50 hover:text-primary transition-colors p-1 rounded hover:bg-surface-variant/30">more_vert</button>
                                             </td>
                                         </tr>
-                                    ))}
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
 
                         {/* Mobile List View */}
                         <div className="md:hidden">
-                            {transactions.map((txn, index) => (
-                                <React.Fragment key={index}>
+                            {loading ? (
+                                <div className="p-6 text-center text-outline text-xs">Loading…</div>
+                            ) : filtered.length === 0 ? (
+                                <div className="p-6 text-center text-on-surface-variant text-xs">No transactions found.</div>
+                            ) : filtered.map((txn, index) => {
+                                const meta = TYPE_META[txn.type] || TYPE_META.transfer;
+                                const sMeta = STATUS_META[txn.status] || STATUS_META.pending;
+                                const isOut = txn.type === 'withdrawal';
+                                return (
+                                <React.Fragment key={txn.id}>
                                     <div className="p-2.5 flex flex-col gap-2 bg-surface-container-low/20">
                                         <div className="flex justify-between items-center">
                                             <div className="flex items-center gap-2">
-                                                <div className={`w-7 h-7 rounded-full flex items-center justify-center border ${txn.bgIconColor}`}>
-                                                    <span className={`material-symbols-outlined text-[14px] ${txn.iconColor}`}>{txn.icon}</span>
+                                                <div className={`w-7 h-7 rounded-full flex items-center justify-center border ${meta.bgIconColor}`}>
+                                                    <span className={`material-symbols-outlined text-[14px] ${meta.iconColor}`}>{meta.icon}</span>
                                                 </div>
                                                 <div>
-                                                    <p className="text-xs font-bold text-on-surface">{txn.category}</p>
-                                                    <p className="text-[9px] text-on-surface-variant font-medium mt-0.5">{txn.date} • {txn.time}</p>
+                                                    <p className="text-xs font-bold text-on-surface capitalize">{meta.label}</p>
+                                                    <p className="text-[9px] text-on-surface-variant font-medium mt-0.5">{new Date(txn.created_at).toLocaleDateString()}</p>
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <p className={`text-xs font-bold font-mono ${txn.amountColor}`}>{txn.amount}</p>
-                                                <span className="text-[9px] font-mono text-on-surface-variant/70">{txn.method}</span>
+                                                <p className={`text-xs font-bold font-mono ${isOut ? 'text-error' : 'text-tertiary'}`}>{isOut ? '-' : '+'}{fmt(txn.amount)}</p>
+                                                <span className="text-[9px] font-mono text-on-surface-variant/70 uppercase">{txn.asset}</span>
                                             </div>
                                         </div>
                                         <div className="flex justify-between items-center pt-1.5 border-t border-outline-variant/5">
-                                            <span className="text-[9px] font-bold font-mono text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">{txn.refId}</span>
+                                            <span className="text-[9px] font-bold font-mono text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">#TXN-{txn.id.substring(0,8).toUpperCase()}</span>
                                             <div className="flex items-center gap-2">
-                                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider border ${txn.statusColor}`}>{txn.status}</span>
+                                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider border ${sMeta.color}`}>{sMeta.label}</span>
                                                 <button className="material-symbols-outlined text-[16px] text-outline/50">more_vert</button>
                                             </div>
                                         </div>
                                     </div>
-                                    {index < transactions.length - 1 && (
-                                        <div className="px-2.5 py-1">
-                                            <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
-                                        </div>
+                                    {index < filtered.length - 1 && (
+                                        <div className="px-2.5 py-1"><div className="h-[1px] w-full bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div></div>
                                     )}
                                 </React.Fragment>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         <div className="px-2.5 py-2 md:px-6 md:py-4 bg-surface-container-highest/10 border-t border-outline-variant/10 flex flex-col sm:flex-row justify-between items-center gap-2.5">

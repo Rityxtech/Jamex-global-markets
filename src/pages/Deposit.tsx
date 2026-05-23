@@ -1,10 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+
+const ASSET_LABEL: Record<string, string> = {
+    usdt: 'USDT TRC20',
+    eth:  'ETH ERC20',
+    btc:  'Bitcoin',
+};
 
 export default function Deposit() {
     const navigate = useNavigate();
     const [selectedAsset, setSelectedAsset] = useState('usdt');
     const [showManualHash, setShowManualHash] = useState(false);
+    const [addresses, setAddresses] = useState({ usdt: '', eth: '', btc: '' });
+    const [copied, setCopied] = useState(false);
+
+    useEffect(() => {
+        supabase
+            .from('platform_config')
+            .select('deposit_address_usdt, deposit_address_eth, deposit_address_btc')
+            .eq('id', 1)
+            .single()
+            .then(({ data }) => {
+                if (data) setAddresses({
+                    usdt: data.deposit_address_usdt || '',
+                    eth:  data.deposit_address_eth  || '',
+                    btc:  data.deposit_address_btc  || '',
+                });
+            });
+    }, []);
+
+    const activeAddress = addresses[selectedAsset as 'usdt' | 'eth' | 'btc'];
+
+    function handleCopy() {
+        if (!activeAddress) return;
+        navigator.clipboard.writeText(activeAddress);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    }
 
     return (
         <div className="flex-1 p-2.5 md:p-margin-desktop space-y-2.5 md:space-y-6 max-w-[1400px] mx-auto w-full mb-6">
@@ -77,18 +110,18 @@ export default function Deposit() {
                                         <div className="space-y-1.5 md:space-y-2">
                                             <label className="text-[9px] md:text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block">Your Personal Deposit Wallet</label>
                                             <div className="flex items-center gap-2">
-                                                <div className="flex-1 bg-surface-container-lowest border border-outline-variant/50 px-2.5 py-2.5 md:px-4 md:py-3.5 rounded-lg font-mono text-xs md:text-sm font-bold text-on-surface break-all md:break-normal tracking-wide shadow-inner">
-                                                    TPL6n8J9WpX8z7yA6c5V4b3N2m1L0xKz98P
+                                                <div className="flex-1 bg-surface-container-lowest border border-outline-variant/50 px-2.5 py-2.5 md:px-4 md:py-3.5 rounded-lg font-mono text-xs md:text-sm font-bold text-on-surface break-all tracking-wide shadow-inner">
+                                                    {activeAddress || <span className="text-outline/60 font-normal italic">Address not configured — contact support</span>}
                                                 </div>
-                                                <button className="px-2.5 py-2.5 md:px-4 md:py-3.5 bg-primary-container text-on-primary-container rounded-lg hover:brightness-110 active:scale-95 transition-all shadow-sm shrink-0 flex items-center justify-center" title="Copy Address">
-                                                    <span className="material-symbols-outlined text-[18px] md:text-[20px]">content_copy</span>
+                                                <button onClick={handleCopy} disabled={!activeAddress} className="px-2.5 py-2.5 md:px-4 md:py-3.5 bg-primary-container text-on-primary-container rounded-lg hover:brightness-110 active:scale-95 transition-all shadow-sm shrink-0 flex items-center justify-center disabled:opacity-40" title="Copy Address">
+                                                    <span className="material-symbols-outlined text-[18px] md:text-[20px]">{copied ? 'check' : 'content_copy'}</span>
                                                 </button>
                                             </div>
                                         </div>
                                         <div className="flex gap-2 md:gap-3 p-2 md:p-4 rounded-lg bg-error/10 border border-error/20 items-start">
                                             <span className="material-symbols-outlined text-error text-[18px] md:text-[20px] shrink-0 mt-0.5">warning</span>
                                             <p className="text-[10px] md:text-xs text-error/90 leading-relaxed font-bold">
-                                                Only send <span className="underline uppercase tracking-wider">USDT TRC20</span> to this address. Sending any other asset or network will result in permanent loss.
+                                                Only send <span className="underline uppercase tracking-wider">{ASSET_LABEL[selectedAsset]}</span> to this address. Sending any other asset or network will result in permanent loss.
                                             </p>
                                         </div>
                                     </div>
@@ -128,7 +161,7 @@ export default function Deposit() {
                                         <div className="md:col-span-8 flex flex-col justify-between font-mono text-[9px] md:text-[10px] text-on-surface-variant space-y-2.5 relative z-10">
                                             <div className="space-y-1 bg-surface-container-high/40 p-2.5 rounded-md border border-outline-variant/10 text-[9px] leading-relaxed">
                                                 <p className="text-primary font-bold"><span className="text-on-surface-variant">[SYS]</span> Listening on network: <span className="text-on-surface underline">{selectedAsset.toUpperCase()}</span></p>
-                                                <p><span className="text-on-surface-variant">[SYS]</span> Monitoring deposit address: <span className="text-on-surface-variant">TPL6n8J9Wp...L0xKz98P</span></p>
+                                                <p><span className="text-on-surface-variant">[SYS]</span> Monitoring deposit address: <span className="text-on-surface-variant">{activeAddress ? `${activeAddress.substring(0,10)}…${activeAddress.slice(-6)}` : '— not configured'}</span></p>
                                                 <div className="h-px bg-outline-variant/10 my-1 w-full"></div>
                                                 <p className="flex items-center gap-1.5"><span className="text-tertiary font-bold animate-pulse">●</span> <span className="text-on-surface font-semibold">Awaiting transfer detection on block explorer...</span></p>
                                                 <p className="text-[8px] text-on-surface-variant/60">Estimated detection time: &lt; 60 seconds</p>

@@ -1,8 +1,50 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
+import { supabase } from '../lib/supabase';
+
+interface ProfileData {
+    full_name: string;
+    avatar_url: string | null;
+    referral_code: string | null;
+    created_at: string | null;
+}
+
+interface KycData {
+    first_name: string;
+    last_name: string;
+    country: string;
+    city: string;
+    status: string;
+}
 
 export default function Profile() {
     const navigate = useNavigate();
+    const { user } = useAuthStore();
+    const [profile, setProfile] = useState<ProfileData | null>(null);
+    const [kyc, setKyc] = useState<KycData | null>(null);
+
+    useEffect(() => {
+        if (!user) return;
+        Promise.all([
+            supabase.from('profiles').select('full_name, avatar_url, referral_code, created_at').eq('id', user.id).single(),
+            supabase.from('kyc_submissions').select('first_name, last_name, country, city, status').eq('user_id', user.id).maybeSingle(),
+        ]).then(([pRes, kRes]) => {
+            if (pRes.data) setProfile(pRes.data as ProfileData);
+            if (kRes.data) setKyc(kRes.data as KycData);
+        });
+    }, [user]);
+
+    const displayName = profile?.full_name
+        || (kyc ? `${kyc.first_name} ${kyc.last_name}`.trim() : '')
+        || user?.email?.split('@')[0]
+        || 'User';
+    const kycVerified = kyc?.status === 'approved';
+    const joinDate = profile?.created_at
+        ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+        : user?.created_at
+        ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+        : '—';
 
     return (
         <div className="flex-1 p-4 md:p-margin-desktop space-y-4 md:space-y-6 max-w-[1600px] mx-auto w-full mb-12">
@@ -16,25 +58,33 @@ export default function Profile() {
                                 <img alt="Institutional Header" className="w-full h-full object-cover opacity-30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCS-TDbO2hbpVDtUFouSg9_eQBVbxo6hYtGg0Bcdnp08tsr8-uV-Jpd8-Vj6-7MB7-wak9BZ53SQSCkJ1pJnEpmqk-ekfSQnXlQKa4CaxD9BB4Ke4N3O46pmRwQtv17XKOrIhlI-FlOQBYIGPNjFI4MAU47Miw6EzaUSGwhj_6fA2KhakOnRfyK3qyjPH0odhB6e0Gs23UhQ9JGuPT-bsVAHuj42gwDFka7vTpfupcRlMSiBIYPJGAJl80Q52I4Tuj3gRSWrfu_KExx" />
                             </div>
                             <div className="px-4 pb-4 md:px-card-padding md:pb-card-padding flex flex-col md:flex-row items-start md:items-end gap-3 md:gap-6 -mt-10 md:-mt-12 relative z-10">
-                                <div className="w-20 h-20 md:w-32 md:h-32 rounded-xl glass-card border-2 md:border-4 border-background p-1 bg-surface-container shadow-lg">
-                                    <img alt="User Profile" className="w-full h-full object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDG3X6LxxL5X36N91_1pfvNas4bUjG1eTJgu-WutIU7gf7X9pdQpu1B77MeN3k0VaobUs68sd2hzztp86L-yj77wo4nasaHlro46kGZhgPnxSSjWexMfggqnby5qCix6AWD2x6MPBvCxnBn8DLwMYsc9g9DgwtCl1VqWwO1gnhOuv-YAAn-gBe14W4Sk1pJgieBHjOUnIcWvubPAftjmpk1qGuM62ENqSDgecKYOy-k1ea1TjyIMpuk-Aece29DRJJvM6Jla115yd3E" />
+                                <div className="w-20 h-20 md:w-32 md:h-32 rounded-xl glass-card border-2 md:border-4 border-background p-1 bg-surface-container shadow-lg flex items-center justify-center overflow-hidden">
+                                    {profile?.avatar_url
+                                        ? <img alt="User Profile" className="w-full h-full object-cover rounded-lg" src={profile.avatar_url} />
+                                        : <span className="text-4xl md:text-5xl font-bold text-primary select-none">{displayName.charAt(0).toUpperCase()}</span>
+                                    }
                                 </div>
                                 <div className="flex-1 pb-1 md:pb-4 w-full">
                                     <div className="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-3 mb-2 md:mb-1">
-                                        <h2 className="text-xl md:text-headline-md font-bold text-on-surface tracking-tight">Alexander J. Rothschild</h2>
-                                        <span className="bg-tertiary-container/20 text-tertiary text-[9px] md:text-label-sm font-bold px-2 py-0.5 md:px-3 md:py-1 rounded border border-tertiary/30 w-max flex items-center gap-1">
-                                            <span className="material-symbols-outlined text-[12px] md:text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                            VERIFIED INSTITUTIONAL
-                                        </span>
+                                        <h2 className="text-xl md:text-headline-md font-bold text-on-surface tracking-tight">{displayName}</h2>
+                                        {kycVerified && (
+                                            <span className="bg-tertiary-container/20 text-tertiary text-[9px] md:text-label-sm font-bold px-2 py-0.5 md:px-3 md:py-1 rounded border border-tertiary/30 w-max flex items-center gap-1">
+                                                <span className="material-symbols-outlined text-[12px] md:text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                                KYC VERIFIED
+                                            </span>
+                                        )}
+                                        {!kycVerified && kyc?.status === 'pending' && (
+                                            <span className="bg-primary/10 text-primary text-[9px] md:text-label-sm font-bold px-2 py-0.5 md:px-3 md:py-1 rounded border border-primary/30 w-max">KYC PENDING</span>
+                                        )}
                                     </div>
                                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs md:text-label-md font-bold text-on-surface-variant">
                                         <div className="flex items-center gap-1.5">
                                             <span className="material-symbols-outlined text-[14px] md:text-[18px]">fingerprint</span>
-                                            <span className="font-tabular-nums">UID: 8829-0012-44X</span>
+                                            <span className="font-tabular-nums">UID: {user?.id.substring(0,12).toUpperCase() || '—'}</span>
                                         </div>
                                         <div className="flex items-center gap-1.5">
                                             <span className="material-symbols-outlined text-[14px] md:text-[18px]">calendar_today</span>
-                                            <span>Joined: Oct 2022</span>
+                                            <span>Joined: {joinDate}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -56,34 +106,35 @@ export default function Profile() {
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant block uppercase tracking-wider">Legal First Name</label>
                                     <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base text-on-surface flex items-center justify-between">
-                                        <span className="font-medium">Alexander</span>
+                                        <span className="font-medium">{kyc?.first_name || '—'}</span>
                                         <span className="material-symbols-outlined text-outline/50 text-[16px]">lock</span>
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant block uppercase tracking-wider">Legal Last Name</label>
                                     <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base text-on-surface flex items-center justify-between">
-                                        <span className="font-medium">Rothschild</span>
+                                        <span className="font-medium">{kyc?.last_name || '—'}</span>
                                         <span className="material-symbols-outlined text-outline/50 text-[16px]">lock</span>
                                     </div>
                                 </div>
                                 <div className="space-y-1.5 md:col-span-2">
                                     <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant block uppercase tracking-wider">Registered Email Address</label>
                                     <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base text-on-surface flex items-center justify-between">
-                                        <span className="font-medium truncate">a.rothschild@jamex.com</span>
+                                        <span className="font-medium truncate">{user?.email || '—'}</span>
                                         <span className="material-symbols-outlined text-tertiary text-[16px]">check_circle</span>
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant block uppercase tracking-wider">Account Type</label>
-                                    <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base text-on-surface font-medium">
-                                        Institutional Wealth
+                                    <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant block uppercase tracking-wider">KYC Status</label>
+                                    <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base font-bold capitalize"
+                                        style={{ color: kyc?.status === 'approved' ? 'var(--md-sys-color-tertiary)' : kyc?.status === 'rejected' ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-on-surface)' }}>
+                                        {kyc?.status || 'Not submitted'}
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant block uppercase tracking-wider">Tax Residency</label>
+                                    <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant block uppercase tracking-wider">Country</label>
                                     <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base text-on-surface font-medium">
-                                        United Kingdom
+                                        {kyc?.country || '—'}
                                     </div>
                                 </div>
                             </div>

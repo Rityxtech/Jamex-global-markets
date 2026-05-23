@@ -1,10 +1,28 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { supabase } from '../lib/supabase';
+
+type ConnStatus = 'checking' | 'connected' | 'offline';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
   const { signOut } = useAuthStore();
+  const [connStatus, setConnStatus] = useState<ConnStatus>('checking');
+
+  useEffect(() => {
+    async function ping() {
+      try {
+        const { error } = await supabase.from('wallets').select('user_id').limit(1);
+        setConnStatus(error ? 'offline' : 'connected');
+      } catch {
+        setConnStatus('offline');
+      }
+    }
+    ping();
+    const interval = setInterval(ping, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = async () => {
     await signOut();
@@ -37,6 +55,26 @@ export default function AdminLayout() {
             <input className="bg-transparent border-none outline-none focus:ring-0 text-label-md w-full placeholder-outline text-on-surface" placeholder="Search accounts, txns..." type="text" />
           </div>
           <div className="flex items-center gap-3">
+            {/* Supabase connection indicator */}
+            <div
+              title={connStatus === 'connected' ? 'Supabase: Connected' : connStatus === 'offline' ? 'Supabase: Offline' : 'Checking connection…'}
+              className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-bold uppercase tracking-wider transition-all ${
+                connStatus === 'connected'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                  : connStatus === 'offline'
+                  ? 'bg-error/10 border-error/30 text-error'
+                  : 'bg-surface-container-highest border-outline-variant/30 text-outline'
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full ${
+                connStatus === 'connected'
+                  ? 'bg-emerald-400 animate-pulse'
+                  : connStatus === 'offline'
+                  ? 'bg-error'
+                  : 'bg-outline animate-pulse'
+              }`} />
+              {connStatus === 'connected' ? 'Live' : connStatus === 'offline' ? 'Offline' : '…'}
+            </div>
             <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</button>
             <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">shield_lock</button>
             <div className="h-8 w-8 rounded-full bg-primary-container flex items-center justify-center border border-primary/20">

@@ -1,9 +1,73 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
+import { supabase } from '../lib/supabase';
+
+interface MyTicket {
+    id: string;
+    subject: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+}
+
+const STATUS_STYLE: Record<string, string> = {
+    open: 'text-primary',
+    in_progress: 'text-tertiary',
+    resolved: 'text-on-surface-variant',
+    closed: 'text-outline',
+};
 
 export default function Support() {
     const [priority, setPriority] = useState('Normal');
     const navigate = useNavigate();
+    const { user } = useAuthStore();
+    const [subject, setSubject] = useState('');
+    const [category, setCategory] = useState('Trading API & Connectivity');
+    const [message, setMessage] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [submitError, setSubmitError] = useState('');
+    const [myTickets, setMyTickets] = useState<MyTicket[]>([]);
+
+    const fetchMyTickets = async () => {
+        if (!user) return;
+        const { data } = await supabase.from('support_tickets')
+            .select('id, subject, status, created_at, updated_at')
+            .eq('user_id', user.id)
+            .not('status', 'in', '("resolved","closed")')
+            .order('created_at', { ascending: false })
+            .limit(5);
+        setMyTickets(data || []);
+    };
+
+    useEffect(() => { fetchMyTickets(); }, [user]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!user) return;
+        if (!subject.trim() || !message.trim()) { setSubmitError('Subject and message are required.'); return; }
+        setSubmitError('');
+        setSubmitting(true);
+        const { error } = await supabase.from('support_tickets').insert({
+            user_id: user.id,
+            subject: subject.trim(),
+            message: message.trim(),
+            category,
+            priority: priority.toLowerCase() as 'low' | 'normal' | 'high' | 'urgent',
+            status: 'open',
+        });
+        if (!error) {
+            setSubmitted(true);
+            setSubject('');
+            setMessage('');
+            fetchMyTickets();
+            setTimeout(() => setSubmitted(false), 5000);
+        } else {
+            setSubmitError(error.message);
+        }
+        setSubmitting(false);
+    };
 
     return (
         <div className="flex-1 p-2.5 md:p-margin-desktop max-w-[1400px] mx-auto w-full mb-6">
@@ -23,14 +87,23 @@ export default function Support() {
                                     <span className="text-[8px] md:text-[10px] text-tertiary font-bold px-1.5 md:px-2 py-0.5 border border-tertiary/30 rounded bg-tertiary/10 uppercase tracking-wider">Priority Routing</span>
                                 </div>
                                 <div className="p-2.5 md:p-card-padding">
-                                    <form className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-4">
+                                    {submitted && (
+                                    <div className="mb-3 p-3 bg-tertiary/10 border border-tertiary/30 rounded-lg text-tertiary text-sm font-bold flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                                        Ticket submitted! Our team will respond shortly.
+                                    </div>
+                                )}
+                                {submitError && (
+                                    <div className="mb-3 p-3 bg-error/10 border border-error/30 rounded-lg text-error text-xs font-bold">{submitError}</div>
+                                )}
+                                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-4">
                                         <div className="md:col-span-2 space-y-1">
                                             <label className="block text-[8px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Subject</label>
-                                            <input className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2 py-2.5 md:px-4 md:py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs md:text-base font-medium" placeholder="Briefly describe the issue" type="text" />
+                                            <input value={subject} onChange={e => setSubject(e.target.value)} className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2 py-2.5 md:px-4 md:py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs md:text-base font-medium" placeholder="Briefly describe the issue" type="text" />
                                         </div>
                                         <div className="space-y-1">
                                             <label className="block text-[8px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Category</label>
-                                            <select className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2 py-2.5 md:px-4 md:py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs md:text-base font-medium">
+                                            <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2 py-2.5 md:px-4 md:py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs md:text-base font-medium">
                                                 <option>Trading API & Connectivity</option>
                                                 <option>Settlement & Clearing</option>
                                                 <option>Account Security</option>
@@ -56,11 +129,11 @@ export default function Support() {
                                         </div>
                                         <div className="md:col-span-2 space-y-1">
                                             <label className="block text-[8px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Message Details</label>
-                                            <textarea className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2 py-2.5 md:px-4 md:py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs md:text-base font-medium resize-none" placeholder="Provide detailed information..." rows={3}></textarea>
+                                            <textarea value={message} onChange={e => setMessage(e.target.value)} className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2 py-2.5 md:px-4 md:py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs md:text-base font-medium resize-none" placeholder="Provide detailed information..." rows={3}></textarea>
                                         </div>
                                         <div className="md:col-span-2 flex flex-col-reverse sm:flex-row justify-end gap-2 md:gap-3 mt-1">
-                                            <button className="w-full sm:w-auto px-4 py-2.5 md:px-6 md:py-2.5 rounded-lg border border-outline-variant/50 bg-surface-container-low text-on-surface-variant hover:text-on-surface transition-all text-[9px] md:text-label-md font-bold uppercase tracking-wider" type="button">Cancel</button>
-                                            <button className="w-full sm:w-auto px-4 py-2.5 md:px-8 md:py-2.5 rounded-lg bg-primary text-on-primary hover:brightness-110 active:scale-95 transition-all text-[9px] md:text-label-md font-bold uppercase tracking-wider shadow-sm shadow-primary/20" type="submit">Submit Ticket</button>
+                                            <button onClick={() => { setSubject(''); setMessage(''); setSubmitError(''); }} className="w-full sm:w-auto px-4 py-2.5 md:px-6 md:py-2.5 rounded-lg border border-outline-variant/50 bg-surface-container-low text-on-surface-variant hover:text-on-surface transition-all text-[9px] md:text-label-md font-bold uppercase tracking-wider" type="button">Cancel</button>
+                                            <button disabled={submitting} className="w-full sm:w-auto px-4 py-2.5 md:px-8 md:py-2.5 rounded-lg bg-primary text-on-primary hover:brightness-110 active:scale-95 transition-all text-[9px] md:text-label-md font-bold uppercase tracking-wider shadow-sm shadow-primary/20 disabled:opacity-60" type="submit">{submitting ? 'Submitting...' : 'Submit Ticket'}</button>
                                         </div>
                                     </form>
                                 </div>
@@ -112,50 +185,24 @@ export default function Support() {
                                     <h3 className="text-[11px] md:text-label-md font-bold text-on-surface uppercase tracking-wide">Active Inquiries</h3>
                                 </div>
                                 <div className="p-0 divide-y divide-outline-variant/5">
-                                    {/* Ticket Item 1 */}
-                                    <div className="p-2.5 md:p-4 hover:bg-white/5 transition-all cursor-pointer group">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className="text-[8px] md:text-[10px] font-bold font-tabular-nums text-on-surface-variant bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/20">#TKT-88421</span>
-                                            <span className="flex items-center gap-1 text-[8px] md:text-[10px] font-bold uppercase tracking-wider text-tertiary">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse shadow-[0_0_4px_rgba(78,222,163,0.8)]"></span>
-                                                In Progress
+                                    {myTickets.length === 0 ? (
+                                        <div className="p-4 text-center text-on-surface-variant text-xs">No open tickets.</div>
+                                    ) : myTickets.map(ticket => (
+                                        <div key={ticket.id} className="p-2.5 md:p-4 hover:bg-white/5 transition-all cursor-pointer group">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="text-[8px] md:text-[10px] font-bold font-tabular-nums text-on-surface-variant bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/20">
+                                                    #{ticket.id.substring(0, 8).toUpperCase()}
+                                                </span>
+                                                <span className={`text-[8px] md:text-[10px] font-bold uppercase tracking-wider ${STATUS_STYLE[ticket.status] || 'text-outline'}`}>
+                                                    {ticket.status.replace('_', ' ')}
+                                                </span>
+                                            </div>
+                                            <h4 className="text-xs md:text-label-md font-bold text-on-surface leading-tight group-hover:text-primary transition-colors line-clamp-1">{ticket.subject}</h4>
+                                            <span className="text-[8px] md:text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+                                                Updated {new Date(ticket.updated_at).toLocaleDateString()}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between items-end gap-2">
-                                            <div>
-                                                <h4 className="text-xs md:text-label-md font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">API Rate Limit Increase</h4>
-                                                <p className="text-[9px] md:text-xs font-medium text-on-surface-variant mt-0.5 line-clamp-1">Tier 2 Trading Engine request...</p>
-                                            </div>
-                                            <div className="flex flex-col items-end gap-1 shrink-0">
-                                                <div className="flex -space-x-1">
-                                                    <img alt="Staff 1" className="w-4 h-4 md:w-6 md:h-6 rounded-full border border-background shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFd-pcUfuGcyO4kJUHg8MSUTZ-KbRnhTZoUGGobZgI7L6UfZhcg0Xuc16Js4N2oTALSUHIDPtXJv1R3ELJKeskPgar8Y4iRR5etCDkMZnhk4pf_dKJXZD9SZiMJoHSF_etlWMgzK9JKqNA4v_oDQzFdmnpnDLCMH8DGvMBJey90uSGX0qAY3CNFG5xOHx9iJkW_F2wER6hfJDcM2Pa_farjcyKZ7-QgDaVfO4ux0fhhF5ggtLoJ10r7cRl0d6gqlVSvkNPwbxumxnj" />
-                                                    <div className="w-4 h-4 md:w-6 md:h-6 rounded-full bg-secondary-container border border-background flex items-center justify-center text-[6px] md:text-[8px] font-bold text-on-secondary-container shadow-sm">+1</div>
-                                                </div>
-                                                <span className="text-[8px] md:text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Updated 2h ago</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Ticket Item 2 */}
-                                    <div className="p-2.5 md:p-4 hover:bg-white/5 transition-all cursor-pointer group">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className="text-[8px] md:text-[10px] font-bold font-tabular-nums text-on-surface-variant bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/20">#TKT-88390</span>
-                                            <span className="flex items-center gap-1 text-[8px] md:text-[10px] font-bold uppercase tracking-wider text-primary">
-                                                <span className="material-symbols-outlined text-[10px] md:text-[14px]">hourglass_empty</span>
-                                                Waiting Info
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between items-end gap-2">
-                                            <div>
-                                                <h4 className="text-xs md:text-label-md font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">Corporate Onboarding Scan</h4>
-                                                <p className="text-[9px] md:text-xs font-medium text-on-surface-variant mt-0.5 line-clamp-1">Awaiting signed documents...</p>
-                                            </div>
-                                            <div className="flex flex-col items-end gap-1 shrink-0">
-                                                <img alt="Staff 2" className="w-4 h-4 md:w-6 md:h-6 rounded-full border border-background shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXoxAWR3WKNjgXf-LIuNssJVUw1w7Ef_DfB2clwCufO09pARMUqjQFWiDkpDR6lkZ2khhJb5z0xA1xrlIwt8Jm_ktptZab_My1uJotxW732z4SBhPo8idXvK2YQ7lPfn4BBEVp0KyZhIwjnqJ8WVUcAwd_p2AaxmH22Ivkvoowiy1_xC5nsSswzrQK70SOGlCqA63MS4kAFsYtUdpjv_Ve59UeCs1JvoEfF4Yfm2b2tjFIaroKg3WYL76cWsBE-5UzTMWfUlwEWQpu" />
-                                                <span className="text-[8px] md:text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Updated 1d ago</span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    ))}
                                 </div>
                                 <button className="w-full py-2 md:py-3 text-[9px] md:text-xs font-bold text-on-surface-variant hover:text-primary transition-colors border-t border-outline-variant/10 uppercase tracking-wider bg-surface-container-highest/20">View All Tickets</button>
                             </section>

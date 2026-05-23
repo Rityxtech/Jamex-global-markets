@@ -1,30 +1,57 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
+import { useWalletStore } from '../store/walletStore';
+import { supabase } from '../lib/supabase';
 
 export default function ConfirmInvestment() {
     const navigate = useNavigate();
+    const { user } = useAuthStore();
+    const { mainBalance, profitBalance } = useWalletStore();
     const [amount, setAmount] = useState<number>(10000);
     const [paymentSource, setPaymentSource] = useState<'main' | 'profit'>('main');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isConfirmed, setIsConfirmed] = useState(false);
+    const [confirmError, setConfirmError] = useState('');
 
     const DAILY_ROI = 0.025; // 2.5%
     const DURATION = 30;
+    const PLAN_NAME = 'Sigma Prime';
 
     const dailyProfit = amount * DAILY_ROI;
     const totalProfit = dailyProfit * DURATION;
     const totalReturn = amount + totalProfit;
 
+    const availableBalance = paymentSource === 'main' ? mainBalance : profitBalance;
     const isValidAmount = amount >= 5000 && amount <= 500000;
 
-    const handleConfirm = () => {
-        if (!isValidAmount || isProcessing || isConfirmed) return;
-        
+    const handleConfirm = async () => {
+        if (!isValidAmount || isProcessing || isConfirmed || !user) return;
+        if (amount > availableBalance) { setConfirmError('Insufficient balance for this investment.'); return; }
+        setConfirmError('');
         setIsProcessing(true);
-        setTimeout(() => {
+        try {
+            const { error: invErr } = await supabase.from('investments').insert({
+                user_id: user.id,
+                plan_name: PLAN_NAME,
+                amount,
+                expected_roi: DAILY_ROI,
+                status: 'active',
+                next_payout_date: new Date(Date.now() + 86400000).toISOString(),
+            });
+            if (invErr) throw invErr;
+            const col = paymentSource === 'main' ? 'main_balance' : 'profit_balance';
+            const { error: wErr } = await supabase.from('wallets')
+                .update({ [col]: availableBalance - amount }).eq('user_id', user.id);
+            if (wErr) throw wErr;
+            useWalletStore.getState().reset();
+            useWalletStore.getState().fetchWallet(user.id);
             setIsProcessing(false);
             setIsConfirmed(true);
-        }, 1500);
+        } catch (err: any) {
+            setConfirmError(err.message || 'Investment failed. Please try again.');
+            setIsProcessing(false);
+        }
     };
 
     return (
@@ -216,6 +243,7 @@ export default function ConfirmInvestment() {
 
                             {/* Action Button - Sticky on Mobile */}
                             <div className="fixed md:static bottom-0 left-0 w-full md:w-auto p-4 md:p-0 bg-surface/90 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none border-t border-outline-variant/20 md:border-none z-40">
+                                {confirmError && <p className="text-error text-xs font-bold mb-3 px-1">{confirmError}</p>}
                                 <button 
                                     onClick={handleConfirm}
                                     disabled={!isValidAmount || isProcessing || isConfirmed}

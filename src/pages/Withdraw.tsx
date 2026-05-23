@@ -2,23 +2,54 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWalletStore } from '../store/walletStore';
 import { useTransactionStore } from '../store/transactionStore';
+import { useAuthStore } from '../store/authStore';
+import { supabase } from '../lib/supabase';
 
 export default function Withdraw() {
     const navigate = useNavigate();
+    const { user } = useAuthStore();
     const { mainBalance, profitBalance } = useWalletStore();
     const { transactions } = useTransactionStore();
     const [selectedAccount, setSelectedAccount] = useState<'main' | 'profit'>('main');
+    const [withdrawAmount, setWithdrawAmount] = useState('');
+    const [destinationAddress, setDestinationAddress] = useState('');
+    const [withdrawError, setWithdrawError] = useState('');
     const [isWithdrawing, setIsWithdrawing] = useState(false);
     const [isWithdrawn, setIsWithdrawn] = useState(false);
 
     const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
 
-    const handleWithdraw = () => {
+    const handleWithdraw = async () => {
+        if (!user) return;
+        const amount = Number(withdrawAmount);
+        const balance = selectedAccount === 'main' ? mainBalance : profitBalance;
+        setWithdrawError('');
+        if (!withdrawAmount || amount <= 0) { setWithdrawError('Enter a valid amount.'); return; }
+        if (amount > balance) { setWithdrawError('Insufficient balance.'); return; }
+        if (!destinationAddress.trim()) { setWithdrawError('Enter a destination wallet address.'); return; }
         setIsWithdrawing(true);
-        setTimeout(() => {
+        try {
+            const { error: txErr } = await supabase.from('transactions').insert({
+                user_id: user.id, type: 'withdrawal', amount, asset: 'USD',
+                status: 'pending', destination_address: destinationAddress.trim(),
+            });
+            if (txErr) throw txErr;
+            const col = selectedAccount === 'main' ? 'main_balance' : 'profit_balance';
+            const { error: wErr } = await supabase.from('wallets')
+                .update({ [col]: balance - amount }).eq('user_id', user.id);
+            if (wErr) throw wErr;
+            useWalletStore.getState().reset();
+            useWalletStore.getState().fetchWallet(user.id);
+            useTransactionStore.getState().reset();
+            useTransactionStore.getState().fetchRecentTransactions(user.id);
             setIsWithdrawing(false);
             setIsWithdrawn(true);
-        }, 2000);
+            setWithdrawAmount('');
+            setDestinationAddress('');
+        } catch (err: any) {
+            setWithdrawError(err.message || 'Withdrawal failed. Please try again.');
+            setIsWithdrawing(false);
+        }
     };
 
     // Helper function for OTP inputs
@@ -173,8 +204,8 @@ export default function Withdraw() {
                                         <span className="text-[9px] md:text-xs text-on-surface-variant font-bold">Available: {formatCurrency(selectedAccount === 'main' ? mainBalance : profitBalance)}</span>
                                     </div>
                                     <div className="relative group">
-                                        <input className="w-full bg-surface-container-lowest border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_10px_rgba(37,99,235,0.2)] focus:outline-none rounded-lg px-2.5 py-2 md:px-4 md:py-3.5 text-lg md:text-3xl font-mono text-on-surface transition-all font-bold" placeholder="0.00" type="number"/>
-                                        <button className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 px-2.5 py-1 md:px-3 md:py-1 bg-primary/10 text-primary text-[10px] md:text-xs rounded border border-primary/20 hover:bg-primary hover:text-on-primary transition-all font-bold tracking-wider">MAX</button>
+                                        <input value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} className="w-full bg-surface-container-lowest border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_10px_rgba(37,99,235,0.2)] focus:outline-none rounded-lg px-2.5 py-2 md:px-4 md:py-3.5 text-lg md:text-3xl font-mono text-on-surface transition-all font-bold" placeholder="0.00" type="number"/>
+                                        <button type="button" onClick={() => setWithdrawAmount(String(selectedAccount === 'main' ? mainBalance : profitBalance))} className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 px-2.5 py-1 md:px-3 md:py-1 bg-primary/10 text-primary text-[10px] md:text-xs rounded border border-primary/20 hover:bg-primary hover:text-on-primary transition-all font-bold tracking-wider">MAX</button>
                                         <span className="absolute left-2.5 -top-2 bg-surface-container-lowest px-1 md:px-2 text-[8px] md:text-[10px] text-primary uppercase tracking-widest font-bold">USD Equivalent</span>
                                     </div>
                                 </div>
@@ -182,7 +213,8 @@ export default function Withdraw() {
                                 <div className="space-y-2 md:space-y-4 pt-1 md:pt-0">
                                     <label className="block text-[10px] md:text-label-md font-bold text-on-surface uppercase tracking-wider">Destination Wallet</label>
                                     <div className="relative">
-                                        <input className="w-full bg-surface-container-lowest border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_10px_rgba(37,99,235,0.2)] focus:outline-none rounded-lg pl-9 pr-2.5 py-2 md:pl-12 md:pr-4 md:py-3.5 text-xs md:text-body-md font-mono font-medium text-on-surface transition-all" placeholder="Enter wallet address (e.g. 0x...)" type="text"/>
+                                        {withdrawError && <p className="text-error text-xs font-bold mb-2">{withdrawError}</p>}
+                                        <input value={destinationAddress} onChange={(e) => setDestinationAddress(e.target.value)} className="w-full bg-surface-container-lowest border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_10px_rgba(37,99,235,0.2)] focus:outline-none rounded-lg pl-9 pr-2.5 py-2 md:pl-12 md:pr-4 md:py-3.5 text-xs md:text-body-md font-mono font-medium text-on-surface transition-all" placeholder="Enter wallet address (e.g. 0x...)" type="text"/>
                                         <span className="material-symbols-outlined absolute left-2.5 md:left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px] md:text-[24px]">account_balance_wallet</span>
                                     </div>
                                     <div className="flex items-start gap-2 md:gap-3 p-2 md:p-3 bg-error/10 border border-error/20 rounded-lg mt-2 md:mt-3">

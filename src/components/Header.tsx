@@ -19,8 +19,14 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Do not render Header on auth pages
-  if (location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/forgot-password' || location.pathname === '/reset-password') {
+  // Do not render Header on auth pages or admin panel (AdminLayout has its own header)
+  if (
+    location.pathname === '/login' ||
+    location.pathname === '/register' ||
+    location.pathname === '/forgot-password' ||
+    location.pathname === '/reset-password' ||
+    location.pathname.startsWith('/admin')
+  ) {
     return null;
   }
 

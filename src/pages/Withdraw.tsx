@@ -10,7 +10,7 @@ export default function Withdraw() {
     const { user } = useAuthStore();
     const { mainBalance, profitBalance } = useWalletStore();
     const { transactions } = useTransactionStore();
-    const [selectedAccount, setSelectedAccount] = useState<'main' | 'profit'>('main');
+    const selectedAccount: 'profit' = 'profit';
     const [withdrawAmount, setWithdrawAmount] = useState('');
     const [destinationAddress, setDestinationAddress] = useState('');
     const [withdrawError, setWithdrawError] = useState('');
@@ -22,7 +22,7 @@ export default function Withdraw() {
     const handleWithdraw = async () => {
         if (!user) return;
         const amount = Number(withdrawAmount);
-        const balance = selectedAccount === 'main' ? mainBalance : profitBalance;
+        const balance = profitBalance;
         setWithdrawError('');
         if (!withdrawAmount || amount <= 0) { setWithdrawError('Enter a valid amount.'); return; }
         if (amount > balance) { setWithdrawError('Insufficient balance.'); return; }
@@ -34,7 +34,7 @@ export default function Withdraw() {
                 status: 'pending', destination_address: destinationAddress.trim(),
             });
             if (txErr) throw txErr;
-            const col = selectedAccount === 'main' ? 'main_balance' : 'profit_balance';
+            const col = 'profit_balance';
             const { error: wErr } = await supabase.from('wallets')
                 .update({ [col]: balance - amount }).eq('user_id', user.id);
             if (wErr) throw wErr;
@@ -174,38 +174,22 @@ export default function Withdraw() {
                             <div className="glass-card rounded-xl p-2.5 md:p-5 space-y-2.5 md:space-y-6 border border-outline-variant/20">
                                 <div className="space-y-2 md:space-y-4">
                                     <label className="block text-[10px] md:text-label-md font-bold text-on-surface uppercase tracking-wider">Source Account</label>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 md:gap-4">
-                                        <button 
-                                            onClick={() => setSelectedAccount('main')}
-                                            className={`flex items-center justify-between p-2.5 md:p-4 rounded-lg transition-all ${selectedAccount === 'main' ? 'bg-primary/10 border border-primary/50 ring-1 ring-primary/20 shadow-sm' : 'bg-surface-container-low border border-outline-variant/50 hover:border-primary/50'}`}>
-                                            <span className={`${selectedAccount === 'main' ? 'text-primary' : 'text-on-surface-variant'} font-bold text-xs md:text-base`}>Main Account</span>
-                                            {selectedAccount === 'main' ? (
-                                                <span className="material-symbols-outlined text-primary text-[18px] md:text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                                            ) : (
-                                                <div className="w-4 h-4 md:w-6 md:h-6 rounded-full border border-outline-variant/50"></div>
-                                            )}
-                                        </button>
-                                        <button 
-                                            onClick={() => setSelectedAccount('profit')}
-                                            className={`flex items-center justify-between p-2.5 md:p-4 rounded-lg transition-all ${selectedAccount === 'profit' ? 'bg-tertiary/10 border border-tertiary/50 ring-1 ring-tertiary/20 shadow-sm' : 'bg-surface-container-low border border-outline-variant/50 hover:border-primary/50'}`}>
-                                            <span className={`${selectedAccount === 'profit' ? 'text-tertiary' : 'text-on-surface-variant'} font-bold text-xs md:text-base`}>Profit Wallet</span>
-                                            {selectedAccount === 'profit' ? (
-                                                <span className="material-symbols-outlined text-tertiary text-[18px] md:text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                                            ) : (
-                                                <div className="w-4 h-4 md:w-6 md:h-6 rounded-full border border-outline-variant/50"></div>
-                                            )}
-                                        </button>
+                                    <div className="grid grid-cols-1 gap-2.5 md:gap-4">
+                                        <div className="flex items-center justify-between p-2.5 md:p-4 rounded-lg bg-tertiary/10 border border-tertiary/50 ring-1 ring-tertiary/20 shadow-sm">
+                                            <span className="text-tertiary font-bold text-xs md:text-base">Profit Wallet</span>
+                                            <span className="material-symbols-outlined text-tertiary text-[18px] md:text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div className="space-y-2 md:space-y-4 pt-1 md:pt-0">
                                     <div className="flex justify-between items-end">
                                         <label className="block text-[10px] md:text-label-md font-bold text-on-surface uppercase tracking-wider">Amount to Withdraw</label>
-                                        <span className="text-[9px] md:text-xs text-on-surface-variant font-bold">Available: {formatCurrency(selectedAccount === 'main' ? mainBalance : profitBalance)}</span>
+                                        <span className="text-[9px] md:text-xs text-on-surface-variant font-bold">Available: {formatCurrency(profitBalance)}</span>
                                     </div>
                                     <div className="relative group">
                                         <input value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} className="w-full bg-surface-container-lowest border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_10px_rgba(37,99,235,0.2)] focus:outline-none rounded-lg px-2.5 py-2 md:px-4 md:py-3.5 text-lg md:text-3xl font-mono text-on-surface transition-all font-bold" placeholder="0.00" type="number"/>
-                                        <button type="button" onClick={() => setWithdrawAmount(String(selectedAccount === 'main' ? mainBalance : profitBalance))} className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 px-2.5 py-1 md:px-3 md:py-1 bg-primary/10 text-primary text-[10px] md:text-xs rounded border border-primary/20 hover:bg-primary hover:text-on-primary transition-all font-bold tracking-wider">MAX</button>
+                                        <button type="button" onClick={() => setWithdrawAmount(String(profitBalance))} className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 px-2.5 py-1 md:px-3 md:py-1 bg-primary/10 text-primary text-[10px] md:text-xs rounded border border-primary/20 hover:bg-primary hover:text-on-primary transition-all font-bold tracking-wider">MAX</button>
                                         <span className="absolute left-2.5 -top-2 bg-surface-container-lowest px-1 md:px-2 text-[8px] md:text-[10px] text-primary uppercase tracking-widest font-bold">USD Equivalent</span>
                                     </div>
                                 </div>

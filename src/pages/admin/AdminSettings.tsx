@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 
 /* ── types ── */
@@ -50,10 +50,8 @@ export default function AdminSettings() {
   const [loading, setLoading]   = useState(true);
   const [saving, setSaving]     = useState(false);
   const [saved, setSaved]       = useState(false);
-  const [show2FA, setShow2FA]   = useState(false);
-  const [code, setCode]         = useState(['', '', '', '', '', '']);
+  const [toast, setToast]       = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
   const [services, setServices] = useState<ServiceStatus[]>([]);
-  const inputRefs               = useRef<(HTMLInputElement | null)[]>([]);
 
   /* ── health check ── */
   const pingServices = useCallback(async () => {
@@ -143,23 +141,13 @@ export default function AdminSettings() {
     if (!error) {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } else { console.error('Save error:', error.message); }
+      setToast({ type: 'success', msg: 'Settings saved successfully.' });
+    } else {
+      setToast({ type: 'error', msg: error.message || 'Failed to save. Check your connection and try again.' });
+    }
+    setTimeout(() => setToast(null), 5000);
 
     setSaving(false);
-    setShow2FA(false);
-    setCode(['', '', '', '', '', '']);
-  }
-
-  /* ── 2FA code input handlers ── */
-  function handleCodeChange(i: number, value: string) {
-    if (value.length > 1) value = value[0];
-    const next = [...code];
-    next[i] = value;
-    setCode(next);
-    if (value && i < 5) inputRefs.current[i + 1]?.focus();
-  }
-  function handleKeyDown(i: number, e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Backspace' && !code[i] && i > 0) inputRefs.current[i - 1]?.focus();
   }
 
   function toggle(key: 'maintenance_mode' | 'new_registrations') {
@@ -177,44 +165,34 @@ export default function AdminSettings() {
 
   return (
     <>
-      {/* Confirm Save Modal */}
-      <div className={`fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-md transition-all duration-300 ${show2FA ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
-        <div className={`glass-card w-full max-w-md p-8 rounded-2xl shadow-2xl border border-primary/20 transition-all duration-300 transform ${show2FA ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="material-symbols-outlined text-3xl">verified_user</span>
+      {/* Toast notification */}
+      <div className={`fixed top-6 right-6 z-[100] transition-all duration-300 ${
+        toast ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'
+      }`}>
+        {toast && (
+          <div className={`flex items-start gap-3 px-5 py-4 rounded-xl shadow-2xl border max-w-sm ${
+            toast.type === 'success'
+              ? 'bg-surface-container glass-card border-tertiary/30'
+              : 'bg-surface-container glass-card border-error/40'
+          }`}>
+            <span className={`material-symbols-outlined text-[22px] shrink-0 mt-0.5 ${
+              toast.type === 'success' ? 'text-tertiary' : 'text-error'
+            }`} style={{ fontVariationSettings: "'FILL' 1" }}>
+              {toast.type === 'success' ? 'check_circle' : 'error'}
+            </span>
+            <div className="flex-1">
+              <p className={`font-bold text-sm ${
+                toast.type === 'success' ? 'text-tertiary' : 'text-error'
+              }`}>
+                {toast.type === 'success' ? 'Saved successfully' : 'Save failed'}
+              </p>
+              <p className="text-on-surface-variant text-xs mt-0.5 leading-snug">{toast.msg}</p>
             </div>
-            <h2 className="font-headline-md text-headline-md">Confirm Global Changes</h2>
-            <p className="text-on-surface-variant mt-2 text-sm">Enter your 6-digit authenticator code to save platform settings.</p>
-          </div>
-          <div className="flex justify-center gap-2 mb-8">
-            {code.map((digit, i) => (
-              <input
-                key={i}
-                ref={el => inputRefs.current[i] = el}
-                type="text" maxLength={1} value={digit}
-                onChange={e => handleCodeChange(i, e.target.value)}
-                onKeyDown={e => handleKeyDown(i, e)}
-                className="w-12 h-14 bg-surface-container-highest border border-outline-variant text-center text-xl font-bold rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-on-surface transition-all"
-              />
-            ))}
-          </div>
-          <div className="flex gap-4">
-            <button
-              onClick={() => { setShow2FA(false); setCode(['', '', '', '', '', '']); }}
-              className="flex-1 px-6 py-3 rounded-lg font-label-md text-on-surface border border-outline-variant hover:bg-surface-variant/20 transition-all cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={doSave}
-              disabled={saving}
-              className="flex-1 px-6 py-3 bg-primary text-on-primary rounded-lg font-label-md shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-60"
-            >
-              {saving ? 'Saving…' : 'Confirm & Save'}
+            <button onClick={() => setToast(null)} className="text-outline/50 hover:text-on-surface transition-colors shrink-0">
+              <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="space-y-8 pb-20 md:pb-0">
@@ -231,7 +209,7 @@ export default function AdminSettings() {
             )}
           </div>
           <button
-            onClick={() => setShow2FA(true)}
+            onClick={doSave}
             disabled={loading}
             className={`flex items-center gap-2 px-6 py-2 rounded-lg font-label-md hover:brightness-110 active:scale-95 transition-all shadow-lg cursor-pointer disabled:opacity-50 ${
               saved ? 'bg-tertiary text-on-tertiary shadow-tertiary/20' : 'bg-primary text-on-primary shadow-primary/20'

@@ -89,7 +89,7 @@ export default function AdminLayout() {
         <aside className="hidden md:flex flex-col py-2 border-r-4 border-green-500 bg-surface-container-lowest/90 backdrop-blur-xl fixed left-0 top-16 h-[calc(100vh-64px)] w-64 z-40">
           
           
-          <nav className="px-4 space-y-1">
+          <nav className="px-4 space-y-1 flex-1">
             {navItems.map(({ to, icon, label, end }) => (
               <NavLink
                 key={to}
@@ -106,13 +106,15 @@ export default function AdminLayout() {
               </NavLink>
             ))}
           </nav>
-          <button 
-            onClick={handleLogout}
-            className="w-full bg-error-container/20 text-error border border-error/30 py-2.5 rounded-lg font-label-md text-label-md hover:bg-error-container/40 transition-colors flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-sm">logout</span>
-            Secure Logout
-          </button>
+          <div className="px-4 pb-4 mt-auto pt-4">
+            <button 
+              onClick={handleLogout}
+              className="w-full bg-error-container/20 text-error border border-error/30 py-2.5 rounded-lg font-label-md text-label-md hover:bg-error-container/40 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-sm">logout</span>
+              Secure Logout
+            </button>
+          </div>
         </aside>
 
         {/* Main Content Area */}

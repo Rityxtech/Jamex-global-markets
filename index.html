@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Jamex Global Markets | Institutional Wealth Management</title>
+    <!-- SPA redirect decode: restores URL from 404.html redirect -->
+    <script>
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+        // Also handle the ?p= query param method
+        var l = window.location;
+        if (l.search.startsWith('?p=/')) {
+          var decoded = l.search.slice(3).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&');
+          });
+          history.replaceState(null, null,
+            l.pathname.slice(0, -1) + decoded[0] +
+            (decoded[1] ? '?' + decoded[1] : '') +
+            l.hash
+          );
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/Jamex-global-markets/assets/index-CjskUcLY.js"></script>
+    <link rel="stylesheet" crossorigin href="/Jamex-global-markets/assets/index-DTvHEKmd.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+

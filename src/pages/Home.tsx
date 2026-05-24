@@ -20,12 +20,25 @@ export default function Home() {
       
 
       <main className="pt-16">
-        <section className="relative min-h-[500px] md:min-h-[870px] flex items-center justify-center mesh-gradient px-[10px] md:px-margin-desktop py-12 md:py-section-padding-v overflow-hidden">
-          <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <section className="relative min-h-[500px] md:min-h-[870px] flex items-center justify-center px-[10px] md:px-margin-desktop py-12 md:py-section-padding-v overflow-hidden">
+          {/* Background Image with Overlay */}
+          <div className="absolute inset-0 z-0">
+            <img 
+              src="https://images.unsplash.com/photo-1639322537228-f710d846310a?q=80&w=2832&auto=format&fit=crop" 
+              alt="Abstract background" 
+              className="w-full h-full object-cover object-center opacity-40"
+            />
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm mix-blend-multiply"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background"></div>
+            <div className="absolute inset-0 mesh-gradient opacity-60"></div>
+          </div>
+
+          <div className="absolute inset-0 opacity-20 pointer-events-none z-0">
             <div className="absolute top-0 left-0 w-full h-full" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
           </div>
-          <div className="relative z-10 max-w-5xl text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 glass-card rounded-full mb-4 md:mb-6 border-primary/20 scale-90 md:scale-100">
+          
+          <div className="relative z-10 max-w-5xl text-center glass-card p-8 md:p-16 rounded-3xl border-white/5 shadow-2xl bg-surface/40 backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-3 py-1 glass-card bg-surface/50 rounded-full mb-4 md:mb-6 border-primary/20 scale-90 md:scale-100">
               <span className="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_8px_rgba(78,222,163,0.5)]"></span>
               <span className="text-[10px] md:text-label-sm font-label-sm text-tertiary tracking-wider uppercase">Institutional Access Now Live</span>
             </div>

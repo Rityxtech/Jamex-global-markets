@@ -26,12 +26,12 @@ export default function Home() {
           {/* Background Image Layer */}
           <div className="absolute inset-0 z-0">
             <img 
-              src={bgImageUrl}
-              alt="Institutional Wealth Management" 
-              className="w-full h-full object-cover object-center opacity-40 mix-blend-luminosity"
+              src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1920&q=80"
+              alt="Financial Markets" 
+              className="w-full h-full object-cover object-center opacity-75"
             />
-            {/* Gradient Overlay for Readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-surface/80 via-surface/60 to-surface"></div>
+            {/* Light gradient overlay — only darkens at top & bottom for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-surface/70 via-transparent to-surface/80"></div>
           </div>
 
           <div className="absolute inset-0 opacity-20 pointer-events-none z-0">

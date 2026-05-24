@@ -78,20 +78,20 @@ export default function ConfirmInvestment() {
     if (!plan) return null;
 
     return (
-        <div className="flex-1 px-4 md:px-margin-desktop pt-6 md:pt-8 pb-12 max-w-[1600px] mx-auto w-full">
+        <div className="flex-1 px-4 md:px-margin-desktop pt-4 md:pt-8 pb-12 max-w-[1600px] mx-auto w-full">
 
             {/* Back button */}
             <button
                 onClick={() => navigate('/plans')}
-                className="flex items-center gap-1.5 text-on-surface-variant hover:text-on-surface text-sm font-bold mb-5 transition-colors"
+                className="flex items-center gap-1.5 text-on-surface-variant hover:text-on-surface text-sm font-bold mb-3 transition-colors"
             >
                 <span className="material-symbols-outlined text-[18px]">arrow_back</span>
                 Back to Plans
             </button>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-8 items-start">
                 {/* Left Column: Plan Details */}
-                <div className="lg:col-span-7 space-y-4 md:space-y-6">
+                <div className="lg:col-span-7 space-y-3 md:space-y-6">
                     {/* Hero Plan Card */}
                     <div className="glass-card rounded-xl overflow-hidden shadow-xl relative border border-outline-variant/20">
                         <div className="absolute top-0 right-0 p-3 md:p-4">
@@ -99,13 +99,13 @@ export default function ConfirmInvestment() {
                                 {plan.popular ? 'Most Popular' : 'Premium Plan'}
                             </span>
                         </div>
-                        <div className="bg-surface-container-high/40 p-4 md:p-5 border-b border-outline-variant/10">
+                        <div className="bg-surface-container-high/40 p-3 md:p-5 border-b border-outline-variant/10">
                             <h2 className="text-xl md:text-2xl font-bold text-primary tracking-tight">{PLAN_NAME}</h2>
                             <p className="text-on-surface-variant text-[10px] md:text-sm mt-0.5 md:mt-1 font-medium">
                                 Institutional-grade algorithmic trading strategy
                             </p>
                         </div>
-                        <div className="p-4 md:p-5 grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
+                        <div className="p-3 md:p-5 grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-6">
                             <div className="space-y-0.5 md:space-y-1">
                                 <span className="text-[9px] md:text-xs text-on-surface-variant uppercase font-bold tracking-wider">Daily ROI</span>
                                 <div className="flex items-center gap-1">
@@ -117,13 +117,13 @@ export default function ConfirmInvestment() {
                                 <span className="text-[9px] md:text-xs text-on-surface-variant uppercase font-bold tracking-wider">Duration</span>
                                 <span className="text-lg md:text-2xl font-bold text-on-surface">{DURATION} Days</span>
                             </div>
-                            <div className="space-y-0.5 md:space-y-1 col-span-2 md:col-span-1 border-t border-outline-variant/10 pt-3 md:border-t-0 md:pt-0">
+                            <div className="space-y-0.5 md:space-y-1 col-span-2 md:col-span-1 border-t border-outline-variant/10 pt-2 md:border-t-0 md:pt-0">
                                 <span className="text-[9px] md:text-xs text-on-surface-variant uppercase font-bold tracking-wider">Capital Return</span>
                                 <span className="text-[10px] md:text-sm bg-surface-container-highest/50 border border-outline-variant/20 px-2 py-1 rounded font-bold inline-block mt-0.5">At Maturity</span>
                             </div>
                         </div>
-                        <div className="px-4 pb-4 md:px-5 md:pb-5">
-                            <div className="rounded-lg bg-surface-container-lowest border border-outline-variant/20 p-3 md:p-4 space-y-2 md:space-y-3">
+                        <div className="px-3 pb-3 md:px-5 md:pb-5">
+                            <div className="rounded-lg bg-surface-container-lowest border border-outline-variant/20 p-2 md:p-4 space-y-1.5 md:space-y-3">
                                 <div className="flex justify-between items-center text-[10px] md:text-sm font-bold">
                                     <span className="text-on-surface-variant uppercase tracking-wider">Min. Investment</span>
                                     <span className="text-on-surface font-tabular-nums">{formatCurrency(MIN_AMOUNT)}</span>
@@ -145,14 +145,14 @@ export default function ConfirmInvestment() {
                     </div>
 
                     {/* Plan Features */}
-                    <div className="glass-card rounded-xl p-4 md:p-5 border border-outline-variant/20">
-                        <h3 className="text-[11px] md:text-sm font-bold text-primary mb-3 md:mb-4 uppercase tracking-wide flex items-center gap-1.5">
+                    <div className="glass-card rounded-xl p-3 md:p-5 border border-outline-variant/20">
+                        <h3 className="text-[11px] md:text-sm font-bold text-primary mb-2 md:mb-4 uppercase tracking-wide flex items-center gap-1.5">
                             <span className="material-symbols-outlined text-[16px] md:text-[20px]">star</span>
                             Plan Features
                         </h3>
-                        <ul className="space-y-2 md:space-y-3">
+                        <ul className="space-y-1.5 md:space-y-3">
                             {plan.features?.map((feature: string, idx: number) => (
-                                <li key={idx} className="flex items-center gap-3 bg-surface-container-lowest/50 border border-outline-variant/10 p-3 rounded-lg">
+                                <li key={idx} className="flex items-center gap-3 bg-surface-container-lowest/50 border border-outline-variant/10 p-2 rounded-lg">
                                     <span className="material-symbols-outlined text-tertiary text-[18px] md:text-[20px] shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                                     <span className="text-on-surface font-medium text-[11px] md:text-sm">{feature}</span>
                                 </li>
@@ -161,13 +161,13 @@ export default function ConfirmInvestment() {
                     </div>
 
                     {/* Strategy Insights */}
-                    <div className="glass-card rounded-xl p-4 md:p-5 border border-outline-variant/20">
-                        <h3 className="text-[11px] md:text-sm font-bold text-primary mb-3 md:mb-4 uppercase tracking-wide flex items-center gap-1.5">
+                    <div className="glass-card rounded-xl p-3 md:p-5 border border-outline-variant/20">
+                        <h3 className="text-[11px] md:text-sm font-bold text-primary mb-2 md:mb-4 uppercase tracking-wide flex items-center gap-1.5">
                             <span className="material-symbols-outlined text-[16px] md:text-[20px]">insights</span>
                             Strategy Parameters
                         </h3>
-                        <div className="space-y-3 md:space-y-4">
-                            <div className="flex gap-3 md:gap-4 items-start bg-surface-container-lowest/50 border border-outline-variant/10 p-3 rounded-lg">
+                        <div className="space-y-2 md:space-y-4">
+                            <div className="flex gap-3 md:gap-4 items-start bg-surface-container-lowest/50 border border-outline-variant/10 p-2 rounded-lg">
                                 <div className="bg-primary/10 border border-primary/20 p-1.5 md:p-2 rounded-lg shrink-0">
                                     <span className="material-symbols-outlined text-primary text-[18px] md:text-[24px]">security</span>
                                 </div>
@@ -176,7 +176,7 @@ export default function ConfirmInvestment() {
                                     <p className="text-on-surface-variant text-[9px] md:text-xs mt-0.5 md:mt-1 leading-snug font-medium">Funds backed by institutional liquidity providers and cold-storage reserves.</p>
                                 </div>
                             </div>
-                            <div className="flex gap-3 md:gap-4 items-start bg-surface-container-lowest/50 border border-outline-variant/10 p-3 rounded-lg">
+                            <div className="flex gap-3 md:gap-4 items-start bg-surface-container-lowest/50 border border-outline-variant/10 p-2 rounded-lg">
                                 <div className="bg-primary/10 border border-primary/20 p-1.5 md:p-2 rounded-lg shrink-0">
                                     <span className="material-symbols-outlined text-primary text-[18px] md:text-[24px]">monitoring</span>
                                 </div>
@@ -191,10 +191,10 @@ export default function ConfirmInvestment() {
 
                 {/* Right Column: Form & Confirmation */}
                 <div className="lg:col-span-5">
-                    <div className="glass-card rounded-xl shadow-xl p-4 md:p-5 space-y-5 md:space-y-6 sticky top-20 md:top-24 border border-outline-variant/20">
+                    <div className="glass-card rounded-xl shadow-xl p-3 md:p-5 space-y-4 md:space-y-6 sticky top-20 md:top-24 border border-outline-variant/20">
 
                         {isConfirmed ? (
-                            <div className="flex flex-col items-center text-center py-6 gap-4">
+                            <div className="flex flex-col items-center text-center py-4 gap-3">
                                 <div className="w-16 h-16 rounded-full bg-tertiary/20 border border-tertiary/40 flex items-center justify-center">
                                     <span className="material-symbols-outlined text-tertiary text-[40px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                                 </div>
@@ -221,14 +221,14 @@ export default function ConfirmInvestment() {
                         ) : (
                             <>
                                 {/* Investment Amount */}
-                                <div className="space-y-2 md:space-y-3">
+                                <div className="space-y-1.5 md:space-y-3">
                                     <label className="text-[10px] md:text-sm font-bold text-on-surface-variant flex justify-between uppercase tracking-wider">
                                         Investment Amount
                                         <span className="text-primary font-tabular-nums">USD</span>
                                     </label>
                                     <div className="relative group">
                                         <input
-                                            className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-3 py-3 md:px-4 md:py-4 text-2xl md:text-3xl font-bold focus:ring-1 focus:ring-primary focus:border-primary transition-all text-on-surface outline-none font-tabular-nums focus:shadow-[0_0_10px_rgba(37,99,235,0.2)]"
+                                            className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-3 py-2 md:px-4 md:py-4 text-2xl md:text-3xl font-bold focus:ring-1 focus:ring-primary focus:border-primary transition-all text-on-surface outline-none font-tabular-nums focus:shadow-[0_0_10px_rgba(37,99,235,0.2)]"
                                             type="number"
                                             min={MIN_AMOUNT}
                                             max={MAX_AMOUNT ?? undefined}
@@ -261,10 +261,10 @@ export default function ConfirmInvestment() {
                                 </div>
 
                                 {/* Payment Source */}
-                                <div className="space-y-2 md:space-y-3">
+                                <div className="space-y-1.5 md:space-y-3">
                                     <label className="text-[10px] md:text-sm font-bold text-on-surface-variant uppercase tracking-wider">Select Funding Source</label>
                                     <div className="grid grid-cols-1 gap-2 md:gap-3">
-                                        <label className={`relative flex items-center p-3 md:p-4 border rounded-lg cursor-pointer transition-all ${paymentSource === 'main' ? 'border-primary bg-primary/5 shadow-sm' : 'border-outline-variant/50 hover:border-primary/50 bg-surface-container-lowest'}`}>
+                                        <label className={`relative flex items-center p-2 md:p-4 border rounded-lg cursor-pointer transition-all ${paymentSource === 'main' ? 'border-primary bg-primary/5 shadow-sm' : 'border-outline-variant/50 hover:border-primary/50 bg-surface-container-lowest'}`}>
                                             <input className="hidden" name="payment_source" type="radio" value="main" checked={paymentSource === 'main'} onChange={() => setPaymentSource('main')} />
                                             <div className={`p-1.5 md:p-2 rounded-lg mr-3 md:mr-4 border ${paymentSource === 'main' ? 'bg-primary/20 border-primary/30' : 'bg-surface-container-high border-outline-variant/30'}`}>
                                                 <span className={`material-symbols-outlined text-[18px] md:text-[24px] ${paymentSource === 'main' ? 'text-primary' : 'text-on-surface-variant'}`}>account_balance_wallet</span>
@@ -279,7 +279,7 @@ export default function ConfirmInvestment() {
                                                 <div className={`w-2 h-2 md:w-2.5 md:h-2.5 bg-primary rounded-full transition-opacity ${paymentSource === 'main' ? 'opacity-100' : 'opacity-0'}`}></div>
                                             </div>
                                         </label>
-                                        <label className={`relative flex items-center p-3 md:p-4 border rounded-lg cursor-pointer transition-all ${paymentSource === 'profit' ? 'border-primary bg-primary/5 shadow-sm' : 'border-outline-variant/50 hover:border-primary/50 bg-surface-container-lowest'}`}>
+                                        <label className={`relative flex items-center p-2 md:p-4 border rounded-lg cursor-pointer transition-all ${paymentSource === 'profit' ? 'border-primary bg-primary/5 shadow-sm' : 'border-outline-variant/50 hover:border-primary/50 bg-surface-container-lowest'}`}>
                                             <input className="hidden" name="payment_source" type="radio" value="profit" checked={paymentSource === 'profit'} onChange={() => setPaymentSource('profit')} />
                                             <div className={`p-1.5 md:p-2 rounded-lg mr-3 md:mr-4 border ${paymentSource === 'profit' ? 'bg-tertiary/20 border-tertiary/30' : 'bg-surface-container-high border-outline-variant/30'}`}>
                                                 <span className={`material-symbols-outlined text-[18px] md:text-[24px] ${paymentSource === 'profit' ? 'text-tertiary' : 'text-on-surface-variant'}`}>monetization_on</span>
@@ -298,7 +298,7 @@ export default function ConfirmInvestment() {
                                 </div>
 
                                 {/* Return Summary */}
-                                <div className="bg-surface-container-highest/30 border border-outline-variant/20 rounded-xl p-4 md:p-5 space-y-3 md:space-y-4">
+                                <div className="bg-surface-container-highest/30 border border-outline-variant/20 rounded-xl p-3 md:p-5 space-y-2 md:space-y-4">
                                     <div className="flex justify-between items-center">
                                         <span className="text-[10px] md:text-sm font-bold text-on-surface-variant uppercase tracking-wider">Daily Profit</span>
                                         <span className="text-base md:text-lg font-bold text-tertiary font-tabular-nums">+{formatCurrency(dailyProfit)}</span>
@@ -322,7 +322,7 @@ export default function ConfirmInvestment() {
                                 </div>
 
                                 {/* Action Button */}
-                                <div className="fixed md:static bottom-0 left-0 w-full md:w-auto p-4 md:p-0 bg-surface/90 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none border-t border-outline-variant/20 md:border-none z-40">
+                                <div className="fixed md:static bottom-0 left-0 w-full md:w-auto p-3 md:p-0 bg-surface/90 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none border-t border-outline-variant/20 md:border-none z-40">
                                     {confirmError && <p className="text-error text-xs font-bold mb-3 px-1">{confirmError}</p>}
                                     <button
                                         onClick={handleConfirm}
@@ -348,7 +348,7 @@ export default function ConfirmInvestment() {
                                             </>
                                         )}
                                     </button>
-                                    <p className="text-center text-[9px] md:text-xs font-medium text-on-surface-variant mt-3 md:mt-4 leading-snug">
+                                    <p className="text-center text-[9px] md:text-xs font-medium text-on-surface-variant mt-2 md:mt-4 leading-snug">
                                         By confirming, you agree to the <Link to="#" className="text-primary hover:underline font-bold">Plan Agreement</Link> &amp; <Link to="#" className="text-primary hover:underline font-bold">Risk Policy</Link>.
                                     </p>
                                 </div>

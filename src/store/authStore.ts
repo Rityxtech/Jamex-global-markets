@@ -42,7 +42,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         useInvestmentStore.getState().fetchInvestments(session.user.id);
     }
     
-    supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       set({ session, user: session?.user || null, loading: false });
       
       // Handle cache loading and clearing based on auth events
@@ -56,5 +56,7 @@ export const useAuthStore = create<AuthState>((set) => ({
           useInvestmentStore.getState().clearInvestments();
       }
     });
+
+    return () => subscription.unsubscribe();
   }
 }));

@@ -18,5 +18,9 @@ export default function ProtectedRoute() {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  if (user.email === 'akugbof@gmail.com') {
+    return <Navigate to="/admin" replace />;
+  }
+
   return <Outlet />;
 }

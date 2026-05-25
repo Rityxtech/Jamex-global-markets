@@ -18,7 +18,7 @@ export default function ProtectedRoute() {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (user.email === import.meta.env.VITE_ADMIN_EMAIL) {
+  if (user.email === import.meta.env.VITE_ADMIN_EMAIL || 'akugbof@gmail.com') {
     return <Navigate to="/admin" replace />;
   }
 

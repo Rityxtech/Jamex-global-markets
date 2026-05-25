@@ -14,7 +14,7 @@ export default function PublicRoute() {
   }
 
   if (user) {
-    if (user.email === import.meta.env.VITE_ADMIN_EMAIL) {
+    if (user.email === import.meta.env.VITE_ADMIN_EMAIL || 'akugbof@gmail.com') {
       return <Navigate to="/admin" replace />;
     }
     return <Navigate to="/dashboard" replace />;

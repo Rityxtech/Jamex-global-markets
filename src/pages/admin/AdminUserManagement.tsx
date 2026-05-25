@@ -351,6 +351,7 @@ export default function AdminUserManagement() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
+                          onClick={e => { e.stopPropagation(); navigate(`/admin/users/${user.user_id}`); }}
                           className="h-8 w-8 flex items-center justify-center rounded border border-outline-variant/30 hover:bg-primary-container text-on-surface-variant hover:text-on-primary-container transition-all active:scale-95 cursor-pointer"
                           title="View KYC"
                         >

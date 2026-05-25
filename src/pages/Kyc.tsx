@@ -51,6 +51,10 @@ export default function Kyc() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
+  // File input refs
+  const frontInputRef = useRef<HTMLInputElement>(null);
+  const backInputRef = useRef<HTMLInputElement>(null);
+
   // Submit state
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
@@ -83,6 +87,10 @@ export default function Kyc() {
   // Camera logic
   const openCamera = async () => {
     try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Camera access is not supported in your browser. Please use Chrome, Firefox, or Safari.');
+        return;
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
       streamRef.current = stream;
       if (videoRef.current) {
@@ -90,8 +98,9 @@ export default function Kyc() {
         videoRef.current.play();
       }
       setIsCameraOpen(true);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Camera access denied:', err);
+      alert(`Could not access camera: ${err.message || 'Please allow camera permissions in your browser settings.'}`);
     }
   };
 
@@ -118,13 +127,32 @@ export default function Kyc() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, side: 'front' | 'back') => {
     const file = e.target.files?.[0] || null;
-    if (!file) return;
+    console.log('File selected:', side, file?.name, file?.size, file?.type);
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
+    const previewUrl = URL.createObjectURL(file);
+    console.log('Preview URL created:', previewUrl);
     if (side === 'front') {
       setFrontId(file);
-      setFrontPreview(URL.createObjectURL(file));
+      setFrontPreview(previewUrl);
+      console.log('Front preview set');
     } else {
       setBackId(file);
-      setBackPreview(URL.createObjectURL(file));
+      setBackPreview(previewUrl);
+      console.log('Back preview set');
+    }
+  };
+
+  const triggerFileInput = (side: 'front' | 'back') => {
+    console.log('Triggering file input for:', side);
+    if (side === 'front') {
+      console.log('Front input ref:', frontInputRef.current);
+      frontInputRef.current?.click();
+    } else {
+      console.log('Back input ref:', backInputRef.current);
+      backInputRef.current?.click();
     }
   };
 
@@ -133,8 +161,8 @@ export default function Kyc() {
 
   const canSubmit = isFormComplete && !uploading;
 
-  // Read-only if submitted and not rejected
-  const isReadOnly = kyc?.status === 'pending' || kyc?.status === 'approved';
+  // Read-only only if approved (allow resubmission when pending or rejected)
+  const isReadOnly = kyc?.status === 'approved';
 
   const handleSubmit = async () => {
     if (!user || !canSubmit) return;
@@ -185,6 +213,15 @@ export default function Kyc() {
           </div>
         </div>
       )}
+
+      {/* Debug Info */}
+      <div className="mb-4 p-2 bg-surface-container-lowest rounded border border-outline-variant/30 text-[10px]">
+        <p><strong>Front Preview:</strong> {frontPreview ? 'SET' : 'NULL'}</p>
+        <p><strong>Back Preview:</strong> {backPreview ? 'SET' : 'NULL'}</p>
+        <p><strong>Selfie Preview:</strong> {selfiePreview ? 'SET' : 'NULL'}</p>
+        <p><strong>Front ID File:</strong> {frontId?.name || 'NULL'}</p>
+        <p><strong>Back ID File:</strong> {backId?.name || 'NULL'}</p>
+      </div>
 
       {submitSuccess && !kyc && (
         <div className="mb-4 md:mb-6 rounded-xl border bg-tertiary/10 border-tertiary/20 p-3 md:p-4 flex items-start gap-3">
@@ -277,9 +314,7 @@ export default function Kyc() {
               {/* Front of ID */}
               <div>
                 <label className="text-[8px] md:text-xs text-on-surface-variant font-bold uppercase tracking-wider block mb-1">Front of Government ID</label>
-                <div className={`group relative bg-surface-container-lowest border-2 border-dashed rounded-xl overflow-hidden transition-colors ${frontPreview ? 'border-primary bg-primary/5' : 'border-outline-variant/40 hover:border-primary/50'} ${isReadOnly ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}>
-                  {!isReadOnly && <input className="absolute inset-0 opacity-0 cursor-pointer z-10" type="file" accept="image/png, image/jpeg, application/pdf"
-                    onChange={e => handleFileChange(e, 'front')} disabled={isReadOnly} />}
+                <div className={`group relative bg-surface-container-lowest border-2 border-dashed rounded-xl overflow-hidden transition-colors ${frontPreview ? 'border-primary bg-primary/5' : 'border-outline-variant/40'}`}>
                   {frontPreview ? (
                     <div className="relative">
                       <img src={frontPreview} alt="Front ID" className="w-full h-28 md:h-36 object-cover" />
@@ -295,9 +330,19 @@ export default function Kyc() {
                     </div>
                   ) : (
                     <div className="p-3 md:p-6 text-center">
-                      <span className="material-symbols-outlined text-outline/50 group-hover:text-primary mb-1 text-[22px] md:text-3xl transition-colors block">badge</span>
-                      <p className="text-[10px] md:text-sm font-bold text-on-surface uppercase tracking-wide">Front of Government ID</p>
-                      <p className="text-[8px] md:text-xs text-on-surface-variant mt-0.5 font-medium">PNG, JPG or PDF up to 10MB</p>
+                      <span className="material-symbols-outlined text-outline/50 mb-1 text-[22px] md:text-3xl block">badge</span>
+                      <p className="text-[10px] md:text-sm font-bold text-on-surface uppercase tracking-wide mb-2">Front of Government ID</p>
+                      <p className="text-[8px] md:text-xs text-on-surface-variant mb-3 font-medium">PNG, JPG or PDF up to 10MB</p>
+                      {!isReadOnly && (
+                        <input
+                          ref={frontInputRef}
+                          type="file"
+                          accept="image/png, image/jpeg, application/pdf"
+                          onChange={e => handleFileChange(e, 'front')}
+                          disabled={isReadOnly}
+                          className="text-[10px] text-on-surface-variant"
+                        />
+                      )}
                     </div>
                   )}
                 </div>
@@ -305,16 +350,14 @@ export default function Kyc() {
 
               {/* Back of ID */}
               <div>
-                <label className="text-[8px] md:text-xs text-on-surface-variant font-bold uppercase tracking-wider block mb-1">Back of Government ID</label>
-                <div className={`group relative bg-surface-container-lowest border-2 border-dashed rounded-xl overflow-hidden transition-colors ${backPreview ? 'border-primary bg-primary/5' : 'border-outline-variant/40 hover:border-primary/50'} ${isReadOnly ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}>
-                  {!isReadOnly && <input className="absolute inset-0 opacity-0 cursor-pointer z-10" type="file" accept="image/png, image/jpeg, application/pdf"
-                    onChange={e => handleFileChange(e, 'back')} disabled={isReadOnly} />}
+                <label className="text-[8px] md:text-xs text-on-surface-variant font-bold uppercase tracking-wider block mb-1">Proof of Address</label>
+                <div className={`group relative bg-surface-container-lowest border-2 border-dashed rounded-xl overflow-hidden transition-colors ${backPreview ? 'border-primary bg-primary/5' : 'border-outline-variant/40'}`}>
                   {backPreview ? (
                     <div className="relative">
                       <img src={backPreview} alt="Back ID" className="w-full h-28 md:h-36 object-cover" />
                       <div className="absolute bottom-0 inset-x-0 bg-black/60 p-1.5 flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-tertiary text-[14px]">task_alt</span>
-                        <span className="text-[10px] font-bold text-white">ID Back Uploaded</span>
+                        <span className="text-[10px] font-bold text-white">Proof of Address Uploaded</span>
                         {uploading && uploadProgress.back > 0 && uploadProgress.back < 100 && (
                           <div className="ml-auto w-16 h-1 bg-white/20 rounded overflow-hidden">
                             <div className="h-full bg-primary" style={{ width: `${uploadProgress.back}%` }}></div>
@@ -324,9 +367,19 @@ export default function Kyc() {
                     </div>
                   ) : (
                     <div className="p-3 md:p-6 text-center">
-                      <span className="material-symbols-outlined text-outline/50 group-hover:text-primary mb-1 text-[22px] md:text-3xl transition-colors block">credit_card</span>
-                      <p className="text-[10px] md:text-sm font-bold text-on-surface uppercase tracking-wide">Back of Government ID</p>
-                      <p className="text-[8px] md:text-xs text-on-surface-variant mt-0.5 font-medium">Ensure all four corners are visible</p>
+                      <span className="material-symbols-outlined text-outline/50 mb-1 text-[22px] md:text-3xl block">receipt_long</span>
+                      <p className="text-[10px] md:text-sm font-bold text-on-surface uppercase tracking-wide mb-2">Proof of Address</p>
+                      <p className="text-[8px] md:text-xs text-on-surface-variant mb-3 font-medium">Utility bill, bank statement, etc.</p>
+                      {!isReadOnly && (
+                        <input
+                          ref={backInputRef}
+                          type="file"
+                          accept="image/png, image/jpeg, application/pdf"
+                          onChange={e => handleFileChange(e, 'back')}
+                          disabled={isReadOnly}
+                          className="text-[10px] text-on-surface-variant"
+                        />
+                      )}
                     </div>
                   )}
                 </div>

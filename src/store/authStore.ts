@@ -10,6 +10,7 @@ interface AuthState {
   user: User | null;
   profile: any | null;
   loading: boolean;
+  isAdmin: () => boolean;
   setSession: (session: Session | null) => void;
   setUser: (user: User | null) => void;
   setProfile: (profile: any | null) => void;
@@ -18,11 +19,12 @@ interface AuthState {
   initialize: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   user: null,
   profile: null,
   loading: true,
+  isAdmin: () => get().profile?.is_admin || false,
   setSession: (session) => set({ session }),
   setUser: (user) => set({ user }),
   setProfile: (profile) => set({ profile }),

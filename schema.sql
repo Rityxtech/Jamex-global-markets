@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   avatar_url     TEXT,
   referral_code  TEXT UNIQUE,
   account_status TEXT NOT NULL DEFAULT 'active' CHECK (account_status IN ('active', 'suspended', 'blocked')),
+  is_admin       BOOLEAN NOT NULL DEFAULT false,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );

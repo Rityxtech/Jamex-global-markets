@@ -115,6 +115,10 @@ export default function AdminKYCReview() {
 
   const handleSuspend = async () => {
     if (!profile) return;
+    if (profile.is_admin) {
+      alert('Cannot suspend admin users.');
+      return;
+    }
     const confirmAction = window.confirm(`Are you sure you want to suspend this user? They will not be able to log in.`);
     if (!confirmAction) return;
 
@@ -130,6 +134,10 @@ export default function AdminKYCReview() {
 
   const handleBlock = async () => {
     if (!profile) return;
+    if (profile.is_admin) {
+      alert('Cannot block admin users.');
+      return;
+    }
     const confirmAction = window.confirm(`Are you sure you want to completely block this user?`);
     if (!confirmAction) return;
 
@@ -145,6 +153,10 @@ export default function AdminKYCReview() {
 
   const handleDelete = async () => {
     if (!profile) return;
+    if (profile.is_admin) {
+      alert('Cannot delete admin users.');
+      return;
+    }
     const confirmAction = window.confirm(`DANGER: Are you sure you want to completely delete this user? This action CANNOT be undone and deletes all their backend data.`);
     if (!confirmAction) return;
 
@@ -158,6 +170,24 @@ export default function AdminKYCReview() {
       navigate('/admin/users');
     } catch (err: any) {
       alert('Error deleting user: ' + err.message + '\nNote: Backend RPC "delete_user" must be created in Supabase with SECURITY DEFINER to delete auth rows.');
+    }
+  };
+
+  const handleToggleAdmin = async () => {
+    if (!profile) return;
+    const newAdminStatus = !profile.is_admin;
+    const action = newAdminStatus ? 'make' : 'remove';
+    
+    const confirmAction = window.confirm(`Are you sure you want to ${action} this user an admin? ${newAdminStatus ? 'Admins cannot be suspended, blocked, or deleted.' : 'This will remove all admin privileges.'}`);
+    if (!confirmAction) return;
+
+    try {
+      const { error } = await supabase.from('profiles').update({ is_admin: newAdminStatus }).eq('id', profile.id);
+      if (error) throw error;
+      setProfile({ ...profile, is_admin: newAdminStatus });
+      alert(`User ${newAdminStatus ? 'is now' : 'is no longer'} an admin.`);
+    } catch (err: any) {
+      alert(`Error ${action} admin: ` + err.message);
     }
   };
 
@@ -377,32 +407,50 @@ export default function AdminKYCReview() {
               <h3 className="font-headline-md text-headline-md font-bold text-error flex items-center gap-2">
                 <span className="material-symbols-outlined">gpp_maybe</span> Danger Zone
               </h3>
-              {profile?.account_status && (
-                <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest ${profile.account_status === 'active' ? 'bg-tertiary/20 text-tertiary' : 'bg-error/20 text-error'}`}>
-                  {profile.account_status}
-                </span>
-              )}
+              <div className="flex items-center gap-2">
+                {profile?.is_admin && (
+                  <span className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest bg-primary/20 text-primary">
+                    ADMIN
+                  </span>
+                )}
+                {profile?.account_status && (
+                  <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest ${profile.account_status === 'active' ? 'bg-tertiary/20 text-tertiary' : 'bg-error/20 text-error'}`}>
+                    {profile.account_status}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="p-6 flex flex-col gap-3">
-              <p className="text-xs text-on-surface-variant font-medium">Use these actions cautiously. Suspending/Blocking will prevent the user from logging in.</p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <p className="text-xs text-on-surface-variant font-medium">Use these actions cautiously. Suspending/Blocking will prevent the user from logging in. Admins cannot be suspended, blocked, or deleted.</p>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <button 
+                  onClick={handleToggleAdmin}
+                  className={`py-2.5 rounded-lg border font-bold text-[11px] uppercase tracking-widest transition-all ${
+                    profile?.is_admin 
+                      ? 'border-primary/50 text-primary hover:bg-primary/10' 
+                      : 'border-secondary/50 text-secondary hover:bg-secondary/10'
+                  }`}
+                >
+                  {profile?.is_admin ? 'Remove Admin' : 'Make Admin'}
+                </button>
                 <button 
                   onClick={handleSuspend}
-                  disabled={profile?.account_status === 'suspended'}
+                  disabled={profile?.account_status === 'suspended' || profile?.is_admin}
                   className="py-2.5 rounded-lg border border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/10 font-bold text-[11px] uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Suspend User
                 </button>
                 <button 
                   onClick={handleBlock}
-                  disabled={profile?.account_status === 'blocked'}
+                  disabled={profile?.account_status === 'blocked' || profile?.is_admin}
                   className="py-2.5 rounded-lg border border-error/50 text-error hover:bg-error/10 font-bold text-[11px] uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Block User
                 </button>
                 <button 
                   onClick={handleDelete}
-                  className="py-2.5 rounded-lg bg-error text-on-error hover:brightness-110 font-bold text-[11px] uppercase tracking-widest transition-all shadow-md shadow-error/20"
+                  disabled={profile?.is_admin}
+                  className="py-2.5 rounded-lg bg-error text-on-error hover:brightness-110 font-bold text-[11px] uppercase tracking-widest transition-all shadow-md shadow-error/20 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Delete User
                 </button>

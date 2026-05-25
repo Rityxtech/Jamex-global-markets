@@ -51,10 +51,6 @@ export default function Kyc() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // File input refs
-  const frontInputRef = useRef<HTMLInputElement>(null);
-  const backInputRef = useRef<HTMLInputElement>(null);
-
   // Submit state
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
@@ -78,9 +74,10 @@ export default function Kyc() {
         city: kyc.city || '',
         postal_code: kyc.postal_code || '',
       });
-      if (kyc.front_id_url) setFrontPreview(kyc.front_id_url);
-      if (kyc.back_id_url) setBackPreview(kyc.back_id_url);
-      if (kyc.selfie_url) setSelfiePreview(kyc.selfie_url);
+      // Only set preview from DB if user hasn't already selected a new local file
+      if (kyc.front_id_url && !frontId) setFrontPreview(kyc.front_id_url);
+      if (kyc.back_id_url && !backId) setBackPreview(kyc.back_id_url);
+      if (kyc.selfie_url && !selfieBlob) setSelfiePreview(kyc.selfie_url);
     }
   }, [kyc]);
 
@@ -125,34 +122,45 @@ export default function Kyc() {
     }, 'image/jpeg', 0.9);
   };
 
+  useEffect(() => {
+    console.log('Kyc Component Mounted. User:', user?.id);
+    return () => console.log('Kyc Component Unmounted.');
+  }, [user]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, side: 'front' | 'back') => {
-    const file = e.target.files?.[0] || null;
-    console.log('File selected:', side, file?.name, file?.size, file?.type);
+    console.log(`[DEBUG] handleFileChange called for side: ${side}`);
+    e.preventDefault();
+    e.stopPropagation();
+
+    const file = e.target.files?.[0];
+    console.log(`[DEBUG] File object:`, file ? `${file.name} (${file.size} bytes)` : 'null/undefined');
+    
     if (!file) {
-      console.log('No file selected');
+      console.log('[DEBUG] Exiting handleFileChange early because file is missing');
       return;
     }
-    const previewUrl = URL.createObjectURL(file);
-    console.log('Preview URL created:', previewUrl);
-    if (side === 'front') {
-      setFrontId(file);
-      setFrontPreview(previewUrl);
-      console.log('Front preview set');
-    } else {
-      setBackId(file);
-      setBackPreview(previewUrl);
-      console.log('Back preview set');
-    }
-  };
-
-  const triggerFileInput = (side: 'front' | 'back') => {
-    console.log('Triggering file input for:', side);
-    if (side === 'front') {
-      console.log('Front input ref:', frontInputRef.current);
-      frontInputRef.current?.click();
-    } else {
-      console.log('Back input ref:', backInputRef.current);
-      backInputRef.current?.click();
+    
+    try {
+      const previewUrl = URL.createObjectURL(file);
+      console.log(`[DEBUG] Generated preview URL: ${previewUrl}`);
+      
+      if (side === 'front') {
+        if (frontPreview && frontPreview.startsWith('blob:')) {
+          URL.revokeObjectURL(frontPreview);
+        }
+        setFrontId(file);
+        setFrontPreview(previewUrl);
+        console.log('[DEBUG] front state updated');
+      } else {
+        if (backPreview && backPreview.startsWith('blob:')) {
+          URL.revokeObjectURL(backPreview);
+        }
+        setBackId(file);
+        setBackPreview(previewUrl);
+        console.log('[DEBUG] back state updated');
+      }
+    } catch (err) {
+      console.error('[DEBUG] Error in handleFileChange:', err);
     }
   };
 
@@ -166,8 +174,16 @@ export default function Kyc() {
 
   const handleSubmit = async () => {
     if (!user || !canSubmit) return;
+    
+    // Scroll to top to show success message
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     const success = await submitKyc(user.id, form, { front: frontId, back: backId, selfie: selfieBlob });
-    if (success) setSubmitSuccess(true);
+    if (success) {
+      setSubmitSuccess(true);
+      // Auto hide success message after 5 seconds to show the standard status banner
+      setTimeout(() => setSubmitSuccess(false), 5000);
+    }
   };
 
   const statusConfig = {
@@ -198,8 +214,19 @@ export default function Kyc() {
   return (
     <div className="p-2.5 md:p-margin-desktop pt-4 md:pt-8 pb-6 md:pb-12 max-w-[1400px] mx-auto w-full">
 
+      {/* Success Banner */}
+      {submitSuccess && (
+        <div className="mb-4 md:mb-6 rounded-xl border bg-tertiary/10 border-tertiary/20 p-3 md:p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-4 duration-500">
+          <span className="material-symbols-outlined text-tertiary text-[22px] shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+          <div>
+            <p className="font-bold text-xs md:text-sm uppercase tracking-wider mb-0.5 text-tertiary">Submitted Successfully</p>
+            <p className="text-[10px] md:text-xs text-on-surface-variant">Your KYC documents have been submitted and are now under review.</p>
+          </div>
+        </div>
+      )}
+
       {/* Status Banner */}
-      {kyc && (
+      {kyc && !submitSuccess && (
         <div className={`mb-4 md:mb-6 rounded-xl border p-3 md:p-4 flex items-start gap-3 ${statusConfig[kyc.status].bg}`}>
           <span className={`material-symbols-outlined text-[22px] md:text-[28px] shrink-0 ${statusConfig[kyc.status].color}`}
             style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -210,25 +237,6 @@ export default function Kyc() {
               KYC Status: {statusConfig[kyc.status].label}
             </p>
             <p className="text-[10px] md:text-xs text-on-surface-variant leading-relaxed">{statusConfig[kyc.status].message}</p>
-          </div>
-        </div>
-      )}
-
-      {/* Debug Info */}
-      <div className="mb-4 p-2 bg-surface-container-lowest rounded border border-outline-variant/30 text-[10px]">
-        <p><strong>Front Preview:</strong> {frontPreview ? 'SET' : 'NULL'}</p>
-        <p><strong>Back Preview:</strong> {backPreview ? 'SET' : 'NULL'}</p>
-        <p><strong>Selfie Preview:</strong> {selfiePreview ? 'SET' : 'NULL'}</p>
-        <p><strong>Front ID File:</strong> {frontId?.name || 'NULL'}</p>
-        <p><strong>Back ID File:</strong> {backId?.name || 'NULL'}</p>
-      </div>
-
-      {submitSuccess && !kyc && (
-        <div className="mb-4 md:mb-6 rounded-xl border bg-tertiary/10 border-tertiary/20 p-3 md:p-4 flex items-start gap-3">
-          <span className="material-symbols-outlined text-tertiary text-[22px] shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-          <div>
-            <p className="font-bold text-xs md:text-sm uppercase tracking-wider mb-0.5 text-tertiary">Submitted Successfully</p>
-            <p className="text-[10px] md:text-xs text-on-surface-variant">Your KYC documents are now under review.</p>
           </div>
         </div>
       )}
@@ -313,76 +321,86 @@ export default function Kyc() {
 
               {/* Front of ID */}
               <div>
-                <label className="text-[8px] md:text-xs text-on-surface-variant font-bold uppercase tracking-wider block mb-1">Front of Government ID</label>
-                <div className={`group relative bg-surface-container-lowest border-2 border-dashed rounded-xl overflow-hidden transition-colors ${frontPreview ? 'border-primary bg-primary/5' : 'border-outline-variant/40'}`}>
-                  {frontPreview ? (
-                    <div className="relative">
-                      <img src={frontPreview} alt="Front ID" className="w-full h-28 md:h-36 object-cover" />
-                      <div className="absolute bottom-0 inset-x-0 bg-black/60 p-1.5 flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-tertiary text-[14px]">task_alt</span>
-                        <span className="text-[10px] font-bold text-white">ID Front Uploaded</span>
-                        {uploading && uploadProgress.front > 0 && uploadProgress.front < 100 && (
-                          <div className="ml-auto w-16 h-1 bg-white/20 rounded overflow-hidden">
-                            <div className="h-full bg-primary" style={{ width: `${uploadProgress.front}%` }}></div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="p-3 md:p-6 text-center">
-                      <span className="material-symbols-outlined text-outline/50 mb-1 text-[22px] md:text-3xl block">badge</span>
-                      <p className="text-[10px] md:text-sm font-bold text-on-surface uppercase tracking-wide mb-2">Front of Government ID</p>
-                      <p className="text-[8px] md:text-xs text-on-surface-variant mb-3 font-medium">PNG, JPG or PDF up to 10MB</p>
+                <p className="text-[8px] md:text-xs text-on-surface-variant font-bold uppercase tracking-wider mb-1">Front of Government ID</p>
+                {frontPreview && (
+                  <div className="relative rounded-xl overflow-hidden border-2 border-primary h-28 md:h-36 mb-2">
+                    <img src={frontPreview} alt="Front ID" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                    <div className="absolute bottom-0 inset-x-0 p-2 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-tertiary text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                      <span className="text-white text-[10px] font-bold">ID Front Ready</span>
                       {!isReadOnly && (
-                        <input
-                          ref={frontInputRef}
-                          type="file"
-                          accept="image/png, image/jpeg, application/pdf"
-                          onChange={e => handleFileChange(e, 'front')}
-                          disabled={isReadOnly}
-                          className="text-[10px] text-on-surface-variant"
-                        />
+                        <button type="button" onClick={() => { 
+                          if (frontPreview && frontPreview.startsWith('blob:')) URL.revokeObjectURL(frontPreview);
+                          setFrontPreview(null); 
+                          setFrontId(null); 
+                        }}
+                          className="ml-auto bg-white/20 hover:bg-white/40 text-white text-[10px] font-bold px-2 py-0.5 rounded transition-colors">
+                          Change
+                        </button>
                       )}
                     </div>
-                  )}
-                </div>
+                    {uploading && uploadProgress.front > 0 && uploadProgress.front < 100 && (
+                      <div className="absolute top-0 inset-x-0 h-1 bg-white/20">
+                        <div className="h-full bg-primary transition-all" style={{ width: `${uploadProgress.front}%` }} />
+                      </div>
+                    )}
+                  </div>
+                )}
+                {!isReadOnly && !frontPreview && (
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,application/pdf"
+                    onChange={(e) => handleFileChange(e, 'front')}
+                    className="block w-full text-xs text-on-surface-variant cursor-pointer rounded-xl border-2 border-dashed border-outline-variant/40 bg-surface-container-lowest p-3
+                      file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0
+                      file:text-xs file:font-bold file:uppercase file:tracking-wider
+                      file:bg-primary file:text-on-primary file:cursor-pointer
+                      hover:file:brightness-110 hover:border-primary/60"
+                  />
+                )}
               </div>
 
-              {/* Back of ID */}
+              {/* Proof of Address */}
               <div>
-                <label className="text-[8px] md:text-xs text-on-surface-variant font-bold uppercase tracking-wider block mb-1">Proof of Address</label>
-                <div className={`group relative bg-surface-container-lowest border-2 border-dashed rounded-xl overflow-hidden transition-colors ${backPreview ? 'border-primary bg-primary/5' : 'border-outline-variant/40'}`}>
-                  {backPreview ? (
-                    <div className="relative">
-                      <img src={backPreview} alt="Back ID" className="w-full h-28 md:h-36 object-cover" />
-                      <div className="absolute bottom-0 inset-x-0 bg-black/60 p-1.5 flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-tertiary text-[14px]">task_alt</span>
-                        <span className="text-[10px] font-bold text-white">Proof of Address Uploaded</span>
-                        {uploading && uploadProgress.back > 0 && uploadProgress.back < 100 && (
-                          <div className="ml-auto w-16 h-1 bg-white/20 rounded overflow-hidden">
-                            <div className="h-full bg-primary" style={{ width: `${uploadProgress.back}%` }}></div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="p-3 md:p-6 text-center">
-                      <span className="material-symbols-outlined text-outline/50 mb-1 text-[22px] md:text-3xl block">receipt_long</span>
-                      <p className="text-[10px] md:text-sm font-bold text-on-surface uppercase tracking-wide mb-2">Proof of Address</p>
-                      <p className="text-[8px] md:text-xs text-on-surface-variant mb-3 font-medium">Utility bill, bank statement, etc.</p>
+                <p className="text-[8px] md:text-xs text-on-surface-variant font-bold uppercase tracking-wider mb-1">Proof of Address</p>
+                {backPreview && (
+                  <div className="relative rounded-xl overflow-hidden border-2 border-primary h-28 md:h-36 mb-2">
+                    <img src={backPreview} alt="Proof of Address" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                    <div className="absolute bottom-0 inset-x-0 p-2 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-tertiary text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                      <span className="text-white text-[10px] font-bold">Address Doc Ready</span>
                       {!isReadOnly && (
-                        <input
-                          ref={backInputRef}
-                          type="file"
-                          accept="image/png, image/jpeg, application/pdf"
-                          onChange={e => handleFileChange(e, 'back')}
-                          disabled={isReadOnly}
-                          className="text-[10px] text-on-surface-variant"
-                        />
+                        <button type="button" onClick={() => { 
+                          if (backPreview && backPreview.startsWith('blob:')) URL.revokeObjectURL(backPreview);
+                          setBackPreview(null); 
+                          setBackId(null); 
+                        }}
+                          className="ml-auto bg-white/20 hover:bg-white/40 text-white text-[10px] font-bold px-2 py-0.5 rounded transition-colors">
+                          Change
+                        </button>
                       )}
                     </div>
-                  )}
-                </div>
+                    {uploading && uploadProgress.back > 0 && uploadProgress.back < 100 && (
+                      <div className="absolute top-0 inset-x-0 h-1 bg-white/20">
+                        <div className="h-full bg-primary transition-all" style={{ width: `${uploadProgress.back}%` }} />
+                      </div>
+                    )}
+                  </div>
+                )}
+                {!isReadOnly && !backPreview && (
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,application/pdf"
+                    onChange={(e) => handleFileChange(e, 'back')}
+                    className="block w-full text-xs text-on-surface-variant cursor-pointer rounded-xl border-2 border-dashed border-outline-variant/40 bg-surface-container-lowest p-3
+                      file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0
+                      file:text-xs file:font-bold file:uppercase file:tracking-wider
+                      file:bg-primary file:text-on-primary file:cursor-pointer
+                      hover:file:brightness-110 hover:border-primary/60"
+                  />
+                )}
               </div>
 
               {/* Liveness / Selfie */}

@@ -118,18 +118,19 @@ export const useKycStore = create<KycState>((set, get) => ({
         if (!selfieUrl) throw new Error('Selfie upload failed.');
       }
 
+      const existing = get().kyc;
+
       const payload = {
         user_id: userId,
         ...formData,
-        front_id_url: frontUrl,
-        back_id_url: backUrl,
-        selfie_url: selfieUrl,
+        front_id_url: frontUrl ?? existing?.front_id_url ?? null,
+        back_id_url: backUrl ?? existing?.back_id_url ?? null,
+        selfie_url: selfieUrl ?? existing?.selfie_url ?? null,
         status: 'pending',
         submitted_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
-      const existing = get().kyc;
       let result;
 
       if (existing?.id) {

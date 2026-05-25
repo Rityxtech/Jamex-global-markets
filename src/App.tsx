@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+
+declare const __BASE_PATH__: string;
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Invest from './pages/Invest';
@@ -72,7 +74,7 @@ export default function App() {
   }, [initialize, connect, disconnect]);
 
   return (
-    <BrowserRouter basename="/Jamex-global-markets">
+    <BrowserRouter basename={__BASE_PATH__}>
       <ScrollToTop />
       <Header />
       <Routes>

@@ -26,8 +26,8 @@ export default function Loans() {
 
     const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
     
-    const principal = currentLoan * 0.8;
-    const downPayment = currentLoan * 0.2;
+    const principal = currentLoan * 0.9;
+    const downPayment = currentLoan * 0.1;
     const monthly = principal / currentDuration;
 
     // Use backend schedule if available (for the first active/pending loan)
@@ -72,7 +72,7 @@ export default function Loans() {
         if (!user) return;
         
         if (mainBalance < downPayment) {
-            setApplyError('Insufficient wallet balance for 20% down payment.');
+            setApplyError('Insufficient wallet balance for 10% down payment.');
             return;
         }
 
@@ -277,7 +277,7 @@ export default function Loans() {
                                             <p className="text-base md:text-lg font-bold font-tabular-nums text-on-surface">{formatter.format(currentLoan)}</p>
                                         </div>
                                         <div className="bg-tertiary/5 p-2 md:p-3 rounded-lg border border-tertiary/10">
-                                            <p className="text-[10px] md:text-[10px] text-tertiary/80 uppercase font-bold tracking-wider mb-0.5">Down (20%)</p>
+                                            <p className="text-[10px] md:text-[10px] text-tertiary/80 uppercase font-bold tracking-wider mb-0.5">Down (10%)</p>
                                             <p className="text-base md:text-lg font-bold font-tabular-nums text-tertiary">{formatter.format(downPayment)}</p>
                                         </div>
                                     </div>
@@ -324,7 +324,7 @@ export default function Loans() {
                                                 checked={termsAccepted}
                                                 onChange={(e) => setTermsAccepted(e.target.checked)}
                                             />
-                                            <span className="text-sm md:text-xs font-medium text-on-surface-variant group-hover:text-on-surface transition-colors leading-tight">I accept the terms and authorize the 20% down payment from wallet balance.</span>
+                                            <span className="text-sm md:text-xs font-medium text-on-surface-variant group-hover:text-on-surface transition-colors leading-tight">I accept the terms and authorize the 10% down payment from wallet balance.</span>
                                         </label>
                                         
                                         {applyError && (

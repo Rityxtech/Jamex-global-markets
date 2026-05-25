@@ -67,7 +67,7 @@ export default function Login() {
             setIsProcessing(false);
             setIsSuccess(true);
             setTimeout(() => {
-                if (formData.email === import.meta.env.VITE_ADMIN_EMAIL || 'akugbof@gmail.com') {
+                if (formData.email === 'akugbof@gmail.com') {
                     navigate('/admin');
                 } else {
                     navigate('/dashboard');

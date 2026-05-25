@@ -169,8 +169,8 @@ export default function Kyc() {
 
   const canSubmit = isFormComplete && !uploading;
 
-  // Read-only only if approved (allow resubmission when pending or rejected)
-  const isReadOnly = kyc?.status === 'approved';
+  // Read-only if pending or approved (only allow resubmission if rejected or not submitted)
+  const isReadOnly = kyc?.status === 'approved' || kyc?.status === 'pending';
 
   const handleSubmit = async () => {
     if (!user || !canSubmit) return;

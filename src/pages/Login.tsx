@@ -35,7 +35,7 @@ export default function Login() {
         setErrorMsg('');
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({
+            const { data: authData, error } = await supabase.auth.signInWithPassword({
                 email: formData.email,
                 password: formData.password,
             });
@@ -44,6 +44,24 @@ export default function Login() {
                 setErrorMsg(error.message);
                 setIsProcessing(false);
                 return;
+            }
+
+            if (authData.user) {
+                const { data: profile } = await supabase.from('profiles').select('account_status').eq('id', authData.user.id).single();
+                
+                if (profile && profile.account_status === 'suspended') {
+                    await supabase.auth.signOut();
+                    setErrorMsg('Your account has been suspended. Please contact support.');
+                    setIsProcessing(false);
+                    return;
+                }
+                
+                if (profile && profile.account_status === 'blocked') {
+                    await supabase.auth.signOut();
+                    setErrorMsg('Your account has been permanently blocked. Access denied.');
+                    setIsProcessing(false);
+                    return;
+                }
             }
 
             setIsProcessing(false);

@@ -25,10 +25,22 @@ export default function AdminKYCReview() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('passport');
   const [kyc, setKyc] = useState<KycData | null>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [comments, setComments] = useState('');
   const [error, setError] = useState('');
+  const [walletAmountStr, setWalletAmountStr] = useState('');
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let raw = e.target.value.replace(/[^0-9.]/g, '');
+    const parts = raw.split('.');
+    if (parts.length > 2) parts.pop();
+    if (parts[0]) {
+      parts[0] = parseInt(parts[0], 10).toLocaleString('en-US');
+    }
+    setWalletAmountStr(parts.join('.'));
+  };
   const [checklist, setChecklist] = useState({
     visual: true,
     sanctions: true,
@@ -53,6 +65,9 @@ export default function AdminKYCReview() {
         .single();
       if (error) throw error;
       setKyc(data as KycData);
+      
+      const { data: profileData } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      if (profileData) setProfile(profileData);
     } catch (err: any) {
       setError(err.message || 'Failed to load KYC data');
     } finally {
@@ -96,6 +111,54 @@ export default function AdminKYCReview() {
 
   const toggleChecklist = (key: keyof typeof checklist) => {
     setChecklist((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleSuspend = async () => {
+    if (!profile) return;
+    const confirmAction = window.confirm(`Are you sure you want to suspend this user? They will not be able to log in.`);
+    if (!confirmAction) return;
+
+    try {
+      const { error } = await supabase.from('profiles').update({ account_status: 'suspended' }).eq('id', profile.id);
+      if (error) throw error;
+      setProfile({ ...profile, account_status: 'suspended' });
+      alert('User successfully suspended.');
+    } catch (err: any) {
+      alert('Error suspending user: ' + err.message);
+    }
+  };
+
+  const handleBlock = async () => {
+    if (!profile) return;
+    const confirmAction = window.confirm(`Are you sure you want to completely block this user?`);
+    if (!confirmAction) return;
+
+    try {
+      const { error } = await supabase.from('profiles').update({ account_status: 'blocked' }).eq('id', profile.id);
+      if (error) throw error;
+      setProfile({ ...profile, account_status: 'blocked' });
+      alert('User successfully blocked.');
+    } catch (err: any) {
+      alert('Error blocking user: ' + err.message);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!profile) return;
+    const confirmAction = window.confirm(`DANGER: Are you sure you want to completely delete this user? This action CANNOT be undone and deletes all their backend data.`);
+    if (!confirmAction) return;
+
+    try {
+      // In Supabase client with anon key, we cannot easily delete Auth user without a secure RPC.
+      // We will attempt RPC or alert the user on how to do it.
+      const { error } = await supabase.rpc('delete_user', { target_user_id: profile.id });
+      if (error) throw error;
+      
+      alert('User successfully deleted.');
+      navigate('/admin/users');
+    } catch (err: any) {
+      alert('Error deleting user: ' + err.message + '\nNote: Backend RPC "delete_user" must be created in Supabase with SECURITY DEFINER to delete auth rows.');
+    }
   };
 
   if (loading) {
@@ -308,29 +371,169 @@ export default function AdminKYCReview() {
             </div>
           </div>
 
-          {/* Manual Checklist */}
-          <div className="glass-card rounded-xl overflow-hidden">
-            <div className="px-6 py-4 bg-surface-container-highest/20 border-b border-outline-variant/30 flex justify-between items-center">
-              <h3 className="font-headline-md text-headline-md font-bold text-on-surface">Review Checklist</h3>
-              <span className="font-label-sm text-label-sm text-on-surface-variant">{completedCount} / 5 Complete</span>
+          {/* Account Management Actions */}
+          <div className="glass-card rounded-xl overflow-hidden mt-2 border border-error/20">
+            <div className="px-6 py-4 bg-error/10 border-b border-error/20 flex justify-between items-center">
+              <h3 className="font-headline-md text-headline-md font-bold text-error flex items-center gap-2">
+                <span className="material-symbols-outlined">gpp_maybe</span> Danger Zone
+              </h3>
+              {profile?.account_status && (
+                <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest ${profile.account_status === 'active' ? 'bg-tertiary/20 text-tertiary' : 'bg-error/20 text-error'}`}>
+                  {profile.account_status}
+                </span>
+              )}
             </div>
-            <div className="p-6 flex flex-col gap-4">
-              {[
-                { key: 'visual', label: 'Visual check of photo validity' },
-                { key: 'sanctions', label: 'Sanctions list screening check' },
-                { key: 'pep', label: 'PEP (Politically Exposed) check' },
-                { key: 'address', label: 'Address verification vs Bill' },
-                { key: 'expiry', label: 'ID Expiry date validation' },
-              ].map((item) => (
-                <label key={item.key} className="flex items-center gap-3 cursor-pointer group" onClick={() => toggleChecklist(item.key as keyof typeof checklist)}>
-                  <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${checklist[item.key as keyof typeof checklist] ? 'border-tertiary bg-tertiary/20' : 'border-outline hover:border-primary'}`}>
-                    {checklist[item.key as keyof typeof checklist] && <span className="material-symbols-outlined text-[16px] text-tertiary">check</span>}
-                  </div>
-                  <span className={`font-label-md text-label-md transition-colors ${checklist[item.key as keyof typeof checklist] ? 'text-on-surface' : 'text-on-surface-variant group-hover:text-on-surface'}`}>
-                    {item.label}
-                  </span>
-                </label>
-              ))}
+            <div className="p-6 flex flex-col gap-3">
+              <p className="text-xs text-on-surface-variant font-medium">Use these actions cautiously. Suspending/Blocking will prevent the user from logging in.</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <button 
+                  onClick={handleSuspend}
+                  disabled={profile?.account_status === 'suspended'}
+                  className="py-2.5 rounded-lg border border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/10 font-bold text-[11px] uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  Suspend User
+                </button>
+                <button 
+                  onClick={handleBlock}
+                  disabled={profile?.account_status === 'blocked'}
+                  className="py-2.5 rounded-lg border border-error/50 text-error hover:bg-error/10 font-bold text-[11px] uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  Block User
+                </button>
+                <button 
+                  onClick={handleDelete}
+                  className="py-2.5 rounded-lg bg-error text-on-error hover:brightness-110 font-bold text-[11px] uppercase tracking-widest transition-all shadow-md shadow-error/20"
+                >
+                  Delete User
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Wallet Management (Replaced Review Checklist) */}
+          <div className="glass-card rounded-xl overflow-hidden">
+            <div className="px-3 py-2 bg-surface-container-highest/20 border-b border-outline-variant/30 flex justify-between items-center">
+              <h3 className="text-xs md:text-sm font-bold text-on-surface flex items-center gap-1.5"><span className="material-symbols-outlined text-[16px]">account_balance_wallet</span>Wallet Management</h3>
+            </div>
+            <div className="p-3 flex flex-col gap-2.5">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Wallet Type</label>
+                  <select 
+                    id="walletType"
+                    className="bg-surface-container-lowest border border-outline-variant/50 rounded-md px-2 py-1.5 text-xs text-on-surface focus:border-primary outline-none"
+                  >
+                    <option value="main_balance">Main Wallet</option>
+                    <option value="profit_balance">Profit Wallet</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Action</label>
+                  <select 
+                    id="walletAction"
+                    className="bg-surface-container-lowest border border-outline-variant/50 rounded-md px-2 py-1.5 text-xs text-on-surface focus:border-primary outline-none"
+                  >
+                    <option value="deposit">Credit (Deposit)</option>
+                    <option value="withdrawal">Debit (Withdrawal)</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Amount ($)</label>
+                  <input 
+                    id="walletAmount"
+                    type="text" 
+                    value={walletAmountStr}
+                    onChange={handleAmountChange}
+                    placeholder="0.00"
+                    className="bg-surface-container-lowest border border-outline-variant/50 rounded-md px-2 py-1.5 text-xs text-on-surface focus:border-primary outline-none font-tabular-nums"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Reason (History)</label>
+                  <select 
+                    id="walletReason"
+                    className="bg-surface-container-lowest border border-outline-variant/50 rounded-md px-2 py-1.5 text-xs text-on-surface focus:border-primary outline-none"
+                  >
+                    <option value="Approved Deposit">Approved Deposit</option>
+                    <option value="Approved Withdrawal">Approved Withdrawal</option>
+                    <option value="Bonus Credit">Bonus Credit</option>
+                    <option value="Account Adjustment">Account Adjustment</option>
+                    <option value="Refund">Refund</option>
+                    <option value="Penalty/Fee">Penalty / Fee</option>
+                  </select>
+                </div>
+              </div>
+
+              <button
+                onClick={async () => {
+                  const typeEl = document.getElementById('walletType') as HTMLSelectElement;
+                  const actionEl = document.getElementById('walletAction') as HTMLSelectElement;
+                  const reasonEl = document.getElementById('walletReason') as HTMLSelectElement;
+                  
+                  const amount = parseFloat(walletAmountStr.replace(/,/g, ''));
+                  if (!amount || amount <= 0) {
+                    alert('Please enter a valid amount');
+                    return;
+                  }
+
+                  const confirmAction = window.confirm(`Are you sure you want to ${actionEl.value} $${amount} to this user's ${typeEl.value.replace('_', ' ')}?`);
+                  if (!confirmAction) return;
+
+                  try {
+                    // Get current wallet balance
+                    const { data: walletData, error: walletError } = await supabase
+                      .from('wallets')
+                      .select(typeEl.value)
+                      .eq('user_id', kyc.user_id)
+                      .single();
+
+                    if (walletError) throw walletError;
+
+                    const currentBalance = Number(walletData[typeEl.value as keyof typeof walletData]);
+                    const newBalance = actionEl.value === 'deposit' 
+                      ? currentBalance + amount 
+                      : currentBalance - amount;
+
+                    if (newBalance < 0) {
+                      alert('Insufficient funds for this debit action');
+                      return;
+                    }
+
+                    // Update wallet
+                    const { error: updateError } = await supabase
+                      .from('wallets')
+                      .update({ [typeEl.value]: newBalance })
+                      .eq('user_id', kyc.user_id);
+
+                    if (updateError) throw updateError;
+
+                    // Insert transaction record using destination_address for the reason so it doesn't break DB schema
+                    const { error: txError } = await supabase
+                      .from('transactions')
+                      .insert({
+                        user_id: kyc.user_id,
+                        type: actionEl.value,
+                        amount: amount,
+                        status: 'completed',
+                        asset: 'USD',
+                        destination_address: `Admin: ${reasonEl.value}`
+                      });
+
+                    if (txError) throw txError;
+
+                    alert(`Successfully processed ${actionEl.value} of $${amount.toLocaleString('en-US')}`);
+                    setWalletAmountStr('');
+                  } catch (err: any) {
+                    alert('Error updating wallet: ' + err.message);
+                  }
+                }}
+                className="mt-1 w-full bg-primary text-on-primary py-2 rounded-md text-[10px] font-bold uppercase tracking-wider hover:brightness-110 transition-all active:scale-95"
+              >
+                Process Transaction
+              </button>
             </div>
           </div>
 

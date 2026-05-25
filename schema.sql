@@ -6,12 +6,13 @@
 
 -- 1. PROFILES (auto-created on signup via trigger)
 CREATE TABLE IF NOT EXISTS public.profiles (
-  id            UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  full_name     TEXT,
-  avatar_url    TEXT,
-  referral_code TEXT UNIQUE,
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+  id             UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  full_name      TEXT,
+  avatar_url     TEXT,
+  referral_code  TEXT UNIQUE,
+  account_status TEXT NOT NULL DEFAULT 'active' CHECK (account_status IN ('active', 'suspended', 'blocked')),
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- 2. WALLETS
@@ -52,6 +53,15 @@ CREATE TABLE IF NOT EXISTS public.investment_plans (
   created_at    TIMESTAMPTZ   NOT NULL DEFAULT now(),
   updated_at    TIMESTAMPTZ   NOT NULL DEFAULT now()
 );
+
+-- Insert Default Investment Plans
+INSERT INTO public.investment_plans (name, tier, daily_yield, duration_days, min_amount, max_amount, is_active)
+VALUES 
+  ('Starter Plan', 'Starter', 1.5, 30, 100, 999, true),
+  ('Professional Plan', 'Professional', 2.5, 60, 1000, 4999, true),
+  ('Executive Plan', 'Executive', 4.0, 90, 5000, 19999, true),
+  ('VIP Platinum', 'VIP', 6.0, 120, 20000, NULL, true)
+ON CONFLICT (name) DO NOTHING;
 
 -- 5. INVESTMENTS
 CREATE TABLE IF NOT EXISTS public.investments (
@@ -174,12 +184,13 @@ CREATE INDEX IF NOT EXISTS idx_tickets_status ON public.support_tickets (status)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, avatar_url, referral_code)
+  INSERT INTO public.profiles (id, full_name, avatar_url, referral_code, account_status)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email,'@',1)),
     NEW.raw_user_meta_data->>'avatar_url',
-    'ref-' || UPPER(SUBSTRING(REPLACE(NEW.id::text,'-',''),1,8))
+    'ref-' || UPPER(SUBSTRING(REPLACE(NEW.id::text,'-',''),1,8)),
+    'active'
   ) ON CONFLICT (id) DO NOTHING;
 
   INSERT INTO public.wallets (user_id) VALUES (NEW.id)

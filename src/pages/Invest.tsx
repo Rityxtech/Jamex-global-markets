@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWalletStore } from '../store/walletStore';
 import { useInvestmentStore } from '../store/investmentStore';
+import { supabase } from '../lib/supabase';
 
 export default function Invest() {
     const navigate = useNavigate();
     const { mainBalance, profitBalance } = useWalletStore();
     const { investments } = useInvestmentStore();
+    const [plans, setPlans] = useState<any[]>([]);
+    const [selectedPlan, setSelectedPlan] = useState<any>(null);
 
     const totalNetWorth = mainBalance + profitBalance;
     const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
@@ -19,6 +22,26 @@ export default function Invest() {
 
     const [amount, setAmount] = useState(10000);
     const [tier, setTier] = useState(0.025); // default Institutional
+
+    // Fetch investment plans from database
+    useEffect(() => {
+        const fetchPlans = async () => {
+            const { data } = await supabase
+                .from('investment_plans')
+                .select('*')
+                .eq('is_active', true)
+                .order('min_amount', { ascending: true });
+            
+            if (data && data.length > 0) {
+                setPlans(data);
+                // Set default to first plan or Standard tier
+                const defaultPlan = data.find(p => p.tier === 'Standard') || data[0];
+                setSelectedPlan(defaultPlan);
+                setTier(defaultPlan.daily_yield / 100);
+            }
+        };
+        fetchPlans();
+    }, []);
 
     const monthlyRoi = amount * tier * 30;
     const yearlyRoi = amount * tier * 365;
@@ -227,13 +250,21 @@ export default function Invest() {
                                 <div>
                                     <label className="text-[9px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Contract Tier</label>
                                     <select 
-                                        value={tier} 
-                                        onChange={(e) => setTier(Number(e.target.value))}
+                                        value={selectedPlan?.id || ''} 
+                                        onChange={(e) => {
+                                            const plan = plans.find(p => p.id === e.target.value);
+                                            if (plan) {
+                                                setSelectedPlan(plan);
+                                                setTier(plan.daily_yield / 100);
+                                            }
+                                        }}
                                         className="w-full bg-surface-container-lowest border border-outline-variant/50 text-on-surface rounded-lg py-2 px-3 focus:ring-primary focus:border-primary font-bold text-[11px] sm:text-xs md:text-label-sm outline-none transition-all"
                                     >
-                                        <option value={0.012}>Standard (1.2% Daily)</option>
-                                        <option value={0.025}>Institutional (2.5% Daily)</option>
-                                        <option value={0.048}>Enterprise (4.8% Daily)</option>
+                                        {plans.map(plan => (
+                                            <option key={plan.id} value={plan.id}>
+                                                {plan.name} ({plan.daily_yield}% Daily)
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2.5 md:gap-4 mt-2 md:mt-6">
@@ -242,13 +273,31 @@ export default function Invest() {
                                         <p className="text-sm sm:text-base md:text-headline-md font-bold font-tabular-nums text-tertiary">${Math.round(monthlyRoi).toLocaleString()}</p>
                                     </div>
                                     <div className="p-2 md:p-3 bg-surface-container-high/50 rounded-lg border border-outline-variant/20">
-                                        <p className="text-[9px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Total 1Y</p>
-                                        <p className="text-sm sm:text-base md:text-headline-md font-bold font-tabular-nums text-on-surface">${Math.round(yearlyRoi).toLocaleString()}</p>
+                                        <p className="text-[9px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Total {selectedPlan?.duration_days || 30}D</p>
+                                        <p className="text-sm sm:text-base md:text-headline-md font-bold font-tabular-nums text-on-surface">${Math.round(amount * tier * (selectedPlan?.duration_days || 30)).toLocaleString()}</p>
                                     </div>
                                 </div>
                             </div>
                             <div className="p-2.5 pt-0 md:p-6 md:pt-0">
-                                <button onClick={handleInitiateContract} className="w-full py-2.5 bg-primary text-on-primary font-bold text-[10px] md:text-sm uppercase tracking-wider rounded-xl hover:brightness-110 active:scale-[0.98] transition-all shadow-sm shadow-primary/20">Initiate Contract</button>
+                                <button 
+                                    onClick={() => {
+                                        if (selectedPlan) {
+                                            navigate('/confirm-investment', { state: { 
+                                                plan: {
+                                                    id: selectedPlan.id,
+                                                    name: selectedPlan.name,
+                                                    roi: selectedPlan.daily_yield,
+                                                    duration: selectedPlan.duration_days,
+                                                    min: selectedPlan.min_amount,
+                                                    max: selectedPlan.max_amount
+                                                }
+                                            }});
+                                        }
+                                    }}
+                                    className="w-full py-2.5 bg-primary text-on-primary font-bold text-[10px] md:text-sm uppercase tracking-wider rounded-xl hover:brightness-110 active:scale-[0.98] transition-all shadow-sm shadow-primary/20"
+                                >
+                                    Initiate Contract
+                                </button>
                             </div>
                         </div>
 

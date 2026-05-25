@@ -1,75 +1,95 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+
+// Define how different plan tiers look visually
+const TIER_STYLES: Record<string, any> = {
+    'Starter': {
+        accentClass: 'text-primary',
+        borderClass: 'border-primary/20 group-hover:border-primary/50',
+        bgGlow: 'from-primary/10',
+        glowColor: 'bg-primary/30',
+        buttonClass: 'bg-primary/10 text-primary hover:bg-primary hover:text-on-primary',
+        popular: false,
+        features: ['Basic Support', 'Standard Execution', 'Monthly Reporting']
+    },
+    'Standard': {
+        accentClass: 'text-secondary',
+        borderClass: 'border-secondary/20 group-hover:border-secondary/50',
+        bgGlow: 'from-secondary/10',
+        glowColor: 'bg-secondary/30',
+        buttonClass: 'bg-secondary/10 text-secondary hover:bg-secondary hover:text-on-secondary',
+        popular: false,
+        features: ['Standard Support', 'Standard Execution', 'Weekly Reporting']
+    },
+    'Professional': {
+        accentClass: 'text-tertiary',
+        borderClass: 'border-tertiary/50 shadow-[0_0_20px_rgba(78,222,163,0.15)] group-hover:border-tertiary/80',
+        bgGlow: 'from-tertiary/20',
+        glowColor: 'bg-tertiary/30',
+        buttonClass: 'bg-tertiary text-on-tertiary hover:brightness-110 shadow-lg shadow-tertiary/20',
+        popular: true,
+        features: ['Priority Support', 'Enhanced Execution', 'Weekly Reporting', 'Dedicated Manager']
+    },
+    'Executive': {
+        accentClass: 'text-[#8b5cf6]',
+        borderClass: 'border-[#8b5cf6]/20 group-hover:border-[#8b5cf6]/50',
+        bgGlow: 'from-[#8b5cf6]/10',
+        glowColor: 'bg-[#8b5cf6]/30',
+        buttonClass: 'bg-[#8b5cf6]/10 text-[#8b5cf6] hover:bg-[#8b5cf6] hover:text-white',
+        popular: false,
+        features: ['24/7 VIP Support', 'Institutional Execution', 'Daily Reporting', 'Senior Account Manager', 'Exclusive Webinars']
+    },
+    'VIP': {
+        accentClass: 'text-[#f59e0b]',
+        borderClass: 'border-[#f59e0b]/20 group-hover:border-[#f59e0b]/50',
+        bgGlow: 'from-[#f59e0b]/10',
+        glowColor: 'bg-[#f59e0b]/30',
+        buttonClass: 'bg-[#f59e0b]/10 text-[#f59e0b] hover:bg-[#f59e0b] hover:text-[#222]',
+        popular: false,
+        features: ['Direct Board Access', 'Zero Spread Execution', 'Real-time Analytics', 'Private Events Access', 'Custom Strategies']
+    }
+};
 
 export default function Plans() {
     const navigate = useNavigate();
-    
-    // Calculator State
-    const [calcAmount, setCalcAmount] = useState<string>('1000');
-    const [calcPlanId, setCalcPlanId] = useState<string>('professional');
+    const [plans, setPlans] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [calcAmount, setCalcAmount] = useState('1000');
+    const [calcPlanId, setCalcPlanId] = useState('');
 
-    const plans = [
-        {
-            id: 'starter',
-            name: 'Starter Plan',
-            roi: 1.5,
-            duration: 30,
-            min: 100,
-            max: 999,
-            features: ['Basic Support', 'Standard Execution', 'Monthly Reporting'],
-            accentClass: 'text-primary',
-            borderClass: 'border-primary/20 group-hover:border-primary/50',
-            bgGlow: 'from-primary/10',
-            glowColor: 'bg-primary/30',
-            buttonClass: 'bg-primary/10 text-primary hover:bg-primary hover:text-on-primary',
-            popular: false,
-        },
-        {
-            id: 'professional',
-            name: 'Professional Plan',
-            roi: 2.5,
-            duration: 60,
-            min: 1000,
-            max: 4999,
-            features: ['Priority Support', 'Enhanced Execution', 'Weekly Reporting', 'Dedicated Manager'],
-            accentClass: 'text-secondary',
-            borderClass: 'border-secondary/20 group-hover:border-secondary/50',
-            bgGlow: 'from-secondary/10',
-            glowColor: 'bg-secondary/30',
-            buttonClass: 'bg-secondary/10 text-secondary hover:bg-secondary hover:text-on-secondary',
-            popular: false,
-        },
-        {
-            id: 'executive',
-            name: 'Executive Plan',
-            roi: 4.0,
-            duration: 90,
-            min: 5000,
-            max: 19999,
-            features: ['24/7 VIP Support', 'Institutional Execution', 'Daily Reporting', 'Senior Account Manager', 'Exclusive Webinars'],
-            accentClass: 'text-tertiary',
-            borderClass: 'border-tertiary/50 shadow-[0_0_20px_rgba(78,222,163,0.15)] group-hover:border-tertiary/80',
-            bgGlow: 'from-tertiary/20',
-            glowColor: 'bg-tertiary/30',
-            buttonClass: 'bg-tertiary text-on-tertiary hover:brightness-110 shadow-lg shadow-tertiary/20',
-            popular: true,
-        },
-        {
-            id: 'vip',
-            name: 'VIP Platinum',
-            roi: 6.0,
-            duration: 120,
-            min: 20000,
-            max: null,
-            features: ['Direct Board Access', 'Zero Spread Execution', 'Real-time Analytics', 'Private Events Access', 'Custom Strategies'],
-            accentClass: 'text-[#8b5cf6]',
-            borderClass: 'border-[#8b5cf6]/20 group-hover:border-[#8b5cf6]/50',
-            bgGlow: 'from-[#8b5cf6]/10',
-            glowColor: 'bg-[#8b5cf6]/30',
-            buttonClass: 'bg-[#8b5cf6]/10 text-[#8b5cf6] hover:bg-[#8b5cf6] hover:text-white',
-            popular: false,
-        }
-    ];
+    useEffect(() => {
+        const fetchPlans = async () => {
+            const { data } = await supabase
+                .from('investment_plans')
+                .select('*')
+                .eq('is_active', true)
+                .order('min_amount', { ascending: true });
+            
+            if (data) {
+                const mappedPlans = data.map(p => {
+                    const style = TIER_STYLES[p.tier] || TIER_STYLES['Standard'];
+                    return {
+                        id: p.id,
+                        name: p.name,
+                        roi: p.daily_yield,
+                        duration: p.duration_days,
+                        min: p.min_amount,
+                        max: p.max_amount,
+                        ...style
+                    };
+                });
+                setPlans(mappedPlans);
+                // Set default plan for calculator (first plan or Standard tier)
+                const defaultPlan = mappedPlans.find(p => p.name.includes('Standard')) || mappedPlans[0];
+                if (defaultPlan) {
+                    setCalcPlanId(defaultPlan.id);
+                }
+            }
+            setLoading(false);
+        };
+        fetchPlans();
+    }, []);
 
     const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
 
@@ -77,6 +97,14 @@ export default function Plans() {
         // Pass plan data in route state to the confirm page
         navigate('/confirm-investment', { state: { plan } });
     };
+
+    if (loading) {
+        return (
+            <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+                <span className="material-symbols-outlined animate-spin text-4xl text-primary">progress_activity</span>
+            </div>
+        );
+    }
 
     return (
         <div className="flex-1 p-2.5 md:p-margin-desktop max-w-[1600px] mx-auto w-full mb-2.5 md:mb-12">

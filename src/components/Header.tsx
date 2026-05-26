@@ -7,7 +7,7 @@ export default function Header() {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   
-  const { user } = useAuthStore();
+  const { user, loading } = useAuthStore();
   const isLoggedIn = !!user;
 
   // Handle scroll effect for glassmorphism intensity
@@ -77,7 +77,13 @@ export default function Header() {
 
       {/* RIGHT SIDE: Auth Buttons / Profile & Fake Logo */}
       <div className="flex items-center gap-4 relative z-10">
-        {!isLoggedIn ? (
+        {loading ? (
+          /* Skeleton while auth state initializes — prevents flash of logged-out UI */
+          <div className="flex items-center gap-3 animate-pulse">
+            <div className="hidden sm:block w-24 h-8 bg-gray-700/60 rounded-xl"></div>
+            <div className="w-10 h-10 bg-gray-700/60 rounded-full"></div>
+          </div>
+        ) : !isLoggedIn ? (
           <div className="flex items-center gap-1 sm:gap-3">
             <Link to="/login" className="px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white hover:text-gray-300 transition-colors">
               Sign In

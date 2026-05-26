@@ -9,6 +9,17 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const { signOut } = useAuthStore();
   const [connStatus, setConnStatus] = useState<ConnStatus>('checking');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Prevent body scrolling when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     async function ping() {
@@ -43,7 +54,16 @@ export default function AdminLayout() {
     <div className="font-body-md text-body-md overflow-x-hidden min-h-screen bg-surface-dim">
       {/* Top Navigation Anchor */}
       <header className="bg-surface-container/80 backdrop-blur-xl text-primary font-headline-md text-headline-md border-b border-outline-variant/30 shadow-sm flex justify-between items-center h-16 px-margin-desktop w-full sticky top-0 z-50">
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-4">
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setIsMobileMenuOpen(prev => !prev)}
+            className="md:hidden p-1 rounded-lg hover:bg-surface-container-highest transition-colors"
+          >
+            <span className="material-symbols-outlined text-on-surface">
+              {isMobileMenuOpen ? 'close' : 'menu'}
+            </span>
+          </button>
           <span className="font-headline-md text-headline-md font-bold text-primary tracking-tight">Jamex Global</span>
           <div className="hidden md:flex gap-6 items-center">
             <span className="text-on-surface-variant font-medium font-label-md text-label-md">Admin Panel</span>
@@ -85,16 +105,54 @@ export default function AdminLayout() {
       </header>
 
       <div className="flex">
-        {/* Sidebar Navigation */}
-        <aside className="hidden md:flex flex-col py-2 border-r-4 border-green-500 bg-surface-container-lowest/90 backdrop-blur-xl fixed left-0 top-16 h-[calc(100vh-64px)] w-64 z-40">
-          
-          
+        {/* Mobile Overlay */}
+        {isMobileMenuOpen && (
+          <div
+            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+
+        {/* Sidebar Navigation — desktop fixed + mobile slide-out */}
+        <aside className={`flex-col py-2 border-r-4 border-green-500 bg-surface-container-lowest/90 backdrop-blur-xl fixed left-0 top-16 h-[calc(100vh-64px)] w-64 z-50 transition-transform duration-300 ease-in-out md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:flex hidden`}>
           <nav className="px-4 space-y-1 flex-1">
             {navItems.map(({ to, icon, label, end }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={end}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={({ isActive }) =>
+                  isActive
+                    ? 'bg-secondary-container/40 text-on-secondary-container border-r-4 border-primary rounded-r-lg flex items-center gap-3 px-4 py-3'
+                    : 'text-on-surface-variant hover:bg-surface-container-highest/50 hover:text-primary transition-all duration-200 flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg'
+                }
+              >
+                <span className="material-symbols-outlined">{icon}</span>
+                <span className="font-label-md text-label-md">{label}</span>
+              </NavLink>
+            ))}
+          </nav>
+          <div className="px-4 pb-4 mt-auto pt-4">
+            <button 
+              onClick={handleLogout}
+              className="w-full bg-error-container/20 text-error border border-error/30 py-2.5 rounded-lg font-label-md text-label-md hover:bg-error-container/40 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-sm">logout</span>
+              Secure Logout
+            </button>
+          </div>
+        </aside>
+
+        {/* Mobile Sidebar — same content, shown via flex on small screens */}
+        <aside className={`md:hidden flex-col py-2 border-r-4 border-green-500 bg-surface-container-lowest/95 backdrop-blur-xl fixed left-0 top-16 h-[calc(100vh-64px)] w-64 z-50 transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <nav className="px-4 space-y-1 flex-1 overflow-y-auto">
+            {navItems.map(({ to, icon, label, end }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) =>
                   isActive
                     ? 'bg-secondary-container/40 text-on-secondary-container border-r-4 border-primary rounded-r-lg flex items-center gap-3 px-4 py-3'
@@ -122,26 +180,6 @@ export default function AdminLayout() {
             <Outlet />
         </main>
       </div>
-
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface-container/95 backdrop-blur-xl border-t border-outline-variant/10 flex justify-around items-center z-50">
-        <NavLink to="/admin" end className={({ isActive }) => `flex flex-col items-center gap-1 ${isActive ? 'text-primary' : 'text-on-surface-variant'}`}>
-          <span className="material-symbols-outlined">dashboard</span>
-          <span className="text-[10px] font-medium">Dash</span>
-        </NavLink>
-        <NavLink to="/admin/users" className={({ isActive }) => `flex flex-col items-center gap-1 ${isActive ? 'text-primary' : 'text-on-surface-variant'}`}>
-          <span className="material-symbols-outlined">group</span>
-          <span className="text-[10px] font-medium">Users</span>
-        </NavLink>
-        <NavLink to="/admin/financials" className={({ isActive }) => `flex flex-col items-center gap-1 ${isActive ? 'text-primary' : 'text-on-surface-variant'}`}>
-          <span className="material-symbols-outlined">payments</span>
-          <span className="text-[10px] font-medium">Txns</span>
-        </NavLink>
-        <NavLink to="/admin/settings" className={({ isActive }) => `flex flex-col items-center gap-1 ${isActive ? 'text-primary' : 'text-on-surface-variant'}`}>
-          <span className="material-symbols-outlined">settings</span>
-          <span className="text-[10px] font-medium">Set</span>
-        </NavLink>
-      </nav>
     </div>
   );
 }

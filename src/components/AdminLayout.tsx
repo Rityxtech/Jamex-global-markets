@@ -55,15 +55,6 @@ export default function AdminLayout() {
       {/* Top Navigation Anchor */}
       <header className="bg-surface-container/80 backdrop-blur-xl text-primary font-headline-md text-headline-md border-b border-outline-variant/30 shadow-sm flex justify-between items-center h-16 px-margin-desktop w-full sticky top-0 z-50">
         <div className="flex items-center gap-4">
-          {/* Mobile hamburger */}
-          <button
-            onClick={() => setIsMobileMenuOpen(prev => !prev)}
-            className="md:hidden p-1 rounded-lg hover:bg-surface-container-highest transition-colors"
-          >
-            <span className="material-symbols-outlined text-on-surface">
-              {isMobileMenuOpen ? 'close' : 'menu'}
-            </span>
-          </button>
           <span className="font-headline-md text-headline-md font-bold text-primary tracking-tight">Jamex Global</span>
           <div className="hidden md:flex gap-6 items-center">
             <span className="text-on-surface-variant font-medium font-label-md text-label-md">Admin Panel</span>
@@ -97,7 +88,13 @@ export default function AdminLayout() {
             </div>
             <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</button>
             <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">shield_lock</button>
-            <div className="h-8 w-8 rounded-full bg-primary-container flex items-center justify-center border border-primary/20">
+            <button
+              onClick={() => setIsMobileMenuOpen(prev => !prev)}
+              className="md:hidden h-8 w-8 rounded-full bg-primary-container flex items-center justify-center border border-primary/20 cursor-pointer"
+            >
+              <img alt="Administrator Avatar" className="h-full w-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2LM4tehUU_4yx6pq6cwN6oTW4JJd98jGVU9gpVXPQMj8V_baMvYjHUAjExVqGOpYXih69t_UWasrV-UCs7b9YcbQw2vJAyb2pdGqBTqKIEvEuxxVh5167StgEsYcuJl5g-c9upyK3-VdlC2h0sgWoQ5wTLcRWtRRnnyks1nmnNrCv6-E9YfdOgMxdLC34hjqOV-4cEKZp6oOktezuD8Fx2na_hatIrhtMV6QpuGc-R8ukFyqKxnF9JU0GiuN2fiU_LXltbYpZTS88" />
+            </button>
+            <div className="hidden md:flex h-8 w-8 rounded-full bg-primary-container items-center justify-center border border-primary/20">
               <img alt="Administrator Avatar" className="h-full w-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2LM4tehUU_4yx6pq6cwN6oTW4JJd98jGVU9gpVXPQMj8V_baMvYjHUAjExVqGOpYXih69t_UWasrV-UCs7b9YcbQw2vJAyb2pdGqBTqKIEvEuxxVh5167StgEsYcuJl5g-c9upyK3-VdlC2h0sgWoQ5wTLcRWtRRnnyks1nmnNrCv6-E9YfdOgMxdLC34hjqOV-4cEKZp6oOktezuD8Fx2na_hatIrhtMV6QpuGc-R8ukFyqKxnF9JU0GiuN2fiU_LXltbYpZTS88" />
             </div>
           </div>

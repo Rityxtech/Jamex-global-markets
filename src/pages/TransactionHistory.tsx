@@ -35,6 +35,12 @@ export default function TransactionHistory() {
     const [loading, setLoading] = useState(true);
     const [typeFilter, setTypeFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [stats, setStats] = useState({
+        totalInflow: 0,
+        totalOutflow: 0,
+        netReturns: 0,
+        pendingCount: 0
+    });
 
     useEffect(() => {
         if (!user) return;
@@ -46,7 +52,33 @@ export default function TransactionHistory() {
             .order('created_at', { ascending: false })
             .limit(100);
         q.then(({ data }) => {
-            setTransactions((data as TxRow[]) || []);
+            const txData = (data as TxRow[]) || [];
+            setTransactions(txData);
+            
+            // Calculate real-time stats
+            const totalInflow = txData
+                .filter(tx => tx.type === 'deposit' && tx.status === 'completed')
+                .reduce((sum, tx) => sum + tx.amount, 0);
+            
+            const totalOutflow = txData
+                .filter(tx => tx.type === 'withdrawal' && tx.status === 'completed')
+                .reduce((sum, tx) => sum + tx.amount, 0);
+            
+            const netReturns = txData
+                .filter(tx => tx.type === 'profit' && tx.status === 'completed')
+                .reduce((sum, tx) => sum + tx.amount, 0);
+            
+            const pendingCount = txData
+                .filter(tx => tx.status === 'pending')
+                .length;
+            
+            setStats({
+                totalInflow,
+                totalOutflow,
+                netReturns,
+                pendingCount
+            });
+            
             setLoading(false);
         });
     }, [user]);
@@ -156,7 +188,7 @@ export default function TransactionHistory() {
 
                             <div className="relative z-10">
                                 <p className="text-[9px] md:text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Total Inflow</p>
-                                <h3 className="text-sm md:text-2xl font-bold font-tabular-nums text-on-surface group-hover:text-primary transition-colors">$1,240,500.00</h3>
+                                <h3 className="text-sm md:text-2xl font-bold font-tabular-nums text-on-surface group-hover:text-primary transition-colors">{fmt(stats.totalInflow)}</h3>
                                 <p className="text-tertiary text-[9px] md:text-xs font-bold flex items-center gap-0.5 mt-1 md:mt-3">
                                     <span className="material-symbols-outlined text-[12px] md:text-[14px]">arrow_upward</span> +12.5% vs last
                                 </p>
@@ -193,7 +225,7 @@ export default function TransactionHistory() {
 
                             <div className="relative z-10">
                                 <p className="text-[9px] md:text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Total Outflow</p>
-                                <h3 className="text-sm md:text-2xl font-bold font-tabular-nums text-on-surface">$450,230.12</h3>
+                                <h3 className="text-sm md:text-2xl font-bold font-tabular-nums text-on-surface">{fmt(stats.totalOutflow)}</h3>
                                 <p className="text-on-surface-variant text-[9px] md:text-xs font-medium mt-1 md:mt-3 line-clamp-1">
                                     Steady liquidity ratio
                                 </p>
@@ -230,7 +262,7 @@ export default function TransactionHistory() {
 
                             <div className="relative z-10">
                                 <p className="text-[9px] md:text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Net Trading Returns</p>
-                                <h3 className="text-sm md:text-2xl font-bold font-tabular-nums text-tertiary">+$84,122.45</h3>
+                                <h3 className="text-sm md:text-2xl font-bold font-tabular-nums text-tertiary">{fmt(stats.netReturns)}</h3>
                                 <p className="text-tertiary text-[9px] md:text-xs font-bold flex items-center gap-0.5 mt-1 md:mt-3">
                                     <span className="material-symbols-outlined text-[12px] md:text-[14px]">trending_up</span> 4.2% Alpha
                                 </p>
@@ -263,7 +295,7 @@ export default function TransactionHistory() {
 
                             <div className="relative z-10">
                                 <p className="text-[9px] md:text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Pending</p>
-                                <h3 className="text-sm md:text-2xl font-bold font-tabular-nums text-on-surface">02</h3>
+                                <h3 className="text-sm md:text-2xl font-bold font-tabular-nums text-on-surface">{stats.pendingCount.toString().padStart(2, '0')}</h3>
                                 <p className="text-on-surface-variant text-[9px] md:text-xs font-medium mt-1 md:mt-3 line-clamp-1">
                                     Action required
                                 </p>
@@ -307,6 +339,11 @@ export default function TransactionHistory() {
                                             <td className="px-4 py-3 md:px-6 md:py-4">
                                                 <p className="text-[11px] md:text-sm font-bold font-tabular-nums text-on-surface">{new Date(txn.created_at).toLocaleDateString()}</p>
                                                 <p className="text-[9px] md:text-[10px] text-on-surface-variant font-tabular-nums mt-0.5">{new Date(txn.created_at).toLocaleTimeString()} UTC</p>
+                                                {txn.destination_address && txn.destination_address.startsWith('Admin: ') && (
+                                                    <p className="text-[8px] md:text-[9px] text-tertiary font-bold mt-1 max-w-[120px] truncate" title={txn.destination_address.replace('Admin: ', '')}>
+                                                        Reason: {txn.destination_address.replace('Admin: ', '')}
+                                                    </p>
+                                                )}
                                             </td>
                                             <td className="px-4 py-3 md:px-6 md:py-4">
                                                 <span className="text-[9px] md:text-xs font-bold font-tabular-nums text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 md:px-2 md:py-1 rounded">#TXN-{txn.id.substring(0,8).toUpperCase()}</span>
@@ -357,6 +394,11 @@ export default function TransactionHistory() {
                                                 <div>
                                                     <p className="text-xs font-bold text-on-surface capitalize">{meta.label}</p>
                                                     <p className="text-[9px] text-on-surface-variant font-medium mt-0.5">{new Date(txn.created_at).toLocaleDateString()}</p>
+                                                    {txn.destination_address && txn.destination_address.startsWith('Admin: ') && (
+                                                        <p className="text-[8px] text-tertiary font-bold mt-0.5">
+                                                            {txn.destination_address.replace('Admin: ', '')}
+                                                        </p>
+                                                    )}
                                                 </div>
                                             </div>
                                             <div className="text-right">

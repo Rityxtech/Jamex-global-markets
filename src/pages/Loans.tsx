@@ -17,22 +17,32 @@ export default function Loans() {
         }
     }, [user, fetchLoans]);
 
-    const [currentLoan, setCurrentLoan] = useState(125000);
+    const [currentLoan, setCurrentLoan] = useState(1000);
+    const [loanAmountInput, setLoanAmountInput] = useState('1000');
+    const [loanAmountError, setLoanAmountError] = useState('');
     const [selectedProduct, setSelectedProduct] = useState('JMX-ALPHA-92');
     const [currentDuration, setCurrentDuration] = useState(3);
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [applyError, setApplyError] = useState('');
     const [isApplying, setIsApplying] = useState(false);
+    const [loanSubmitted, setLoanSubmitted] = useState(false);
+
+    const planMinAmount: Record<string, number> = {
+        'JMX-ALPHA-92': 1000,
+        'GLB-PRECISION-X': 10000,
+    };
 
     const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
     
-    const principal = currentLoan * 0.8;
-    const downPayment = currentLoan * 0.2;
+    const principal = currentLoan * 0.9;
+    const downPayment = currentLoan * 0.1;
     const monthly = principal / currentDuration;
 
     // Use backend schedule if available (for the first active/pending loan)
     // If no active loan, we use the calculator schedule
     const activeLoan = loans.find(l => l.status === 'active' || l.status === 'pending');
+    const pendingLoan = loans.find(l => l.status === 'pending');
+    const approvedActiveLoan = loans.find(l => l.status === 'active');
     
     const today = new Date();
     const calculatorSchedule = Array.from({ length: currentDuration }).map((_, i) => {
@@ -61,18 +71,40 @@ export default function Loans() {
         }))
         : calculatorSchedule.map((item, i) => ({ ...item, displayId: i + 1 }));
 
-    const handleSelectPlan = (amount: number, name: string) => {
-        setCurrentLoan(amount);
+    const handleSelectPlan = (name: string) => {
+        const minAmount = planMinAmount[name];
         setSelectedProduct(name);
+        setCurrentLoan(minAmount);
+        setLoanAmountInput(minAmount.toString());
+        setLoanAmountError('');
         setApplyError('');
+    };
+
+    const handleLoanAmountChange = (value: string) => {
+        setLoanAmountInput(value);
+        const numVal = parseFloat(value);
+        const minAmount = planMinAmount[selectedProduct];
+        if (!value || isNaN(numVal) || numVal < minAmount) {
+            setLoanAmountError(`Minimum is ${formatter.format(minAmount)}`);
+            if (!isNaN(numVal) && numVal > 0) setCurrentLoan(numVal);
+        } else {
+            setLoanAmountError('');
+            setCurrentLoan(numVal);
+        }
     };
 
     const handleInitiate = async () => {
         setApplyError('');
         if (!user) return;
+
+        const minAmount = planMinAmount[selectedProduct];
+        if (currentLoan < minAmount) {
+            setApplyError(`Minimum loan amount for this plan is ${formatter.format(minAmount)}.`);
+            return;
+        }
         
         if (mainBalance < downPayment) {
-            setApplyError('Insufficient wallet balance for 20% down payment.');
+            setApplyError('Insufficient wallet balance for 10% down payment.');
             return;
         }
 
@@ -95,7 +127,7 @@ export default function Loans() {
         const success = await applyForLoan(user.id, loanData, repaymentsData);
         if (success) {
             setTermsAccepted(false);
-            // In a full app, we would trigger wallet deduction here or rely on backend trigger
+            setLoanSubmitted(true);
         } else {
             setApplyError('Failed to apply for loan. Please try again.');
         }
@@ -123,7 +155,7 @@ export default function Loans() {
                                     {/* Plan A */}
                                     <div 
                                         className={`group rounded-xl p-2.5 md:p-4 transition-all cursor-pointer ${selectedProduct === 'JMX-ALPHA-92' ? 'bg-primary/5 border border-primary ring-1 ring-primary/30 shadow-[0_0_15px_rgba(37,99,235,0.1)]' : 'bg-surface-container-low border border-outline-variant/30 hover:border-primary/50'}`}
-                                        onClick={() => handleSelectPlan(125000, 'JMX-ALPHA-92')}
+                                        onClick={() => handleSelectPlan('JMX-ALPHA-92')}
                                     >
                                         <div className="flex justify-between items-start mb-2 md:mb-4">
                                             <div>
@@ -134,20 +166,34 @@ export default function Loans() {
                                         </div>
                                         <div className="flex items-end justify-between">
                                             <div>
-                                                <p className="text-[10px] md:text-[10px] text-on-surface-variant uppercase font-bold">Funding</p>
-                                                <p className="text-lg md:text-headline-md font-bold font-tabular-nums text-on-surface leading-none mt-1">$125,000</p>
+                                                <p className="text-[10px] md:text-[10px] text-on-surface-variant uppercase font-bold">Min. Funding</p>
+                                                <p className="text-lg md:text-headline-md font-bold font-tabular-nums text-on-surface leading-none mt-1">$1,000</p>
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-[10px] md:text-[10px] text-tertiary uppercase font-bold">Target ROI</p>
                                                 <p className="text-sm md:text-label-md font-bold text-tertiary leading-none mt-1">14.2% p.a.</p>
                                             </div>
                                         </div>
+                                        {selectedProduct === 'JMX-ALPHA-92' && (
+                                            <div className="mt-2.5" onClick={(e) => e.stopPropagation()}>
+                                                <label className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider block mb-1">Your Amount (Min. $1,000)</label>
+                                                <input
+                                                    type="number"
+                                                    min={1000}
+                                                    value={loanAmountInput}
+                                                    onChange={(e) => handleLoanAmountChange(e.target.value)}
+                                                    className="w-full bg-surface-container-lowest border border-primary/30 rounded-lg px-2.5 py-1.5 text-sm font-bold text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30"
+                                                    placeholder="Min. $1,000"
+                                                />
+                                                {loanAmountError && <p className="text-error text-[10px] mt-0.5">{loanAmountError}</p>}
+                                            </div>
+                                        )}
                                     </div>
                                     
                                     {/* Plan B */}
                                     <div 
                                         className={`group rounded-xl p-2.5 md:p-4 transition-all cursor-pointer ${selectedProduct === 'GLB-PRECISION-X' ? 'bg-primary/5 border border-primary ring-1 ring-primary/30 shadow-[0_0_15px_rgba(37,99,235,0.1)]' : 'bg-surface-container-low border border-outline-variant/30 hover:border-primary/50'}`}
-                                        onClick={() => handleSelectPlan(250000, 'GLB-PRECISION-X')}
+                                        onClick={() => handleSelectPlan('GLB-PRECISION-X')}
                                     >
                                         <div className="flex justify-between items-start mb-2 md:mb-4">
                                             <div>
@@ -158,14 +204,28 @@ export default function Loans() {
                                         </div>
                                         <div className="flex items-end justify-between">
                                             <div>
-                                                <p className="text-[10px] md:text-[10px] text-on-surface-variant uppercase font-bold">Funding</p>
-                                                <p className="text-lg md:text-headline-md font-bold font-tabular-nums text-on-surface leading-none mt-1">$250,000</p>
+                                                <p className="text-[10px] md:text-[10px] text-on-surface-variant uppercase font-bold">Min. Funding</p>
+                                                <p className="text-lg md:text-headline-md font-bold font-tabular-nums text-on-surface leading-none mt-1">$10,000</p>
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-[10px] md:text-[10px] text-tertiary uppercase font-bold">Target ROI</p>
                                                 <p className="text-sm md:text-label-md font-bold text-tertiary leading-none mt-1">11.8% p.a.</p>
                                             </div>
                                         </div>
+                                        {selectedProduct === 'GLB-PRECISION-X' && (
+                                            <div className="mt-2.5" onClick={(e) => e.stopPropagation()}>
+                                                <label className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider block mb-1">Your Amount (Min. $10,000)</label>
+                                                <input
+                                                    type="number"
+                                                    min={10000}
+                                                    value={loanAmountInput}
+                                                    onChange={(e) => handleLoanAmountChange(e.target.value)}
+                                                    className="w-full bg-surface-container-lowest border border-primary/30 rounded-lg px-2.5 py-1.5 text-sm font-bold text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30"
+                                                    placeholder="Min. $10,000"
+                                                />
+                                                {loanAmountError && <p className="text-error text-[10px] mt-0.5">{loanAmountError}</p>}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -277,7 +337,7 @@ export default function Loans() {
                                             <p className="text-base md:text-lg font-bold font-tabular-nums text-on-surface">{formatter.format(currentLoan)}</p>
                                         </div>
                                         <div className="bg-tertiary/5 p-2 md:p-3 rounded-lg border border-tertiary/10">
-                                            <p className="text-[10px] md:text-[10px] text-tertiary/80 uppercase font-bold tracking-wider mb-0.5">Down (20%)</p>
+                                            <p className="text-[10px] md:text-[10px] text-tertiary/80 uppercase font-bold tracking-wider mb-0.5">Down (10%)</p>
                                             <p className="text-base md:text-lg font-bold font-tabular-nums text-tertiary">{formatter.format(downPayment)}</p>
                                         </div>
                                     </div>
@@ -324,9 +384,23 @@ export default function Loans() {
                                                 checked={termsAccepted}
                                                 onChange={(e) => setTermsAccepted(e.target.checked)}
                                             />
-                                            <span className="text-sm md:text-xs font-medium text-on-surface-variant group-hover:text-on-surface transition-colors leading-tight">I accept the terms and authorize the 20% down payment from wallet balance.</span>
+                                            <span className="text-sm md:text-xs font-medium text-on-surface-variant group-hover:text-on-surface transition-colors leading-tight">I accept the terms and authorize the 10% down payment from wallet balance.</span>
                                         </label>
                                         
+                                        {loanSubmitted && (
+                                            <div className="text-xs font-medium bg-tertiary/10 p-2.5 rounded-lg border border-tertiary/20 text-tertiary flex items-start gap-2">
+                                                <span className="material-symbols-outlined text-[16px] mt-0.5 shrink-0">check_circle</span>
+                                                <span>Your loan request has been submitted for approval. You will be notified once it's approved.</span>
+                                            </div>
+                                        )}
+
+                                        {pendingLoan && !loanSubmitted && (
+                                            <div className="text-xs font-medium bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20 text-amber-400 flex items-start gap-2">
+                                                <span className="material-symbols-outlined text-[16px] mt-0.5 shrink-0">pending</span>
+                                                <span>Your loan application is pending approval. You will be notified once it's reviewed.</span>
+                                            </div>
+                                        )}
+
                                         {applyError && (
                                             <div className="text-error text-xs font-medium bg-error/10 p-2 rounded border border-error/20">
                                                 {applyError}
@@ -337,14 +411,16 @@ export default function Loans() {
                                             disabled={!termsAccepted || isApplying || activeLoan !== undefined}
                                             onClick={handleInitiate}
                                             className={`w-full py-2.5 md:py-3.5 rounded-lg text-xs md:text-sm font-bold uppercase tracking-wider transition-all shadow-sm ${
-                                                activeLoan !== undefined 
+                                                approvedActiveLoan
                                                 ? 'bg-surface-container-highest text-on-surface-variant cursor-not-allowed'
+                                                : pendingLoan
+                                                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30 cursor-not-allowed'
                                                 : termsAccepted && !isApplying 
                                                 ? 'bg-primary text-on-primary hover:brightness-110 active:scale-[0.98] shadow-primary/20' 
                                                 : 'bg-surface-container-high text-outline/50 cursor-not-allowed'
                                             }`}
                                         >
-                                            {isApplying ? 'Processing...' : activeLoan ? 'Loan Already Active' : 'Sign & Initiate'}
+                                            {isApplying ? 'Processing...' : approvedActiveLoan ? 'Loan Active' : pendingLoan ? 'Application Pending Approval' : 'Sign & Initiate'}
                                         </button>
                                     </div>
                                 </div>

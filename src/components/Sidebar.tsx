@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useKycStore } from '../store/kycStore';
 
 export default function Sidebar() {
     const location = useLocation();
     const navigate = useNavigate();
     const { user } = useAuthStore();
+    const { kyc, fetchKyc } = useKycStore();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    // Fetch KYC status on mount so we can display the correct verification tick
+    useEffect(() => {
+        if (user?.id && !kyc) {
+            fetchKyc(user.id);
+        }
+    }, [user, kyc, fetchKyc]);
 
     useEffect(() => {
         const handleToggle = () => setIsMobileMenuOpen(prev => !prev);
@@ -91,7 +100,11 @@ export default function Sidebar() {
                                         <p className="text-[14px] font-bold text-white truncate leading-tight group-hover:text-primary transition-colors">
                                             {user?.user_metadata?.full_name || 'Verified User'}
                                         </p>
-                                        <span className="material-symbols-outlined text-primary text-[14px] shrink-0 drop-shadow-[0_0_4px_rgba(37,99,235,0.4)]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                        {kyc?.status === 'approved' ? (
+                                            <span className="material-symbols-outlined text-primary text-[14px] shrink-0 drop-shadow-[0_0_4px_rgba(37,99,235,0.4)]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                        ) : (
+                                            <span className="material-symbols-outlined text-error text-[14px] shrink-0 drop-shadow-[0_0_4px_rgba(239,68,68,0.4)]" style={{ fontVariationSettings: "'FILL' 1" }}>cancel</span>
+                                        )}
                                     </div>
                                     <p className="text-[11px] text-gray-400 truncate font-medium">
                                         {user?.email || 'user@example.com'}
@@ -171,8 +184,13 @@ export default function Sidebar() {
                         <h3 className="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Account</h3>
                         <div className="space-y-0">
                             <Link to="/kyc" className={getLinkClass("/kyc")}>
-                                <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/kyc")}>verified_user</span>
+                                <span className={`material-symbols-outlined text-[20px] ${kyc?.status === 'approved' ? 'text-primary' : 'text-error animate-pulse'}`} style={getIconStyle("/kyc")}>
+                                    {kyc?.status === 'approved' ? 'verified_user' : 'gpp_bad'}
+                                </span>
                                 <span className="text-sm">Verification</span>
+                                {kyc?.status !== 'approved' && (
+                                    <span className="ml-auto w-2 h-2 rounded-full bg-error animate-ping"></span>
+                                )}
                             </Link>
                             <Link to="/referrals" className={getLinkClass("/referrals")}>
                                 <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/referrals")}>groups</span>

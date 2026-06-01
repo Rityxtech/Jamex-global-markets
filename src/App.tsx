@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 
 declare const __BASE_PATH__: string;
 import Home from './pages/Home';
+import About from './pages/About';
 import Dashboard from './pages/Dashboard';
 import Invest from './pages/Invest';
 import Plans from './pages/Plans';
@@ -73,12 +74,14 @@ export default function App() {
     return () => disconnect();
   }, [initialize, connect, disconnect]);
 
+  console.log('[DEBUG] __BASE_PATH__ =', __BASE_PATH__);
   return (
     <BrowserRouter basename={__BASE_PATH__}>
       <ScrollToTop />
       <Header />
       <Routes>
         <Route path="/" element={<RootRoute />} />
+        <Route path="/about" element={<About />} />
 
         {/* Public Routes (guests only) */}
         <Route element={<PublicRoute />}>

@@ -87,7 +87,7 @@ export default function Header() {
       {!isLoggedIn && (
         <nav className="hidden md:flex items-center gap-8 relative z-[70]">
           <Link to="/" className="text-sm font-bold text-white border-b-2 border-white py-1">Home</Link>
-          <Link to="/" className="text-sm font-semibold text-gray-300 hover:text-white transition-colors py-1">About us</Link>
+          <Link to="/about" className="text-sm font-semibold text-gray-300 hover:text-white transition-colors py-1">About us</Link>
           <Link to="/plans" className="text-sm font-semibold text-gray-300 hover:text-white transition-colors py-1">Plans</Link>
           <Link to="/support" className="text-sm font-semibold text-gray-300 hover:text-white transition-colors py-1">Contact us</Link>
         </nav>
@@ -159,7 +159,7 @@ export default function Header() {
                 <span className="material-symbols-outlined text-[20px]">home</span>
                 Home
               </Link>
-              <Link to="/" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 h-11 rounded-xl text-sm font-bold transition-colors ${location.pathname === '/' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-300 hover:bg-white/5 hover:text-white'}`}>
+              <Link to="/about" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 h-11 rounded-xl text-sm font-bold transition-colors ${location.pathname === '/about' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-300 hover:bg-white/5 hover:text-white'}`}>
                 <span className="material-symbols-outlined text-[20px]">info</span>
                 About us
               </Link>

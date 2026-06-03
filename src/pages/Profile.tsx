@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { supabase } from '../lib/supabase';
 
@@ -10,11 +10,7 @@ interface ProfileData {
     created_at: string | null;
 }
 
-interface KycData {
-    first_name: string;
-    last_name: string;
-    country: string;
-    city: string;
+interface KycStatus {
     status: string;
 }
 
@@ -22,23 +18,20 @@ export default function Profile() {
     const navigate = useNavigate();
     const { user } = useAuthStore();
     const [profile, setProfile] = useState<ProfileData | null>(null);
-    const [kyc, setKyc] = useState<KycData | null>(null);
+    const [kyc, setKyc] = useState<KycStatus | null>(null);
 
     useEffect(() => {
         if (!user) return;
         Promise.all([
             supabase.from('profiles').select('full_name, avatar_url, referral_code, created_at').eq('id', user.id).single(),
-            supabase.from('kyc_submissions').select('first_name, last_name, country, city, status').eq('user_id', user.id).maybeSingle(),
+            supabase.from('kyc_submissions').select('status').eq('user_id', user.id).maybeSingle(),
         ]).then(([pRes, kRes]) => {
             if (pRes.data) setProfile(pRes.data as ProfileData);
-            if (kRes.data) setKyc(kRes.data as KycData);
+            if (kRes.data) setKyc(kRes.data as KycStatus);
         });
     }, [user]);
 
-    const displayName = profile?.full_name
-        || (kyc ? `${kyc.first_name} ${kyc.last_name}`.trim() : '')
-        || user?.email?.split('@')[0]
-        || 'User';
+    const displayName = profile?.full_name || user?.email?.split('@')[0] || 'User';
     const kycVerified = kyc?.status === 'approved';
     const joinDate = profile?.created_at
         ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
@@ -73,9 +66,6 @@ export default function Profile() {
                                                 KYC VERIFIED
                                             </span>
                                         )}
-                                        {!kycVerified && kyc?.status === 'pending' && (
-                                            <span className="bg-primary/10 text-primary text-[9px] md:text-label-sm font-bold px-2 py-0.5 md:px-3 md:py-1 rounded border border-primary/30 w-max">KYC PENDING</span>
-                                        )}
                                     </div>
                                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs md:text-label-md font-bold text-on-surface-variant">
                                         <div className="flex items-center gap-1.5">
@@ -97,83 +87,110 @@ export default function Profile() {
                             </div>
                         </section>
 
-                        {/* Personal Information */}
+                        {/* Account Information */}
                         <section className="lg:col-span-7 glass-card rounded-xl overflow-hidden border border-outline-variant/20">
                             <div className="bg-surface-container-high/40 px-4 md:px-card-padding py-3 border-b border-outline-variant/10">
-                                <h3 className="text-[11px] md:text-label-md font-bold tracking-wide text-on-surface uppercase">Personal Information (KYC)</h3>
+                                <h3 className="text-[11px] md:text-label-md font-bold tracking-wide text-on-surface uppercase">Account Information</h3>
                             </div>
                             <div className="p-4 md:p-card-padding grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant block uppercase tracking-wider">Legal First Name</label>
-                                    <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base text-on-surface flex items-center justify-between">
-                                        <span className="font-medium">{kyc?.first_name || '—'}</span>
-                                        <span className="material-symbols-outlined text-outline/50 text-[16px]">lock</span>
+                                    <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant block uppercase tracking-wider">Display Name</label>
+                                    <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base text-on-surface font-medium">
+                                        {displayName}
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant block uppercase tracking-wider">Legal Last Name</label>
-                                    <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base text-on-surface flex items-center justify-between">
-                                        <span className="font-medium">{kyc?.last_name || '—'}</span>
-                                        <span className="material-symbols-outlined text-outline/50 text-[16px]">lock</span>
-                                    </div>
-                                </div>
-                                <div className="space-y-1.5 md:col-span-2">
-                                    <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant block uppercase tracking-wider">Registered Email Address</label>
+                                    <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant block uppercase tracking-wider">Email Address</label>
                                     <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base text-on-surface flex items-center justify-between">
                                         <span className="font-medium truncate">{user?.email || '—'}</span>
                                         <span className="material-symbols-outlined text-tertiary text-[16px]">check_circle</span>
                                     </div>
                                 </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant block uppercase tracking-wider">KYC Status</label>
-                                    <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base font-bold capitalize"
-                                        style={{ color: kyc?.status === 'approved' ? 'var(--md-sys-color-tertiary)' : kyc?.status === 'rejected' ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-on-surface)' }}>
-                                        {kyc?.status || 'Not submitted'}
-                                    </div>
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant block uppercase tracking-wider">Country</label>
-                                    <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base text-on-surface font-medium">
-                                        {kyc?.country || '—'}
+                                <div className="space-y-1.5 md:col-span-2">
+                                    <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant block uppercase tracking-wider">Referral Code</label>
+                                    <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base text-on-surface font-medium flex items-center justify-between">
+                                        <span className="font-tabular-nums">{profile?.referral_code || '—'}</span>
+                                        <span className="material-symbols-outlined text-outline/50 text-[16px]">content_copy</span>
                                     </div>
                                 </div>
                             </div>
                         </section>
 
-                        {/* Security Quick Stats */}
+                        {/* KYC Status Summary */}
                         <section className="lg:col-span-5 flex flex-col">
                             <div className="glass-card rounded-xl p-4 md:p-card-padding flex-1 border border-outline-variant/20 flex flex-col">
                                 <div className="flex items-center justify-between mb-4 md:mb-6">
-                                    <h3 className="text-[11px] md:text-label-md font-bold text-on-surface uppercase tracking-wide">Security Level</h3>
-                                    <span className="text-[10px] md:text-xs text-primary font-bold bg-primary/10 px-2 py-0.5 rounded uppercase border border-primary/20">Advanced</span>
+                                    <h3 className="text-[11px] md:text-label-md font-bold text-on-surface uppercase tracking-wide">Identity Verification</h3>
+                                    {kycVerified ? (
+                                        <span className="text-[10px] md:text-xs text-tertiary font-bold bg-tertiary/10 px-2 py-0.5 rounded uppercase border border-tertiary/20">Verified</span>
+                                    ) : kyc?.status === 'pending' ? (
+                                        <span className="text-[10px] md:text-xs text-primary font-bold bg-primary/10 px-2 py-0.5 rounded uppercase border border-primary/20">Pending</span>
+                                    ) : (
+                                        <span className="text-[10px] md:text-xs text-on-surface-variant font-bold bg-surface-container-highest px-2 py-0.5 rounded uppercase border border-outline-variant/30">Not Submitted</span>
+                                    )}
                                 </div>
-                                <div className="space-y-3 md:space-y-4 flex-1">
-                                    <div className="flex items-center gap-3 md:gap-4 p-2 rounded-lg hover:bg-surface-container-low transition-colors">
-                                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-tertiary/10 border border-tertiary/20 flex items-center justify-center">
-                                            <span className="material-symbols-outlined text-tertiary text-[16px] md:text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>shield</span>
+                                <div className="flex-1">
+                                    <div className="flex items-start gap-3 mb-4">
+                                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                                            <span className="material-symbols-outlined text-primary text-[20px] md:text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified_user</span>
                                         </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm md:text-base font-bold text-on-surface leading-tight">Two-Factor Auth</p>
-                                            <p className="text-[10px] md:text-xs text-on-surface-variant mt-0.5">Active via Authenticator</p>
+                                        <div>
+                                            <p className="text-sm md:text-base font-bold text-on-surface">KYC Verification</p>
+                                            <p className="text-[10px] md:text-xs text-on-surface-variant mt-0.5">
+                                                {kycVerified
+                                                    ? 'Your identity has been verified. You have full access to all features.'
+                                                    : kyc?.status === 'pending'
+                                                    ? 'Your documents are under review. This usually takes 1-3 business days.'
+                                                    : 'Complete identity verification to unlock deposits, withdrawals, and investments.'}
+                                            </p>
                                         </div>
-                                        <span className="text-tertiary material-symbols-outlined text-[24px] md:text-[28px]">toggle_on</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 md:gap-4 p-2 rounded-lg hover:bg-surface-container-low transition-colors">
-                                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                                            <span className="material-symbols-outlined text-primary text-[16px] md:text-[20px]">key</span>
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm md:text-base font-bold text-on-surface leading-tight">Withdrawal Whitelist</p>
-                                            <p className="text-[10px] md:text-xs text-on-surface-variant mt-0.5">Enabled for verified addrs</p>
-                                        </div>
-                                        <span className="text-primary material-symbols-outlined text-[24px] md:text-[28px]">toggle_on</span>
                                     </div>
                                 </div>
-                                <div className="mt-4 md:mt-6 pt-4 border-t border-outline-variant/10">
-                                    <button onClick={() => navigate('/settings')} className="w-full bg-surface-container-high text-on-surface py-2.5 md:py-3 rounded-lg text-sm md:text-label-md font-bold hover:bg-surface-variant transition-all border border-outline-variant/30">
-                                        Manage Security
+                                <div className="pt-4 border-t border-outline-variant/10">
+                                    <button
+                                        onClick={() => navigate('/kyc')}
+                                        className="w-full bg-surface-container-high text-on-surface py-2.5 md:py-3 rounded-lg text-sm md:text-label-md font-bold hover:bg-surface-variant transition-all border border-outline-variant/30 flex items-center justify-center gap-2"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px]">{kycVerified ? 'visibility' : 'assignment'}</span>
+                                        {kycVerified ? 'View KYC Details' : 'Complete Verification'}
                                     </button>
                                 </div>
+                            </div>
+                        </section>
+
+                        {/* Security Quick Stats */}
+                        <section className="lg:col-span-12 glass-card rounded-xl p-4 md:p-card-padding border border-outline-variant/20">
+                            <div className="flex items-center justify-between mb-4 md:mb-6">
+                                <h3 className="text-[11px] md:text-label-md font-bold text-on-surface uppercase tracking-wide">Security Level</h3>
+                                <span className="text-[10px] md:text-xs text-primary font-bold bg-primary/10 px-2 py-0.5 rounded uppercase border border-primary/20">Advanced</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                                <div className="flex items-center gap-3 md:gap-4 p-2 rounded-lg hover:bg-surface-container-low transition-colors">
+                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-tertiary/10 border border-tertiary/20 flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-tertiary text-[16px] md:text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>shield</span>
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm md:text-base font-bold text-on-surface leading-tight">Two-Factor Auth</p>
+                                        <p className="text-[10px] md:text-xs text-on-surface-variant mt-0.5">Active via Authenticator</p>
+                                    </div>
+                                    <span className="text-tertiary material-symbols-outlined text-[24px] md:text-[28px]">toggle_on</span>
+                                </div>
+                                <div className="flex items-center gap-3 md:gap-4 p-2 rounded-lg hover:bg-surface-container-low transition-colors">
+                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-primary text-[16px] md:text-[20px]">key</span>
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm md:text-base font-bold text-on-surface leading-tight">Withdrawal Whitelist</p>
+                                        <p className="text-[10px] md:text-xs text-on-surface-variant mt-0.5">Enabled for verified addrs</p>
+                                    </div>
+                                    <span className="text-primary material-symbols-outlined text-[24px] md:text-[28px]">toggle_on</span>
+                                </div>
+                            </div>
+                            <div className="mt-4 md:mt-6 pt-4 border-t border-outline-variant/10">
+                                <button onClick={() => navigate('/settings')} className="w-full md:w-auto bg-surface-container-high text-on-surface px-4 py-2.5 md:py-3 rounded-lg text-sm md:text-label-md font-bold hover:bg-surface-variant transition-all border border-outline-variant/30 flex items-center justify-center gap-2">
+                                    <span className="material-symbols-outlined text-[18px]">settings</span>
+                                    Manage Security
+                                </button>
                             </div>
                         </section>
 

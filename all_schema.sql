@@ -1,10 +1,12 @@
 -- ================================================================
---  JAMEX GLOBAL MARKETS — COMPLETE DATABASE SCHEMA  v1.0
---  Single source of truth. Safe to re-run (idempotent).
---  Run the full file in Supabase SQL Editor.
+--  JAMEX GLOBAL MARKETS — ALL-IN-ONE SCHEMA (v2.0)
+--  Single file for easy debugging / reset. Safe to re-run.
+--  Run the ENTIRE file in the Supabase SQL Editor.
 -- ================================================================
 
--- 1. PROFILES (auto-created on signup via trigger)
+-- ================================================================
+-- 1. PROFILES
+-- ================================================================
 CREATE TABLE IF NOT EXISTS public.profiles (
   id             UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name      TEXT,
@@ -16,7 +18,9 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- ================================================================
 -- 2. WALLETS
+-- ================================================================
 CREATE TABLE IF NOT EXISTS public.wallets (
   id             UUID         NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id        UUID         NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -26,7 +30,9 @@ CREATE TABLE IF NOT EXISTS public.wallets (
   updated_at     TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
 
+-- ================================================================
 -- 3. TRANSACTIONS
+-- ================================================================
 CREATE TABLE IF NOT EXISTS public.transactions (
   id                  UUID          NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id             UUID          NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -41,7 +47,9 @@ CREATE INDEX IF NOT EXISTS idx_tx_user   ON public.transactions (user_id);
 CREATE INDEX IF NOT EXISTS idx_tx_type   ON public.transactions (type, status);
 CREATE INDEX IF NOT EXISTS idx_tx_date   ON public.transactions (created_at DESC);
 
--- 4. INVESTMENT PLANS (admin-managed)
+-- ================================================================
+-- 4. INVESTMENT PLANS
+-- ================================================================
 CREATE TABLE IF NOT EXISTS public.investment_plans (
   id            UUID          NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   name          TEXT          NOT NULL UNIQUE,
@@ -55,16 +63,17 @@ CREATE TABLE IF NOT EXISTS public.investment_plans (
   updated_at    TIMESTAMPTZ   NOT NULL DEFAULT now()
 );
 
--- Insert Default Investment Plans
 INSERT INTO public.investment_plans (name, tier, daily_yield, duration_days, min_amount, max_amount, is_active)
-VALUES 
+VALUES
   ('Starter Plan', 'Starter', 1.5, 30, 100, 999, true),
   ('Professional Plan', 'Professional', 2.5, 60, 1000, 4999, true),
   ('Executive Plan', 'Executive', 4.0, 90, 5000, 19999, true),
   ('VIP Platinum', 'VIP', 6.0, 120, 20000, NULL, true)
 ON CONFLICT (name) DO NOTHING;
 
+-- ================================================================
 -- 5. INVESTMENTS
+-- ================================================================
 CREATE TABLE IF NOT EXISTS public.investments (
   id               UUID          NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id          UUID          NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -78,7 +87,9 @@ CREATE TABLE IF NOT EXISTS public.investments (
 CREATE INDEX IF NOT EXISTS idx_inv_user   ON public.investments (user_id);
 CREATE INDEX IF NOT EXISTS idx_inv_status ON public.investments (status);
 
+-- ================================================================
 -- 6. KYC SUBMISSIONS
+-- ================================================================
 CREATE TABLE IF NOT EXISTS public.kyc_submissions (
   id               UUID        NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id          UUID        NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -100,7 +111,9 @@ CREATE TABLE IF NOT EXISTS public.kyc_submissions (
 CREATE INDEX IF NOT EXISTS idx_kyc_status  ON public.kyc_submissions (status);
 CREATE INDEX IF NOT EXISTS idx_kyc_country ON public.kyc_submissions (country);
 
+-- ================================================================
 -- 7. LOANS
+-- ================================================================
 CREATE TABLE IF NOT EXISTS public.loans (
   id              UUID          NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id         UUID          NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -113,7 +126,9 @@ CREATE TABLE IF NOT EXISTS public.loans (
 );
 CREATE INDEX IF NOT EXISTS idx_loans_user ON public.loans (user_id);
 
+-- ================================================================
 -- 8. LOAN REPAYMENTS
+-- ================================================================
 CREATE TABLE IF NOT EXISTS public.loan_repayments (
   id               UUID          NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   loan_id          UUID          NOT NULL REFERENCES public.loans(id) ON DELETE CASCADE,
@@ -128,7 +143,9 @@ CREATE TABLE IF NOT EXISTS public.loan_repayments (
 CREATE INDEX IF NOT EXISTS idx_rep_loan ON public.loan_repayments (loan_id);
 CREATE INDEX IF NOT EXISTS idx_rep_user ON public.loan_repayments (user_id);
 
+-- ================================================================
 -- 9. REFERRALS
+-- ================================================================
 CREATE TABLE IF NOT EXISTS public.referrals (
   id          UUID        NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   referrer_id UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -138,7 +155,9 @@ CREATE TABLE IF NOT EXISTS public.referrals (
 );
 CREATE INDEX IF NOT EXISTS idx_ref_referrer ON public.referrals (referrer_id);
 
+-- ================================================================
 -- 10. REFERRAL ACTIVITY
+-- ================================================================
 CREATE TABLE IF NOT EXISTS public.referral_activity (
   id             UUID          NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id        UUID          NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -150,7 +169,9 @@ CREATE TABLE IF NOT EXISTS public.referral_activity (
 );
 CREATE INDEX IF NOT EXISTS idx_refact_user ON public.referral_activity (user_id);
 
+-- ================================================================
 -- 11. USER SETTINGS
+-- ================================================================
 CREATE TABLE IF NOT EXISTS public.user_settings (
   user_id                  UUID    PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   two_factor_enabled       BOOLEAN NOT NULL DEFAULT false,
@@ -161,7 +182,9 @@ CREATE TABLE IF NOT EXISTS public.user_settings (
   updated_at               TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- ================================================================
 -- 12. SUPPORT TICKETS
+-- ================================================================
 CREATE TABLE IF NOT EXISTS public.support_tickets (
   id          UUID        NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id     UUID        REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -180,7 +203,27 @@ CREATE INDEX IF NOT EXISTS idx_tickets_user   ON public.support_tickets (user_id
 CREATE INDEX IF NOT EXISTS idx_tickets_status ON public.support_tickets (status);
 
 -- ================================================================
--- 13. FUNCTIONS & TRIGGERS
+-- 13. PLATFORM CONFIG
+-- ================================================================
+CREATE TABLE IF NOT EXISTS public.platform_config (
+  id                    INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  withdrawal_fee        NUMERIC(5,2)  NOT NULL DEFAULT 2.50,
+  deposit_fee           NUMERIC(5,2)  NOT NULL DEFAULT 0.00,
+  roi_cap_standard      NUMERIC(5,2)  NOT NULL DEFAULT 12.5,
+  roi_cap_institutional NUMERIC(5,2)  NOT NULL DEFAULT 28.0,
+  maintenance_mode      BOOLEAN       NOT NULL DEFAULT false,
+  new_registrations     BOOLEAN       NOT NULL DEFAULT true,
+  deposit_address_usdt  TEXT          NOT NULL DEFAULT '',
+  deposit_address_eth   TEXT          NOT NULL DEFAULT '',
+  deposit_address_btc   TEXT          NOT NULL DEFAULT '',
+  advanced_config       JSONB         DEFAULT '{}'::jsonb,
+  updated_at            TIMESTAMPTZ   NOT NULL DEFAULT now()
+);
+
+INSERT INTO public.platform_config (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+
+-- ================================================================
+-- 14. FUNCTIONS & TRIGGERS
 -- ================================================================
 
 -- Auto-create profile + wallet + settings on every new signup
@@ -229,15 +272,12 @@ DROP TRIGGER IF EXISTS trg_settings_upd       ON public.user_settings;
 CREATE TRIGGER trg_settings_upd       BEFORE UPDATE ON public.user_settings      FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
 DROP TRIGGER IF EXISTS trg_tickets_upd        ON public.support_tickets;
 CREATE TRIGGER trg_tickets_upd        BEFORE UPDATE ON public.support_tickets    FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
+DROP TRIGGER IF EXISTS trg_platform_upd       ON public.platform_config;
+CREATE TRIGGER trg_platform_upd       BEFORE UPDATE ON public.platform_config   FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
 
 -- ================================================================
--- 14. ROW LEVEL SECURITY
---   Pattern: users see/edit only their own rows.
---   Admin (akugbof@gmail.com) gets a separate FOR ALL policy that
---   matches their JWT email — bypasses all user restrictions.
---   All legacy policy names are dropped first for a clean slate.
+-- 15. ROW LEVEL SECURITY
 -- ================================================================
-
 ALTER TABLE public.profiles          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.wallets           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.transactions      ENABLE ROW LEVEL SECURITY;
@@ -250,18 +290,13 @@ ALTER TABLE public.referrals         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.referral_activity ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_settings     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.support_tickets   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.platform_config   ENABLE ROW LEVEL SECURITY;
 
 -- ── PROFILES ──
 DROP POLICY IF EXISTS "profiles_select_own"  ON public.profiles;
 DROP POLICY IF EXISTS "profiles_insert_own"  ON public.profiles;
 DROP POLICY IF EXISTS "profiles_update_own"  ON public.profiles;
 DROP POLICY IF EXISTS "profiles_admin_all"   ON public.profiles;
-DROP POLICY IF EXISTS "users_read_own_profile"    ON public.profiles;
-DROP POLICY IF EXISTS "users_update_own_profile"  ON public.profiles;
-DROP POLICY IF EXISTS "admin_all_profiles"         ON public.profiles;
-DROP POLICY IF EXISTS "admin_read_all_profiles"    ON public.profiles;
-DROP POLICY IF EXISTS "Public profiles are viewable by everyone." ON public.profiles;
-
 CREATE POLICY "profiles_select_own" ON public.profiles FOR SELECT TO authenticated USING (auth.uid() = id);
 CREATE POLICY "profiles_insert_own" ON public.profiles FOR INSERT TO authenticated WITH CHECK (auth.uid() = id);
 CREATE POLICY "profiles_update_own" ON public.profiles FOR UPDATE TO authenticated USING (auth.uid() = id);
@@ -271,11 +306,6 @@ CREATE POLICY "profiles_admin_all"  ON public.profiles FOR ALL    TO authenticat
 DROP POLICY IF EXISTS "wallets_select_own"   ON public.wallets;
 DROP POLICY IF EXISTS "wallets_update_own"   ON public.wallets;
 DROP POLICY IF EXISTS "wallets_admin_all"    ON public.wallets;
-DROP POLICY IF EXISTS "users_read_own_wallet"   ON public.wallets;
-DROP POLICY IF EXISTS "users_update_own_wallet" ON public.wallets;
-DROP POLICY IF EXISTS "admin_all_wallets"        ON public.wallets;
-DROP POLICY IF EXISTS "admin_read_all_wallets"   ON public.wallets;
-
 CREATE POLICY "wallets_select_own" ON public.wallets FOR SELECT TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "wallets_update_own" ON public.wallets FOR UPDATE TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "wallets_admin_all"  ON public.wallets FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
@@ -284,11 +314,6 @@ CREATE POLICY "wallets_admin_all"  ON public.wallets FOR ALL    TO authenticated
 DROP POLICY IF EXISTS "transactions_select_own"  ON public.transactions;
 DROP POLICY IF EXISTS "transactions_insert_own"  ON public.transactions;
 DROP POLICY IF EXISTS "transactions_admin_all"   ON public.transactions;
-DROP POLICY IF EXISTS "users_read_own_transactions"    ON public.transactions;
-DROP POLICY IF EXISTS "users_insert_own_transactions"  ON public.transactions;
-DROP POLICY IF EXISTS "admin_all_transactions"          ON public.transactions;
-DROP POLICY IF EXISTS "admin_read_all_transactions"     ON public.transactions;
-
 CREATE POLICY "transactions_select_own" ON public.transactions FOR SELECT TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "transactions_insert_own" ON public.transactions FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "transactions_admin_all"  ON public.transactions FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
@@ -296,7 +321,6 @@ CREATE POLICY "transactions_admin_all"  ON public.transactions FOR ALL    TO aut
 -- ── INVESTMENT PLANS ──
 DROP POLICY IF EXISTS "plans_select_all" ON public.investment_plans;
 DROP POLICY IF EXISTS "plans_admin_all"  ON public.investment_plans;
-
 CREATE POLICY "plans_select_all" ON public.investment_plans FOR SELECT TO authenticated USING (true);
 CREATE POLICY "plans_admin_all"  ON public.investment_plans FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
 
@@ -304,11 +328,6 @@ CREATE POLICY "plans_admin_all"  ON public.investment_plans FOR ALL    TO authen
 DROP POLICY IF EXISTS "investments_select_own"  ON public.investments;
 DROP POLICY IF EXISTS "investments_insert_own"  ON public.investments;
 DROP POLICY IF EXISTS "investments_admin_all"   ON public.investments;
-DROP POLICY IF EXISTS "users_read_own_investments"    ON public.investments;
-DROP POLICY IF EXISTS "users_insert_own_investments"  ON public.investments;
-DROP POLICY IF EXISTS "admin_all_investments"          ON public.investments;
-DROP POLICY IF EXISTS "admin_read_all_investments"     ON public.investments;
-
 CREATE POLICY "investments_select_own" ON public.investments FOR SELECT TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "investments_insert_own" ON public.investments FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "investments_admin_all"  ON public.investments FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
@@ -318,12 +337,6 @@ DROP POLICY IF EXISTS "kyc_select_own"   ON public.kyc_submissions;
 DROP POLICY IF EXISTS "kyc_insert_own"   ON public.kyc_submissions;
 DROP POLICY IF EXISTS "kyc_update_own"   ON public.kyc_submissions;
 DROP POLICY IF EXISTS "kyc_admin_all"    ON public.kyc_submissions;
-DROP POLICY IF EXISTS "users_read_own_kyc"    ON public.kyc_submissions;
-DROP POLICY IF EXISTS "users_insert_own_kyc"  ON public.kyc_submissions;
-DROP POLICY IF EXISTS "users_update_own_kyc"  ON public.kyc_submissions;
-DROP POLICY IF EXISTS "admin_all_kyc"          ON public.kyc_submissions;
-DROP POLICY IF EXISTS "admin_read_all_kyc"     ON public.kyc_submissions;
-
 CREATE POLICY "kyc_select_own" ON public.kyc_submissions FOR SELECT TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "kyc_insert_own" ON public.kyc_submissions FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "kyc_update_own" ON public.kyc_submissions FOR UPDATE TO authenticated USING (auth.uid() = user_id);
@@ -333,10 +346,6 @@ CREATE POLICY "kyc_admin_all"  ON public.kyc_submissions FOR ALL    TO authentic
 DROP POLICY IF EXISTS "loans_select_own"  ON public.loans;
 DROP POLICY IF EXISTS "loans_insert_own"  ON public.loans;
 DROP POLICY IF EXISTS "loans_admin_all"   ON public.loans;
-DROP POLICY IF EXISTS "users_read_own_loans"    ON public.loans;
-DROP POLICY IF EXISTS "users_insert_own_loans"  ON public.loans;
-DROP POLICY IF EXISTS "admin_all_loans"          ON public.loans;
-
 CREATE POLICY "loans_select_own" ON public.loans FOR SELECT TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "loans_insert_own" ON public.loans FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "loans_admin_all"  ON public.loans FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
@@ -346,11 +355,6 @@ DROP POLICY IF EXISTS "repayments_select_own"  ON public.loan_repayments;
 DROP POLICY IF EXISTS "repayments_insert_own"  ON public.loan_repayments;
 DROP POLICY IF EXISTS "repayments_update_own"  ON public.loan_repayments;
 DROP POLICY IF EXISTS "repayments_admin_all"   ON public.loan_repayments;
-DROP POLICY IF EXISTS "users_read_own_repayments"    ON public.loan_repayments;
-DROP POLICY IF EXISTS "users_insert_own_repayments"  ON public.loan_repayments;
-DROP POLICY IF EXISTS "users_update_own_repayments"  ON public.loan_repayments;
-DROP POLICY IF EXISTS "admin_all_repayments"          ON public.loan_repayments;
-
 CREATE POLICY "repayments_select_own" ON public.loan_repayments FOR SELECT TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "repayments_insert_own" ON public.loan_repayments FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "repayments_update_own" ON public.loan_repayments FOR UPDATE TO authenticated USING (auth.uid() = user_id);
@@ -360,10 +364,6 @@ CREATE POLICY "repayments_admin_all"  ON public.loan_repayments FOR ALL    TO au
 DROP POLICY IF EXISTS "referrals_select_own"  ON public.referrals;
 DROP POLICY IF EXISTS "referrals_insert_own"  ON public.referrals;
 DROP POLICY IF EXISTS "referrals_admin_all"   ON public.referrals;
-DROP POLICY IF EXISTS "Users can view their own referrals"              ON public.referrals;
-DROP POLICY IF EXISTS "Users can insert referrals (when signing up)"    ON public.referrals;
-DROP POLICY IF EXISTS "admin_all_referrals"                              ON public.referrals;
-
 CREATE POLICY "referrals_select_own" ON public.referrals FOR SELECT TO authenticated USING (auth.uid() = referrer_id OR auth.uid() = referred_id);
 CREATE POLICY "referrals_insert_own" ON public.referrals FOR INSERT TO authenticated WITH CHECK (auth.uid() = referred_id);
 CREATE POLICY "referrals_admin_all"  ON public.referrals FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
@@ -371,34 +371,31 @@ CREATE POLICY "referrals_admin_all"  ON public.referrals FOR ALL    TO authentic
 -- ── REFERRAL ACTIVITY ──
 DROP POLICY IF EXISTS "refact_select_own"  ON public.referral_activity;
 DROP POLICY IF EXISTS "refact_admin_all"   ON public.referral_activity;
-DROP POLICY IF EXISTS "Users can view their own referral activities" ON public.referral_activity;
-DROP POLICY IF EXISTS "admin_all_activity"                            ON public.referral_activity;
-
 CREATE POLICY "refact_select_own" ON public.referral_activity FOR SELECT TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "refact_admin_all"  ON public.referral_activity FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
 
 -- ── USER SETTINGS ──
 DROP POLICY IF EXISTS "settings_crud_own"   ON public.user_settings;
 DROP POLICY IF EXISTS "settings_admin_all"  ON public.user_settings;
-DROP POLICY IF EXISTS "Users can view their own settings"   ON public.user_settings;
-DROP POLICY IF EXISTS "Users can update their own settings" ON public.user_settings;
-DROP POLICY IF EXISTS "Users can insert their own settings" ON public.user_settings;
-DROP POLICY IF EXISTS "admin_all_settings"                   ON public.user_settings;
-
 CREATE POLICY "settings_crud_own"  ON public.user_settings FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "settings_admin_all" ON public.user_settings FOR ALL TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
 
 -- ── SUPPORT TICKETS ──
-DROP POLICY IF EXISTS "tickets_crud_own"   ON public.support_tickets;
-DROP POLICY IF EXISTS "tickets_admin_all"  ON public.support_tickets;
+DROP POLICY IF EXISTS "tickets_crud_own"     ON public.support_tickets;
+DROP POLICY IF EXISTS "tickets_admin_all"    ON public.support_tickets;
 DROP POLICY IF EXISTS "tickets_guest_insert" ON public.support_tickets;
-
-CREATE POLICY "tickets_crud_own"  ON public.support_tickets FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "tickets_admin_all" ON public.support_tickets FOR ALL TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+CREATE POLICY "tickets_crud_own"     ON public.support_tickets FOR ALL    TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "tickets_admin_all"    ON public.support_tickets FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
 CREATE POLICY "tickets_guest_insert" ON public.support_tickets FOR INSERT TO anon WITH CHECK (user_id IS NULL);
 
+-- ── PLATFORM CONFIG ──
+DROP POLICY IF EXISTS "platform_config_admin"    ON public.platform_config;
+DROP POLICY IF EXISTS "platform_config_read_all" ON public.platform_config;
+CREATE POLICY "platform_config_admin"    ON public.platform_config FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+CREATE POLICY "platform_config_read_all" ON public.platform_config FOR SELECT TO authenticated USING (true);
+
 -- ================================================================
--- 15. STORAGE BUCKET — kyc-documents
+-- 16. STORAGE BUCKET — kyc-documents
 -- ================================================================
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('kyc-documents', 'kyc-documents', true)
@@ -421,7 +418,7 @@ CREATE POLICY "kyc_storage_read" ON storage.objects
   );
 
 -- ================================================================
--- 16. REALTIME PUBLICATIONS
+-- 17. REALTIME PUBLICATIONS
 -- ================================================================
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.wallets;           EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.transactions;      EXCEPTION WHEN duplicate_object THEN NULL; END $$;
@@ -431,50 +428,10 @@ DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.referrals;     
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.referral_activity; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.user_settings;     EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.support_tickets;   EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.platform_config;   EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ================================================================
--- 13b. PLATFORM CONFIG  (single-row admin settings store)
--- ================================================================
-CREATE TABLE IF NOT EXISTS public.platform_config (
-  id                    INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
-  withdrawal_fee        NUMERIC(5,2)  NOT NULL DEFAULT 2.50,
-  deposit_fee           NUMERIC(5,2)  NOT NULL DEFAULT 0.00,
-  roi_cap_standard      NUMERIC(5,2)  NOT NULL DEFAULT 12.5,
-  roi_cap_institutional NUMERIC(5,2)  NOT NULL DEFAULT 28.0,
-  maintenance_mode      BOOLEAN       NOT NULL DEFAULT false,
-  new_registrations     BOOLEAN       NOT NULL DEFAULT true,
-  deposit_address_usdt  TEXT          NOT NULL DEFAULT '',
-  deposit_address_eth   TEXT          NOT NULL DEFAULT '',
-  deposit_address_btc   TEXT          NOT NULL DEFAULT '',
-  advanced_config       JSONB         DEFAULT '{}'::jsonb,
-  updated_at            TIMESTAMPTZ   NOT NULL DEFAULT now()
-);
-
--- Add deposit address columns to existing instances (idempotent)
-ALTER TABLE public.platform_config ADD COLUMN IF NOT EXISTS deposit_address_usdt TEXT NOT NULL DEFAULT '';
-ALTER TABLE public.platform_config ADD COLUMN IF NOT EXISTS deposit_address_eth  TEXT NOT NULL DEFAULT '';
-ALTER TABLE public.platform_config ADD COLUMN IF NOT EXISTS deposit_address_btc  TEXT NOT NULL DEFAULT '';
-
-ALTER TABLE public.platform_config ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "platform_config_admin" ON public.platform_config;
-CREATE POLICY "platform_config_admin" ON public.platform_config
-  FOR ALL TO authenticated
-  USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
--- Allow all authenticated users to read platform config (deposit addresses, fees)
-DROP POLICY IF EXISTS "platform_config_read_all" ON public.platform_config;
-CREATE POLICY "platform_config_read_all" ON public.platform_config
-  FOR SELECT TO authenticated
-  USING (true);
-
-DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.platform_config; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
--- Ensure the single config row exists
-INSERT INTO public.platform_config (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
-
-
--- ================================================================
--- 17. BACKFILL — create missing rows for users who signed up before
---     this schema was applied (profiles, wallets, settings).
+-- 18. BACKFILL — missing rows for pre-existing users
 -- ================================================================
 INSERT INTO public.profiles (id, full_name, referral_code)
 SELECT
@@ -493,8 +450,33 @@ SELECT id FROM auth.users
 ON CONFLICT (user_id) DO NOTHING;
 
 -- ================================================================
--- 18. MIGRATIONS — Contact Page Guest Tickets
+-- 19. MIGRATIONS — Contact Page Guest Tickets
 -- ================================================================
 ALTER TABLE public.support_tickets ALTER COLUMN user_id DROP NOT NULL;
-ALTER TABLE public.support_tickets ADD COLUMN IF NOT EXISTS guest_name TEXT;
+ALTER TABLE public.support_tickets ADD COLUMN IF NOT EXISTS guest_name  TEXT;
 ALTER TABLE public.support_tickets ADD COLUMN IF NOT EXISTS guest_email TEXT;
+
+-- ================================================================
+-- 20. ADMIN SETUP
+-- ================================================================
+-- The `profiles` table already has `is_admin BOOLEAN NOT NULL DEFAULT false`.
+-- To promote a user to admin, run:
+--
+--   UPDATE public.profiles SET is_admin = true WHERE id = '<user-uuid>';
+--
+-- Or by email:
+--
+--   UPDATE public.profiles SET is_admin = true
+--   WHERE id = (SELECT id FROM auth.users WHERE email = 'admin@example.com');
+--
+-- Helper function for RLS policies (optional — use if you want policies
+-- that check `is_admin` instead of a hardcoded email):
+--
+--   CREATE OR REPLACE FUNCTION public.is_admin_user()
+--   RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+--     SELECT COALESCE((SELECT is_admin FROM public.profiles WHERE id = auth.uid()), false);
+--   $$;
+--
+-- Then replace hardcoded email checks in RLS policies with:
+--   USING (public.is_admin_user());
+--

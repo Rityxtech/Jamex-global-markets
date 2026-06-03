@@ -3,7 +3,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 
 export default function ProtectedRoute() {
-  const { user, loading } = useAuthStore();
+  const { user, loading, profile } = useAuthStore();
   const location = useLocation();
 
   if (loading) {
@@ -18,7 +18,7 @@ export default function ProtectedRoute() {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (user.email === 'akugbof@gmail.com') {
+  if (profile?.is_admin) {
     return <Navigate to="/admin" replace />;
   }
 

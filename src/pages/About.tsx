@@ -33,11 +33,11 @@ export default function About() {
   const navigate = useNavigate();
 
   const team = [
-    { name: 'Alexander Reed', role: 'Chief Executive Officer', seed: 'alexreed' },
-    { name: 'Olivia Chen', role: 'Chief Investment Officer', seed: 'oliviachen' },
-    { name: 'James Thornton', role: 'Head of Compliance', seed: 'jamesthornton' },
-    { name: 'Sophia Laurent', role: 'Head of Strategy', seed: 'sophialaurent' },
-    { name: 'Marcus Webb', role: 'Chief Technology Officer', seed: 'marcuswebb' },
+    { name: 'Alex Graham', role: 'Chief Executive Officer', seed: 'alexreed', img: 'https://fv5-5.files.fm/thumb_show.php?i=qsym2f6tww&view&v=1&PHPSESSID=e60b40f12ea71cb799f381ec1c9042d931626886' },
+    { name: 'Deborah Morrison', role: 'Chief Investment Officer', seed: 'oliviachen', img: 'https://fv5-5.files.fm/thumb_show.php?i=9s9sw9gcgq&view&v=1&PHPSESSID=e60b40f12ea71cb799f381ec1c9042d931626886' },
+    { name: 'James Thornton', role: 'Head of Compliance', seed: 'jamesthornton', img: 'https://fv5-5.files.fm/thumb_show.php?i=e4ay2s3hhp&view&v=1&PHPSESSID=e60b40f12ea71cb799f381ec1c9042d931626886' },
+    { name: 'Sophia Laurent', role: 'Head of Strategy', seed: 'sophialaurent', img: 'https://fv5-5.files.fm/thumb_show.php?i=y8j7m9gpyt&view&v=1&PHPSESSID=e60b40f12ea71cb799f381ec1c9042d931626886' },
+    { name: 'Marcus Webb', role: 'Chief Technology Officer', seed: 'marcuswebb', img: 'https://fv5-5.files.fm/thumb_show.php?i=sfajkg88z4&view&v=1&PHPSESSID=e60b40f12ea71cb799f381ec1c9042d931626886' },
   ];
 
   const values = [
@@ -71,23 +71,27 @@ export default function About() {
     <div className="text-on-surface font-body-md selection:bg-primary/30 min-h-screen">
       <main>
         {/* ─── HERO ─── */}
-        <section className="mt-14 md:mt-16 pt-6 md:pt-10 pb-6 md:pb-10 px-4 sm:px-margin-desktop text-center">
-          <Reveal>
-            <div className="max-w-2xl mx-auto">
-              <span className="inline-block text-label-sm font-label-sm text-primary uppercase tracking-widest mb-2">About Jamex Global</span>
-              <h1 className="font-display-lg text-display-lg text-on-surface mb-2 md:mb-3 leading-tight">
-                Building the Future of<br className="hidden md:block" /> Wealth Management
-              </h1>
-              <p className="text-body-md font-body-md text-on-surface-variant max-w-lg mx-auto">
-                Since 2019, we have empowered investors worldwide with institutional-grade tools, transparent returns, and unwavering security.
-              </p>
-            </div>
-          </Reveal>
+        <section className="relative overflow-hidden pt-16 md:pt-20 pb-6 md:pb-8 px-4 sm:px-margin-desktop text-center">
+          <div className="absolute top-1/2 left-1/3 w-48 h-48 bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
+
+          <div className="relative z-10 max-w-xl mx-auto">
+            <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="inline-block text-label-sm font-label-sm text-primary uppercase tracking-widest mb-2 border border-primary/20 px-3 py-1 rounded-full bg-primary/5">About Us</motion.span>
+            <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="font-headline-lg text-headline-lg text-on-surface mb-2 leading-tight">
+              Institutional Wealth, Simplified
+            </motion.h1>
+            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="text-body-md font-body-md text-on-surface-variant max-w-md mx-auto mb-4">
+              Secure, transparent investing since 2019.
+            </motion.p>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-2">
+              <button onClick={() => navigate('/plans')} className="w-full sm:w-auto cursor-pointer bg-primary text-on-primary px-5 py-2 rounded-xl font-bold text-sm shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 transition-all">Explore Plans</button>
+              <button onClick={() => navigate('/contact')} className="w-full sm:w-auto cursor-pointer glass-card text-on-surface px-5 py-2 rounded-xl font-bold text-sm hover:border-primary/50 transition-all">Contact Us</button>
+            </motion.div>
+          </div>
         </section>
 
         {/* ─── OUR STORY ─── */}
         <section className="bg-surface-container py-4 md:py-8 px-4 sm:px-margin-desktop">
-          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 items-center">
+          <div className="max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 items-center">
             <Reveal className="order-2 lg:order-1">
               <span className="text-label-sm font-label-sm text-primary uppercase tracking-widest mb-1 block">Our Story</span>
               <h2 className="font-headline-lg text-headline-lg text-on-surface mb-2 md:mb-3">From Vision to Global Impact</h2>
@@ -108,7 +112,7 @@ export default function About() {
 
         {/* ─── MISSION, VISION & VALUES ─── */}
         <section className="py-4 md:py-8 px-4 sm:px-margin-desktop">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto">
             <Reveal className="text-center mb-3 md:mb-5">
               <span className="text-label-sm font-label-sm text-primary uppercase tracking-widest mb-1 block">What Drives Us</span>
               <h2 className="font-headline-lg text-headline-lg text-on-surface">Mission, Vision & Values</h2>
@@ -131,12 +135,12 @@ export default function About() {
 
         {/* ─── BY THE NUMBERS ─── */}
         <section className="bg-gradient-to-r from-primary/5 to-blue-500/5 py-4 md:py-6 px-4 sm:px-margin-desktop">
-          <div className="max-w-6xl mx-auto">
-            <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <div className="max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto">
+            <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
               {stats.map((s) => (
                 <StaggerItem key={s.label}>
                   <div className="text-center py-2 md:py-3">
-                    <div className="font-display-lg text-display-lg text-primary mb-0.5">{s.value}</div>
+                    <div className="font-display-lg text-headline-lg md:text-display-lg text-primary mb-0.5">{s.value}</div>
                     <div className="text-label-sm font-label-sm text-on-surface-variant">{s.label}</div>
                   </div>
                 </StaggerItem>
@@ -147,7 +151,7 @@ export default function About() {
 
         {/* ─── WHAT SETS US APART ─── */}
         <section className="py-4 md:py-8 px-4 sm:px-margin-desktop">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto">
             <Reveal className="text-center mb-3 md:mb-5">
               <span className="text-label-sm font-label-sm text-primary uppercase tracking-widest mb-1 block">Why Choose Us</span>
               <h2 className="font-headline-lg text-headline-lg text-on-surface">What Sets Us Apart</h2>
@@ -172,17 +176,17 @@ export default function About() {
 
         {/* ─── LEADERSHIP TEAM ─── */}
         <section className="bg-surface-container py-4 md:py-8 px-4 sm:px-margin-desktop">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto">
             <Reveal className="text-center mb-3 md:mb-5">
               <span className="text-label-sm font-label-sm text-primary uppercase tracking-widest mb-1 block">Meet The Team</span>
               <h2 className="font-headline-lg text-headline-lg text-on-surface">Leadership</h2>
             </Reveal>
-            <StaggerContainer className="flex gap-3 md:gap-4 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
+            <StaggerContainer className="flex gap-3 md:gap-4 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory justify-center">
               {team.map((m) => (
                 <StaggerItem key={m.name} className="snap-start shrink-0 w-[160px] md:w-[200px]">
                   <div className="glass-card rounded-xl p-3 md:p-4 text-center h-full flex flex-col items-center">
                     <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden mb-2 ring-2 ring-primary/20">
-                      <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${m.seed}`} alt={m.name} className="w-full h-full object-cover bg-surface-container-high" />
+                      <img src={m.img || `https://api.dicebear.com/7.x/avataaars/svg?seed=${m.seed}`} alt={m.name} onError={(e) => { (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${m.seed}`; }} className="w-full h-full object-cover bg-surface-container-high" />
                     </div>
                     <h3 className="font-headline-sm text-headline-sm text-on-surface mb-0.5 truncate w-full">{m.name}</h3>
                     <p className="text-label-sm font-label-sm text-on-surface-variant truncate w-full">{m.role}</p>
@@ -195,7 +199,7 @@ export default function About() {
 
         {/* ─── REGULATORY & COMPLIANCE ─── */}
         <section className="py-4 md:py-8 px-4 sm:px-margin-desktop">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto">
             <Reveal className="text-center mb-3 md:mb-5">
               <span className="text-label-sm font-label-sm text-primary uppercase tracking-widest mb-1 block">Trust & Safety</span>
               <h2 className="font-headline-lg text-headline-lg text-on-surface">Regulated & Compliant</h2>
@@ -215,7 +219,7 @@ export default function About() {
 
         {/* ─── FINAL CTA ─── */}
         <section className="py-4 md:py-8 px-4 sm:px-margin-desktop">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl xl:max-w-6xl mx-auto">
             <Reveal>
               <div className="bg-gradient-to-r from-primary/10 to-blue-500/10 rounded-2xl p-5 md:p-8 text-center border border-outline-variant/20">
                 <h2 className="font-headline-lg text-headline-lg text-on-surface mb-1 md:mb-2">Ready to grow your wealth?</h2>
@@ -224,7 +228,7 @@ export default function About() {
                   <button onClick={() => navigate('/register')} className="w-full sm:w-auto cursor-pointer bg-[#2563eb] text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 transition-all">
                     Get Started
                   </button>
-                  <button onClick={() => navigate('/support')} className="w-full sm:w-auto cursor-pointer glass-card text-on-surface px-6 py-2.5 rounded-xl font-bold text-sm hover:border-primary/50 transition-all">
+                  <button onClick={() => navigate('/contact')} className="w-full sm:w-auto cursor-pointer glass-card text-on-surface px-6 py-2.5 rounded-xl font-bold text-sm hover:border-primary/50 transition-all">
                     Contact Us
                   </button>
                 </div>

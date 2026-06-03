@@ -10,11 +10,14 @@ interface AuthState {
   user: User | null;
   profile: any | null;
   loading: boolean;
+  authError: string | null;
   isAdmin: () => boolean;
   setSession: (session: Session | null) => void;
   setUser: (user: User | null) => void;
   setProfile: (profile: any | null) => void;
   setLoading: (loading: boolean) => void;
+  setAuthError: (error: string | null) => void;
+  checkProfileStatus: (userId: string) => Promise<any | false>;
   signOut: () => Promise<void>;
   initialize: () => Promise<void>;
 }
@@ -24,49 +27,67 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   profile: null,
   loading: true,
+  authError: null,
   isAdmin: () => get().profile?.is_admin || false,
   setSession: (session) => set({ session }),
   setUser: (user) => set({ user }),
   setProfile: (profile) => set({ profile }),
   setLoading: (loading) => set({ loading }),
+  setAuthError: (authError) => set({ authError }),
   signOut: async () => {
     await supabase.auth.signOut();
-    set({ session: null, user: null, profile: null });
+    set({ session: null, user: null, profile: null, authError: null });
     // LOW EGRESS: Clear cache on sign out
     useWalletStore.getState().reset();
     useTransactionStore.getState().reset();
     useInvestmentStore.getState().clearInvestments();
   },
+  checkProfileStatus: async (userId: string) => {
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    if (profile && profile.account_status === 'suspended') {
+      await supabase.auth.signOut();
+      set({ session: null, user: null, profile: null, authError: 'Your account has been suspended. Please contact support.', loading: false });
+      return false;
+    }
+    if (profile && profile.account_status === 'blocked') {
+      await supabase.auth.signOut();
+      set({ session: null, user: null, profile: null, authError: 'Your account has been permanently blocked. Access denied.', loading: false });
+      return false;
+    }
+    return profile;
+  },
   initialize: async () => {
     const { data: { session } } = await supabase.auth.getSession();
     set({ session, user: session?.user || null, loading: false });
-    
+
     // Trigger initial fetch if logged in
     if (session?.user) {
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+      const profile = await get().checkProfileStatus(session.user.id);
+      if (profile) {
         set({ profile });
-
         useWalletStore.getState().fetchWallet(session.user.id);
         useTransactionStore.getState().fetchRecentTransactions(session.user.id);
         useInvestmentStore.getState().fetchInvestments(session.user.id);
+      }
     }
-    
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       set({ session, user: session?.user || null, loading: false });
-      
+
       // Handle cache loading and clearing based on auth events
       if (session?.user) {
-          const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+        const profile = await get().checkProfileStatus(session.user.id);
+        if (profile) {
           set({ profile });
-
           useWalletStore.getState().fetchWallet(session.user.id);
           useTransactionStore.getState().fetchRecentTransactions(session.user.id);
           useInvestmentStore.getState().fetchInvestments(session.user.id);
+        }
       } else {
-          set({ profile: null });
-          useWalletStore.getState().reset();
-          useTransactionStore.getState().reset();
-          useInvestmentStore.getState().clearInvestments();
+        set({ profile: null });
+        useWalletStore.getState().reset();
+        useTransactionStore.getState().reset();
+        useInvestmentStore.getState().clearInvestments();
       }
     });
 

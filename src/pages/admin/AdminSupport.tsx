@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 
 interface Ticket {
   id: string;
-  user_id: string;
+  user_id: string | null;
   display_name: string;
   subject: string;
   message: string;
@@ -12,6 +12,8 @@ interface Ticket {
   priority: 'low' | 'normal' | 'high' | 'urgent';
   category: string;
   admin_reply: string | null;
+  guest_name: string | null;
+  guest_email: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -73,14 +75,17 @@ export default function AdminSupport() {
     try {
       const [txRes, profileRes] = await Promise.all([
         supabase.from('support_tickets')
-          .select('id,user_id,subject,message,status,priority,category,admin_reply,created_at,updated_at')
+          .select('id,user_id,subject,message,status,priority,category,admin_reply,guest_name,guest_email,created_at,updated_at')
           .order('created_at', { ascending: false }),
         supabase.from('profiles').select('id,full_name'),
       ]);
       const pm: Record<string, string> = {};
       (profileRes.data || []).forEach((p: any) => { if (p.id) pm[p.id] = p.full_name || ''; });
       const merged: Ticket[] = (txRes.data || []).map(t => ({
-        ...t, display_name: pm[t.user_id] || `User ${t.user_id.substring(0, 8)}…`,
+        ...t,
+        display_name: t.user_id
+          ? (pm[t.user_id] || `User ${t.user_id.substring(0, 8)}…`)
+          : (t.guest_name || 'Guest'),
       }));
       setTickets(merged);
       if (!initialized.current && merged.length > 0) {
@@ -186,6 +191,9 @@ export default function AdminSupport() {
                 <div className="min-w-0 pr-2">
                   <h2 className="font-headline-md font-bold text-on-surface leading-tight truncate">{selected.display_name}</h2>
                   <p className="text-label-sm text-on-surface-variant truncate">{selected.subject}</p>
+                  {selected.guest_email && (
+                    <p className="text-[10px] text-primary/80 mt-0.5">{selected.guest_email}</p>
+                  )}
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <span className={`text-[10px] font-bold px-2 py-1 rounded border ${statusStyle(selected.status)}`}>

@@ -69,11 +69,11 @@ export default function Home() {
   ];
 
   const team = [
-    { name: 'Alexander Reed', role: 'Chief Executive Officer', seed: 'alexreed' },
-    { name: 'Olivia Chen', role: 'Chief Investment Officer', seed: 'oliviachen' },
-    { name: 'James Thornton', role: 'Head of Compliance', seed: 'jamesthornton' },
-    { name: 'Sophia Laurent', role: 'Head of Strategy', seed: 'sophialaurent' },
-    { name: 'Marcus Webb', role: 'Chief Technology Officer', seed: 'marcuswebb' },
+    { name: 'Alex Graham', role: 'Chief Executive Officer', seed: 'alexreed', img: 'https://fv5-5.files.fm/thumb_show.php?i=qsym2f6tww&view&v=1&PHPSESSID=e60b40f12ea71cb799f381ec1c9042d931626886' },
+    { name: 'Deborah Morrison', role: 'Chief Investment Officer', seed: 'oliviachen', img: 'https://fv5-5.files.fm/thumb_show.php?i=9s9sw9gcgq&view&v=1&PHPSESSID=e60b40f12ea71cb799f381ec1c9042d931626886' },
+    { name: 'James Thornton', role: 'Head of Compliance', seed: 'jamesthornton', img: 'https://fv5-5.files.fm/thumb_show.php?i=e4ay2s3hhp&view&v=1&PHPSESSID=e60b40f12ea71cb799f381ec1c9042d931626886' },
+    { name: 'Sophia Laurent', role: 'Head of Strategy', seed: 'sophialaurent', img: 'https://fv5-5.files.fm/thumb_show.php?i=y8j7m9gpyt&view&v=1&PHPSESSID=e60b40f12ea71cb799f381ec1c9042d931626886' },
+    { name: 'Marcus Webb', role: 'Chief Technology Officer', seed: 'marcuswebb', img: 'https://fv5-5.files.fm/thumb_show.php?i=sfajkg88z4&view&v=1&PHPSESSID=e60b40f12ea71cb799f381ec1c9042d931626886' },
   ];
 
   const faqs = [
@@ -104,7 +104,7 @@ export default function Home() {
           <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
           <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-tertiary/10 rounded-full blur-[100px] pointer-events-none" />
 
-          <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-3 md:gap-10 pt-[15px] pb-3.5 md:pt-16 md:pb-12 px-4">
+          <div className="relative z-10 max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto flex flex-col lg:flex-row items-center gap-3 md:gap-10 pt-[15px] pb-3.5 md:pt-16 md:pb-12 px-4">
             <div className="flex-1 text-center lg:text-left">
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
               <div className="inline-flex items-center gap-2 px-3 py-1 glass-card rounded-full mb-2 md:mb-5 border-primary/20">
@@ -117,8 +117,8 @@ export default function Home() {
               <span className="hidden md:inline">Grow Your Wealth With <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">Institutional-Grade</span> Investment Plans</span>
             </motion.h1>
             <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="font-body-md text-body-lg text-on-surface-variant max-w-2xl mx-auto mb-2.5 md:mb-8 leading-relaxed">
-              <span className="md:hidden">Institutional-grade security and daily yields for global markets.</span>
-              <span className="hidden md:inline">Unlock the future of finance with institutional-grade security, deep liquidity, and professional-grade trading tools for global markets.</span>
+              <span className="md:hidden">Institutional grade security and daily yields for global markets.</span>
+              <span className="hidden md:inline">Unlock the future of finance with institutional grade security, deep liquidity, and professional grade trading tools for global markets.</span>
             </motion.p>
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-2 md:gap-3">
               <button onClick={() => navigate('/register')} className="cursor-pointer bg-primary-container text-on-primary-container px-6 md:px-8 py-2.5 md:py-3.5 font-headline-md text-body-md rounded-lg shadow-lg shadow-primary-container/20 hover:opacity-90 active:scale-95 transition-all">
@@ -128,15 +128,15 @@ export default function Home() {
                 View Plans
               </button>
             </motion.div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.45 }} className="mt-3 md:mt-10 grid grid-cols-4 md:grid-cols-4 gap-2 md:gap-6">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.45 }} className="mt-3 md:mt-10 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
               {[
                 { val: '$42.8B+', lab: 'AUM Managed' },
                 { val: '0.01s', lab: 'Execution Speed' },
                 { val: '24/7', lab: 'Expert Support' },
                 { val: '150+', lab: 'Digital Assets' },
               ].map((s) => (
-                <div key={s.lab} className="text-center">
-                  <div className="text-headline-md font-headline-md text-primary mb-0.5">{s.val}</div>
+                <div key={s.lab} className="text-center px-1">
+                  <div className="text-headline-md md:text-headline-lg font-headline-md text-primary mb-0.5">{s.val}</div>
                   <div className="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest">{s.lab}</div>
                 </div>
               ))}
@@ -179,7 +179,7 @@ export default function Home() {
         </section>
 
         {/* ─── HOW IT WORKS ─── */}
-        <section className="py-4 md:py-10 px-4 sm:px-margin-desktop max-w-6xl mx-auto">
+        <section className="py-4 md:py-10 px-4 sm:px-margin-desktop max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto">
           <Reveal className="text-center mb-4 md:mb-8">
             <span className="text-label-sm font-label-sm text-primary uppercase tracking-widest">Simple Process</span>
             <h2 className="font-headline-lg text-headline-lg text-on-surface mt-2">How It Works</h2>
@@ -209,7 +209,7 @@ export default function Home() {
         </section>
 
         {/* ─── INVESTMENT PLANS PREVIEW ─── */}
-        <section className="py-4 md:py-10 px-4 sm:px-margin-desktop max-w-6xl mx-auto">
+        <section className="py-4 md:py-10 px-4 sm:px-margin-desktop max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto">
           <Reveal className="flex flex-col md:flex-row justify-between items-end mb-4 md:mb-8 gap-3 md:gap-4">
             <div>
               <span className="text-label-sm font-label-sm text-primary uppercase tracking-widest">Investment Plans</span>
@@ -250,7 +250,7 @@ export default function Home() {
         </section>
 
         {/* ─── PLATFORM FEATURES ─── */}
-        <section className="py-4 md:py-10 px-4 sm:px-margin-desktop max-w-6xl mx-auto">
+        <section className="py-4 md:py-10 px-4 sm:px-margin-desktop max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto">
           <Reveal className="text-center mb-4 md:mb-8">
             <span className="text-label-sm font-label-sm text-primary uppercase tracking-widest">Why Jamex</span>
             <h2 className="font-headline-lg text-headline-lg text-on-surface mt-2">Everything You Need</h2>
@@ -283,7 +283,7 @@ export default function Home() {
 
         {/* ─── SECURITY & TRUST ─── */}
         <section className="bg-surface-container py-4 md:py-10 px-4 sm:px-margin-desktop">
-          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-10 items-center">
+          <div className="max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-10 items-center">
             <Reveal>
               <div className="relative">
                 <div className="absolute -top-6 -left-6 w-32 h-32 bg-primary/20 rounded-full blur-[60px]" />
@@ -324,7 +324,7 @@ export default function Home() {
         </section>
 
         {/* ─── REFERRAL TEASER ─── */}
-        <section className="py-4 md:py-10 px-4 sm:px-margin-desktop max-w-6xl mx-auto">
+        <section className="py-4 md:py-10 px-4 sm:px-margin-desktop max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto">
           <Reveal>
             <div className="glass-card rounded-2xl p-0 flex flex-col md:flex-row items-center gap-0 relative overflow-hidden">
               <div className="relative w-full md:w-64 h-36 md:h-auto md:self-stretch shrink-0 overflow-hidden">
@@ -344,7 +344,7 @@ export default function Home() {
         </section>
 
         {/* ─── TESTIMONIALS ─── */}
-        <section className="py-4 md:py-10 px-4 sm:px-margin-desktop max-w-6xl mx-auto">
+        <section className="py-4 md:py-10 px-4 sm:px-margin-desktop max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto">
           <Reveal className="text-center mb-4 md:mb-8">
             <span className="text-label-sm font-label-sm text-primary uppercase tracking-widest">Testimonials</span>
             <h2 className="font-headline-lg text-headline-lg text-on-surface mt-2">Trusted by Professionals</h2>
@@ -373,7 +373,7 @@ export default function Home() {
         </section>
 
         {/* ─── TEAM ─── */}
-        <section className="py-4 md:py-10 px-4 sm:px-margin-desktop max-w-6xl mx-auto">
+        <section className="py-4 md:py-10 px-4 sm:px-margin-desktop max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto">
           <Reveal className="text-center mb-4 md:mb-8">
             <span className="text-label-sm font-label-sm text-primary uppercase tracking-widest">Our Leadership</span>
             <h2 className="font-headline-lg text-headline-lg text-on-surface mt-2">Meet the Team</h2>
@@ -383,7 +383,7 @@ export default function Home() {
               <StaggerItem key={m.name} className="snap-start shrink-0 w-[150px] md:w-auto">
                 <div className="glass-card rounded-xl overflow-hidden text-center group">
                   <div className="relative h-36 md:h-48 overflow-hidden">
-                    <img src={`https://picsum.photos/seed/${m.seed}/300/400`} alt={m.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                    <img src={m.img || `https://picsum.photos/seed/${m.seed}/300/400`} alt={m.name} onError={(e) => { (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${m.seed}/300/400`; }} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
                     <div className="absolute inset-0 bg-gradient-to-t from-glassCard via-transparent to-transparent" />
                   </div>
                   <div className="p-3 md:p-4">
@@ -397,7 +397,7 @@ export default function Home() {
         </section>
 
         {/* ─── FAQ ─── */}
-        <section className="py-4 md:py-10 px-4 sm:px-margin-desktop max-w-6xl mx-auto">
+        <section className="py-4 md:py-10 px-4 sm:px-margin-desktop max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto">
           <Reveal className="text-center mb-4 md:mb-8">
             <span className="text-label-sm font-label-sm text-primary uppercase tracking-widest">FAQ</span>
             <h2 className="font-headline-lg text-headline-lg text-on-surface mt-2">Frequently Asked Questions</h2>
@@ -436,14 +436,14 @@ export default function Home() {
         {/* ─── FINAL CTA ─── */}
         <section className="py-4 md:py-10 px-4 sm:px-margin-desktop">
           <Reveal>
-            <div className="max-w-4xl mx-auto bg-primary-container rounded-2xl p-5 md:p-10 text-center relative overflow-hidden">
+            <div className="max-w-4xl xl:max-w-6xl mx-auto bg-primary-container rounded-2xl p-5 md:p-10 text-center relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%)', backgroundSize: '20px 20px' }} />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-on-primary-container/10 rounded-full blur-[80px] pointer-events-none" />
               <h2 className="font-headline-lg text-headline-lg text-on-primary-container mb-2 md:mb-3 relative z-10">Ready to Grow Your Wealth?</h2>
               <p className="font-body-md text-body-md text-on-primary-container/80 max-w-lg mx-auto mb-3 md:mb-6 relative z-10">Join leading investors on the most secure wealth platform. Start earning daily yields today.</p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 relative z-10">
                 <button onClick={() => navigate('/register')} className="cursor-pointer bg-on-primary-container text-primary-container px-8 py-3.5 font-label-md text-label-md rounded-xl hover:opacity-90 transition-all font-bold">Create Account</button>
-                <button onClick={() => navigate('/support')} className="cursor-pointer bg-primary-container border-2 border-on-primary-container/30 text-on-primary-container px-8 py-3.5 font-label-md text-label-md rounded-xl hover:bg-on-primary-container hover:text-primary-container transition-all">Contact Support</button>
+                <button onClick={() => navigate('/contact')} className="cursor-pointer bg-primary-container border-2 border-on-primary-container/30 text-on-primary-container px-8 py-3.5 font-label-md text-label-md rounded-xl hover:bg-on-primary-container hover:text-primary-container transition-all">Contact Support</button>
               </div>
             </div>
           </Reveal>
@@ -459,7 +459,7 @@ export default function Home() {
         <div className="flex flex-wrap justify-center gap-3 md:gap-5">
           <button onClick={() => navigate('/')} className="text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">About us</button>
           <button onClick={() => navigate('/plans')} className="text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">Plans</button>
-          <button onClick={() => navigate('/support')} className="text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">Contact us</button>
+          <button onClick={() => navigate('/contact')} className="text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">Contact us</button>
           <a className="text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Privacy</a>
           <a className="text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Terms</a>
         </div>

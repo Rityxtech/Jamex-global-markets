@@ -13,12 +13,14 @@ import Withdraw from './pages/Withdraw';
 import ConfirmInvestment from './pages/ConfirmInvestment';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import AdminLogin from './pages/AdminLogin';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Kyc from './pages/Kyc';
 import Referral from './pages/Referral';
 import TransactionHistory from './pages/TransactionHistory';
 import Support from './pages/Support';
+import Contact from './pages/Contact';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Loans from './pages/Loans';
@@ -49,7 +51,7 @@ function ScrollToTop() {
 
 /** Shows Home for guests; redirects authenticated users to /dashboard */
 function RootRoute() {
-  const { user, loading } = useAuthStore();
+  const { user, loading, profile } = useAuthStore();
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background text-on-surface">
@@ -58,7 +60,7 @@ function RootRoute() {
     );
   }
   if (user) {
-    if (user.email === 'akugbof@gmail.com') return <Navigate to="/admin" replace />;
+    if (profile?.is_admin) return <Navigate to="/admin" replace />;
     return <Navigate to="/dashboard" replace />;
   }
   return <Home />;
@@ -82,10 +84,13 @@ export default function App() {
       <Routes>
         <Route path="/" element={<RootRoute />} />
         <Route path="/about" element={<About />} />
+        <Route path="/plans" element={<Plans />} />
+        <Route path="/contact" element={<Contact />} />
 
         {/* Public Routes (guests only) */}
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<Login />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
@@ -96,7 +101,6 @@ export default function App() {
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/invest" element={<Invest />} />
-            <Route path="/plans" element={<Plans />} />
             <Route path="/wallet" element={<Wallet />} />
             <Route path="/deposit" element={<Deposit />} />
             <Route path="/withdraw" element={<Withdraw />} />

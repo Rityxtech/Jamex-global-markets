@@ -86,10 +86,10 @@ export default function Header() {
       {/* CENTER: Navigation Links (Logged Out Desktop) */}
       {!isLoggedIn && (
         <nav className="hidden md:flex items-center gap-8 relative z-[70]">
-          <Link to="/" className="text-sm font-bold text-white border-b-2 border-white py-1">Home</Link>
-          <Link to="/about" className="text-sm font-semibold text-gray-300 hover:text-white transition-colors py-1">About us</Link>
-          <Link to="/plans" className="text-sm font-semibold text-gray-300 hover:text-white transition-colors py-1">Plans</Link>
-          <Link to="/support" className="text-sm font-semibold text-gray-300 hover:text-white transition-colors py-1">Contact us</Link>
+          <Link to="/" className={`text-sm font-bold transition-colors py-1 ${location.pathname === '/' ? 'text-white border-b-2 border-white' : 'text-gray-300 hover:text-white'}`}>Home</Link>
+          <Link to="/about" className={`text-sm font-bold transition-colors py-1 ${location.pathname === '/about' ? 'text-white border-b-2 border-white' : 'text-gray-300 hover:text-white'}`}>About us</Link>
+          <Link to="/plans" className={`text-sm font-bold transition-colors py-1 ${location.pathname === '/plans' ? 'text-white border-b-2 border-white' : 'text-gray-300 hover:text-white'}`}>Plans</Link>
+          <Link to="/contact" className={`text-sm font-bold transition-colors py-1 ${location.pathname === '/contact' ? 'text-white border-b-2 border-white' : 'text-gray-300 hover:text-white'}`}>Contact us</Link>
         </nav>
       )}
 
@@ -167,7 +167,7 @@ export default function Header() {
                 <span className="material-symbols-outlined text-[20px]">diamond</span>
                 Plans
               </Link>
-              <Link to="/support" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 h-11 rounded-xl text-sm font-bold transition-colors ${location.pathname === '/support' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-300 hover:bg-white/5 hover:text-white'}`}>
+              <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 h-11 rounded-xl text-sm font-bold transition-colors ${location.pathname === '/contact' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-300 hover:bg-white/5 hover:text-white'}`}>
                 <span className="material-symbols-outlined text-[20px]">headset_mic</span>
                 Contact us
               </Link>

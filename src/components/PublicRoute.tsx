@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 
 export default function PublicRoute() {
-  const { user, loading } = useAuthStore();
+  const { user, loading, profile } = useAuthStore();
 
   if (loading) {
     return (
@@ -14,7 +14,7 @@ export default function PublicRoute() {
   }
 
   if (user) {
-    if (user.email === 'akugbof@gmail.com') {
+    if (profile?.is_admin) {
       return <Navigate to="/admin" replace />;
     }
     return <Navigate to="/dashboard" replace />;

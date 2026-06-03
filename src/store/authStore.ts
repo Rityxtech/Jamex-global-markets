@@ -18,6 +18,7 @@ interface AuthState {
   setLoading: (loading: boolean) => void;
   setAuthError: (error: string | null) => void;
   checkProfileStatus: (userId: string) => Promise<any | false>;
+  syncOAuthProfile: (user: User, existingProfile: any) => Promise<any | null>;
   signOut: () => Promise<void>;
   initialize: () => Promise<void>;
 }
@@ -56,6 +57,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     return profile;
   },
+  syncOAuthProfile: async (user: User, existingProfile: any) => {
+    const meta = user.user_metadata || {};
+    const googleName = meta.full_name;
+    const googleAvatar = meta.avatar_url;
+    if (!googleName && !googleAvatar) return null;
+
+    const updates: any = {};
+    if (!existingProfile?.full_name && googleName) updates.full_name = googleName;
+    if (!existingProfile?.avatar_url && googleAvatar) updates.avatar_url = googleAvatar;
+
+    if (Object.keys(updates).length === 0) return null;
+
+    const { data: updatedProfile, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', user.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to sync OAuth profile:', error);
+      return null;
+    }
+    return updatedProfile;
+  },
   initialize: async () => {
     const { data: { session } } = await supabase.auth.getSession();
     set({ session, user: session?.user || null, loading: false });
@@ -64,7 +90,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (session?.user) {
       const profile = await get().checkProfileStatus(session.user.id);
       if (profile) {
-        set({ profile });
+        const synced = await get().syncOAuthProfile(session.user, profile);
+        set({ profile: synced || profile });
         useWalletStore.getState().fetchWallet(session.user.id);
         useTransactionStore.getState().fetchRecentTransactions(session.user.id);
         useInvestmentStore.getState().fetchInvestments(session.user.id);
@@ -78,7 +105,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (session?.user) {
         const profile = await get().checkProfileStatus(session.user.id);
         if (profile) {
-          set({ profile });
+          const synced = await get().syncOAuthProfile(session.user, profile);
+          set({ profile: synced || profile });
           useWalletStore.getState().fetchWallet(session.user.id);
           useTransactionStore.getState().fetchRecentTransactions(session.user.id);
           useInvestmentStore.getState().fetchInvestments(session.user.id);

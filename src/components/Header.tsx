@@ -8,8 +8,10 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
-  const { user, loading } = useAuthStore();
+  const { user, profile, loading } = useAuthStore();
   const isLoggedIn = !!user;
+  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'U';
+  const avatarUrl = profile?.avatar_url;
 
   // Handle scroll effect for glassmorphism intensity
   useEffect(() => {
@@ -137,7 +139,13 @@ export default function Header() {
                 }}
                 className="w-10 h-10 rounded-full border-2 border-white shadow-md overflow-hidden hover:border-[#2563eb] transition-colors bg-gray-100 cursor-pointer p-0"
               >
-                <img alt="User Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8rnZBb6DNeNhGDYvtVvvofqp-s6sLQVmilHaqeqKBcD-6Mz-EGcqhvwJDsaBzor3-TNIGY7YLMF0PKALoslp4OYBS5ixeDdkQYPZwrzya2HwHdalEYNUi7f1gTmczAlDEcRC8PzfbFV1QluVYj7k6Jb8PjpIY8nX_QEQeBid_xg-qSOW6ZwEVm9A8u9oAw21hdjZ73UmfRwHrvrtfgOGn_5VQHH_Rg6r93mz6P3L7IbsrKZID-y6mrrW9D7gLWmEF7q3E74C9qzfj" className="w-full h-full object-cover" />
+                {avatarUrl ? (
+                  <img alt="User Avatar" src={avatarUrl} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="w-full h-full flex items-center justify-center text-sm font-bold text-gray-700 bg-gray-200 select-none">
+                    {displayName.charAt(0).toUpperCase()}
+                  </span>
+                )}
               </button>
             </div>
           </div>

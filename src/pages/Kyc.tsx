@@ -50,6 +50,8 @@ export default function Kyc() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const frontInputRef = useRef<HTMLInputElement>(null);
+  const backInputRef = useRef<HTMLInputElement>(null);
 
   // Submit state
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -128,40 +130,21 @@ export default function Kyc() {
   }, [user]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, side: 'front' | 'back') => {
-    console.log(`[DEBUG] handleFileChange called for side: ${side}`);
-    e.preventDefault();
-    e.stopPropagation();
-
     const file = e.target.files?.[0];
-    console.log(`[DEBUG] File object:`, file ? `${file.name} (${file.size} bytes)` : 'null/undefined');
-    
-    if (!file) {
-      console.log('[DEBUG] Exiting handleFileChange early because file is missing');
-      return;
-    }
-    
-    try {
-      const previewUrl = URL.createObjectURL(file);
-      console.log(`[DEBUG] Generated preview URL: ${previewUrl}`);
-      
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
       if (side === 'front') {
-        if (frontPreview && frontPreview.startsWith('blob:')) {
-          URL.revokeObjectURL(frontPreview);
-        }
         setFrontId(file);
-        setFrontPreview(previewUrl);
-        console.log('[DEBUG] front state updated');
+        setFrontPreview(reader.result as string);
       } else {
-        if (backPreview && backPreview.startsWith('blob:')) {
-          URL.revokeObjectURL(backPreview);
-        }
         setBackId(file);
-        setBackPreview(previewUrl);
-        console.log('[DEBUG] back state updated');
+        setBackPreview(reader.result as string);
       }
-    } catch (err) {
-      console.error('[DEBUG] Error in handleFileChange:', err);
-    }
+    };
+    reader.readAsDataURL(file);
+    // Reset input so the same file can be selected again if needed
+    e.target.value = '';
   };
 
   const isFormComplete = form.first_name && form.last_name && form.date_of_birth &&
@@ -330,10 +313,9 @@ export default function Kyc() {
                       <span className="material-symbols-outlined text-tertiary text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                       <span className="text-white text-[10px] font-bold">ID Front Ready</span>
                       {!isReadOnly && (
-                        <button type="button" onClick={() => { 
-                          if (frontPreview && frontPreview.startsWith('blob:')) URL.revokeObjectURL(frontPreview);
-                          setFrontPreview(null); 
-                          setFrontId(null); 
+                        <button type="button" onClick={() => {
+                          setFrontPreview(null);
+                          setFrontId(null);
                         }}
                           className="ml-auto bg-white/20 hover:bg-white/40 text-white text-[10px] font-bold px-2 py-0.5 rounded transition-colors">
                           Change
@@ -347,17 +329,23 @@ export default function Kyc() {
                     )}
                   </div>
                 )}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,application/pdf"
+                  className="hidden"
+                  onChange={(e) => handleFileChange(e, 'front')}
+                  ref={frontInputRef}
+                />
                 {!isReadOnly && !frontPreview && (
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,application/pdf"
-                    onChange={(e) => handleFileChange(e, 'front')}
-                    className="block w-full text-xs text-on-surface-variant cursor-pointer rounded-xl border-2 border-dashed border-outline-variant/40 bg-surface-container-lowest p-3
-                      file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0
-                      file:text-xs file:font-bold file:uppercase file:tracking-wider
-                      file:bg-primary file:text-on-primary file:cursor-pointer
-                      hover:file:brightness-110 hover:border-primary/60"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => frontInputRef.current?.click()}
+                    className="w-full rounded-xl border-2 border-dashed border-outline-variant/40 bg-surface-container-lowest p-4 flex flex-col items-center justify-center gap-2 hover:border-primary/60 transition-all cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-primary text-[22px]">upload</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Upload Front ID</span>
+                    <span className="text-[9px] text-on-surface-variant/60">PNG, JPG or PDF</span>
+                  </button>
                 )}
               </div>
 
@@ -372,10 +360,9 @@ export default function Kyc() {
                       <span className="material-symbols-outlined text-tertiary text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                       <span className="text-white text-[10px] font-bold">Address Doc Ready</span>
                       {!isReadOnly && (
-                        <button type="button" onClick={() => { 
-                          if (backPreview && backPreview.startsWith('blob:')) URL.revokeObjectURL(backPreview);
-                          setBackPreview(null); 
-                          setBackId(null); 
+                        <button type="button" onClick={() => {
+                          setBackPreview(null);
+                          setBackId(null);
                         }}
                           className="ml-auto bg-white/20 hover:bg-white/40 text-white text-[10px] font-bold px-2 py-0.5 rounded transition-colors">
                           Change
@@ -389,17 +376,23 @@ export default function Kyc() {
                     )}
                   </div>
                 )}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,application/pdf"
+                  className="hidden"
+                  onChange={(e) => handleFileChange(e, 'back')}
+                  ref={backInputRef}
+                />
                 {!isReadOnly && !backPreview && (
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,application/pdf"
-                    onChange={(e) => handleFileChange(e, 'back')}
-                    className="block w-full text-xs text-on-surface-variant cursor-pointer rounded-xl border-2 border-dashed border-outline-variant/40 bg-surface-container-lowest p-3
-                      file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0
-                      file:text-xs file:font-bold file:uppercase file:tracking-wider
-                      file:bg-primary file:text-on-primary file:cursor-pointer
-                      hover:file:brightness-110 hover:border-primary/60"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => backInputRef.current?.click()}
+                    className="w-full rounded-xl border-2 border-dashed border-outline-variant/40 bg-surface-container-lowest p-4 flex flex-col items-center justify-center gap-2 hover:border-primary/60 transition-all cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-primary text-[22px]">upload</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Upload Proof of Address</span>
+                    <span className="text-[9px] text-on-surface-variant/60">PNG, JPG or PDF</span>
+                  </button>
                 )}
               </div>
 

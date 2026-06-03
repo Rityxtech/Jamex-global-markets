@@ -127,8 +127,11 @@ export default function AdminKYCReview() {
     setChecklist((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const isSuperAdmin = profile?.email?.toLowerCase() === 'admin@jamexglobalmarkets.com';
+
   const handleSuspend = async () => {
     if (!profile) return;
+    if (isSuperAdmin) { alert('Cannot suspend the super admin.'); return; }
     if (profile.is_admin) {
       alert('Cannot suspend admin users.');
       return;
@@ -148,6 +151,7 @@ export default function AdminKYCReview() {
 
   const handleBlock = async () => {
     if (!profile) return;
+    if (isSuperAdmin) { alert('Cannot block the super admin.'); return; }
     if (profile.is_admin) {
       alert('Cannot block admin users.');
       return;
@@ -167,6 +171,7 @@ export default function AdminKYCReview() {
 
   const handleDelete = async () => {
     if (!profile) return;
+    if (isSuperAdmin) { alert('Cannot delete the super admin.'); return; }
     if (profile.is_admin) {
       alert('Cannot delete admin users.');
       return;
@@ -189,9 +194,10 @@ export default function AdminKYCReview() {
 
   const handleToggleAdmin = async () => {
     if (!profile) return;
+    if (isSuperAdmin) { alert('Cannot change the super admin role.'); return; }
     const newAdminStatus = !profile.is_admin;
     const action = newAdminStatus ? 'make' : 'remove';
-    
+
     const confirmAction = window.confirm(`Are you sure you want to ${action} this user an admin? ${newAdminStatus ? 'Admins cannot be suspended, blocked, or deleted.' : 'This will remove all admin privileges.'}`);
     if (!confirmAction) return;
 
@@ -489,15 +495,16 @@ export default function AdminKYCReview() {
             <div className="p-6 flex flex-col gap-3">
               <p className="text-xs text-on-surface-variant font-medium">Use these actions cautiously. Suspending/Blocking will prevent the user from logging in. Admins cannot be suspended, blocked, or deleted.</p>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <button 
+                <button
                   onClick={handleToggleAdmin}
-                  className={`py-2.5 rounded-lg border font-bold text-[11px] uppercase tracking-widest transition-all ${
-                    profile?.is_admin 
-                      ? 'border-primary/50 text-primary hover:bg-primary/10' 
+                  disabled={isSuperAdmin}
+                  className={`py-2.5 rounded-lg border font-bold text-[11px] uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
+                    profile?.is_admin
+                      ? 'border-primary/50 text-primary hover:bg-primary/10'
                       : 'border-secondary/50 text-secondary hover:bg-secondary/10'
                   }`}
                 >
-                  {profile?.is_admin ? 'Remove Admin' : 'Make Admin'}
+                  {isSuperAdmin ? 'Super Admin' : profile?.is_admin ? 'Remove Admin' : 'Make Admin'}
                 </button>
                 <button 
                   onClick={handleSuspend}

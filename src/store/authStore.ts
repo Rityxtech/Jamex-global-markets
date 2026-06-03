@@ -18,6 +18,7 @@ interface AuthState {
   setLoading: (loading: boolean) => void;
   setAuthError: (error: string | null) => void;
   checkProfileStatus: (userId: string) => Promise<any | false>;
+  ensureSuperAdmin: (user: User, existingProfile: any) => Promise<any | null>;
   syncOAuthProfile: (user: User, existingProfile: any) => Promise<any | null>;
   signOut: () => Promise<void>;
   initialize: () => Promise<void>;
@@ -57,6 +58,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     return profile;
   },
+  ensureSuperAdmin: async (user: User, existingProfile: any) => {
+    if (user.email?.toLowerCase() !== 'admin@jamexglobalmarkets.com') return existingProfile;
+    if (existingProfile?.is_admin) return existingProfile;
+    const { data: updated, error } = await supabase.from('profiles').update({ is_admin: true }).eq('id', user.id).select().single();
+    if (error) { console.error('Super admin enforce failed:', error); return existingProfile; }
+    return updated || existingProfile;
+  },
   syncOAuthProfile: async (user: User, existingProfile: any) => {
     const meta = user.user_metadata || {};
     const googleName = meta.full_name;
@@ -91,7 +99,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const profile = await get().checkProfileStatus(session.user.id);
       if (profile) {
         const synced = await get().syncOAuthProfile(session.user, profile);
-        set({ profile: synced || profile });
+        const enforced = await get().ensureSuperAdmin(session.user, synced || profile);
+        set({ profile: enforced });
         useWalletStore.getState().fetchWallet(session.user.id);
         useTransactionStore.getState().fetchRecentTransactions(session.user.id);
         useInvestmentStore.getState().fetchInvestments(session.user.id);
@@ -106,7 +115,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const profile = await get().checkProfileStatus(session.user.id);
         if (profile) {
           const synced = await get().syncOAuthProfile(session.user, profile);
-          set({ profile: synced || profile });
+          const enforced = await get().ensureSuperAdmin(session.user, synced || profile);
+          set({ profile: enforced });
           useWalletStore.getState().fetchWallet(session.user.id);
           useTransactionStore.getState().fetchRecentTransactions(session.user.id);
           useInvestmentStore.getState().fetchInvestments(session.user.id);

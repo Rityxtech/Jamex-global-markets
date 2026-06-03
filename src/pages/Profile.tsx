@@ -38,6 +38,8 @@ export default function Profile() {
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [savingProfile, setSavingProfile] = useState(false);
+    const [saveError, setSaveError] = useState('');
+    const [saveSuccess, setSaveSuccess] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Wallet Modal
@@ -94,16 +96,19 @@ export default function Profile() {
     const handleSaveProfile = async () => {
         if (!user) return;
         setSavingProfile(true);
+        setSaveError('');
+        setSaveSuccess(false);
         try {
             let avatarUrl = profile?.avatar_url || null;
             if (avatarFile) {
-                const fileExt = avatarFile.name.split('.').pop();
+                const fileExt = avatarFile.name.split('.').pop() || 'png';
                 const filePath = `${user.id}/avatar-${Date.now()}.${fileExt}`;
                 const { error: upError } = await supabase.storage.from('avatars').upload(filePath, avatarFile, { upsert: true });
-                if (!upError) {
-                    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
-                    avatarUrl = urlData.publicUrl;
+                if (upError) {
+                    throw new Error(upError.message || 'Failed to upload avatar');
                 }
+                const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+                avatarUrl = urlData.publicUrl;
             }
             const updates: any = {};
             if (editName.trim()) updates.full_name = editName.trim();
@@ -111,14 +116,21 @@ export default function Profile() {
 
             if (Object.keys(updates).length > 0) {
                 const { data: updated, error } = await supabase.from('profiles').update(updates).eq('id', user.id).select().single();
-                if (!error && updated) {
+                if (error) throw new Error(error.message || 'Failed to update profile');
+                if (updated) {
                     setProfile(updated as ProfileData);
                     useAuthStore.getState().setProfile(updated);
                 }
             }
-            setShowEditModal(false);
-            setAvatarFile(null);
-            setAvatarPreview(null);
+            setSaveSuccess(true);
+            setTimeout(() => {
+                setShowEditModal(false);
+                setAvatarFile(null);
+                setAvatarPreview(null);
+                setSaveSuccess(false);
+            }, 1200);
+        } catch (err: any) {
+            setSaveError(err.message || 'Something went wrong. Please try again.');
         } finally {
             setSavingProfile(false);
         }
@@ -192,11 +204,11 @@ export default function Profile() {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-gutter">
                         {/* Profile Identity Card */}
                         <section className="lg:col-span-12 glass-card rounded-xl overflow-hidden relative group border border-outline-variant/20">
-                            <div className="h-20 md:h-32 w-full relative overflow-hidden">
+                            <div className="h-14 md:h-32 w-full relative overflow-hidden">
                                 <div className="absolute inset-0 bg-gradient-to-r from-primary-container/40 to-secondary-container/20"></div>
                                 <img alt="Institutional Header" className="w-full h-full object-cover opacity-30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCS-TDbO2hbpVDtUFouSg9_eQBVbxo6hYtGg0Bcdnp08tsr8-uV-Jpd8-Vj6-7MB7-wak9BZ53SQSCkJ1pJnEpmqk-ekfSQnXlQKa4CaxD9BB4Ke4N3O46pmRwQtv17XKOrIhlI-FlOQBYIGPNjFI4MAU47Miw6EzaUSGwhj_6fA2KhakOnRfyK3qyjPH0odhB6e0Gs23UhQ9JGuPT-bsVAHuj42gwDFka7vTpfupcRlMSiBIYPJGAJl80Q52I4Tuj3gRSWrfu_KExx" />
                             </div>
-                            <div className="px-4 pb-4 md:px-card-padding md:pb-card-padding flex flex-col md:flex-row items-start md:items-end gap-3 md:gap-6 -mt-10 md:-mt-12 relative z-10">
+                            <div className="px-4 pb-2 md:px-card-padding md:pb-card-padding flex flex-col md:flex-row items-start md:items-end gap-3 md:gap-6 -mt-7 md:-mt-12 relative z-10">
                                 <div className="w-20 h-20 md:w-32 md:h-32 rounded-xl glass-card border-2 md:border-4 border-background p-1 bg-surface-container shadow-lg flex items-center justify-center overflow-hidden">
                                     {profile?.avatar_url
                                         ? <img alt="User Profile" className="w-full h-full object-cover rounded-lg" src={profile.avatar_url} />
@@ -445,6 +457,14 @@ export default function Profile() {
                                     Change Photo
                                 </button>
                             </div>
+                            {saveError && (
+                                <div className="text-error text-xs font-medium bg-error/10 border border-error/20 p-2 rounded-lg">{saveError}</div>
+                            )}
+                            {saveSuccess && (
+                                <div className="text-tertiary text-xs font-medium bg-tertiary/10 border border-tertiary/20 p-2 rounded-lg flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-[14px]">check_circle</span> Profile updated successfully!
+                                </div>
+                            )}
                             <div className="space-y-1.5">
                                 <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Display Name</label>
                                 <input 
@@ -457,13 +477,13 @@ export default function Profile() {
                             <div className="flex gap-3 pt-2">
                                 <button 
                                     onClick={handleSaveProfile}
-                                    disabled={savingProfile}
+                                    disabled={savingProfile || saveSuccess}
                                     className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg text-sm font-bold hover:brightness-110 transition-all disabled:opacity-50"
                                 >
-                                    {savingProfile ? 'Saving...' : 'Save Changes'}
+                                    {savingProfile ? 'Saving...' : saveSuccess ? 'Saved!' : 'Save Changes'}
                                 </button>
                                 <button 
-                                    onClick={() => setShowEditModal(false)}
+                                    onClick={() => { setShowEditModal(false); setSaveError(''); setSaveSuccess(false); setAvatarFile(null); setAvatarPreview(null); }}
                                     className="flex-1 bg-surface-container-high text-on-surface py-2.5 rounded-lg text-sm font-bold border border-outline-variant/30 hover:bg-surface-variant transition-all"
                                 >
                                     Cancel

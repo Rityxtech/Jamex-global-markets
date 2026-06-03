@@ -1,14 +1,80 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWalletStore } from '../store/walletStore';
 import { useTransactionStore } from '../store/transactionStore';
+import { supabase } from '../lib/supabase';
+
+const ASSET_LABEL: Record<string, string> = {
+    usdt: 'USDT TRC20',
+    eth:  'ETH ERC20',
+    btc:  'Bitcoin',
+};
 
 export default function Wallet() {
   const navigate = useNavigate();
   const { mainBalance, profitBalance } = useWalletStore();
-  const { transactions } = useTransactionStore();
+  const { transactions, fetchRecentTransactions } = useTransactionStore();
 
   const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+
+  /* Deposit state */
+  const [selectedAsset, setSelectedAsset] = useState('usdt');
+  const [addresses, setAddresses] = useState({ usdt: '', eth: '', btc: '' });
+  const [copied, setCopied] = useState(false);
+  const [txHash, setTxHash] = useState('');
+  const [depositSubmitting, setDepositSubmitting] = useState(false);
+  const [depositMessage, setDepositMessage] = useState('');
+
+  useEffect(() => {
+    supabase.from('platform_config').select('deposit_address_usdt, deposit_address_eth, deposit_address_btc').eq('id', 1).single().then(({ data }) => {
+      if (data) {
+        setAddresses({
+          usdt: data.deposit_address_usdt || '',
+          eth:  data.deposit_address_eth  || '',
+          btc:  data.deposit_address_btc  || '',
+        });
+      }
+    });
+  }, []);
+
+  const activeAddress = addresses[selectedAsset as 'usdt' | 'eth' | 'btc'];
+
+  function handleCopy() {
+    if (!activeAddress) return;
+    try { navigator.clipboard.writeText(activeAddress); } catch (e) {
+      const ta = document.createElement('textarea'); ta.value = activeAddress; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    }
+    setCopied(true); setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleConfirmDeposit() {
+    const hash = txHash.trim();
+    if (!hash) { setDepositMessage('Please enter the transaction hash.'); return; }
+    if (!activeAddress) { setDepositMessage('Deposit address not configured. Contact support.'); return; }
+    setDepositSubmitting(true);
+    setDepositMessage('');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+      const { error } = await supabase.from('transactions').insert({
+        user_id: user.id,
+        type: 'deposit',
+        asset: selectedAsset.toUpperCase(),
+        amount: 0,
+        status: 'pending',
+        destination_address: `TXID: ${hash}`,
+      });
+      if (error) throw error;
+      setDepositMessage('success');
+      setTxHash('');
+      fetchRecentTransactions(user.id);
+      setTimeout(() => setDepositMessage(''), 4000);
+    } catch (err: any) {
+      setDepositMessage(err.message || 'Failed to submit deposit report.');
+    } finally {
+      setDepositSubmitting(false);
+    }
+  }
 
   return (
     <div className="p-2.5 md:p-margin-desktop space-y-2.5 md:space-y-gutter max-w-[1600px] mx-auto w-full">
@@ -141,34 +207,78 @@ export default function Wallet() {
                   <div>
                     <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant mb-1.5 md:mb-2 block uppercase tracking-wide">Select Asset</label>
                     <div className="grid grid-cols-3 gap-2">
-                      <button className="cursor-pointer border border-primary bg-primary/10 rounded-lg py-1.5 flex flex-col items-center gap-1 transition-all">
-                        <img alt="BTC" className="w-5 h-5 md:w-6 md:h-6" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWSzDqxX9xuzk5baLDM7Fh5VpFBPjITgGKoYNxbhWRmSP1t41iVePsTLxrVKPEoxEuAPFo5Q54jIjidBRnzogkTMyeek-i0BNBcVA-FvoWrAHAVCjle50noKAFUzhlUUrKpeV2DygAHcaNnPvGctTUxkSt_ruHuvCkLbRVFY3dUiHxzH-mt5Sms6CqRZsVaDMUa0TsV22Aw5hBIONnPSq0h4L-xu951VMAx_JikDapcoNftx8OemuyjosX_kB80NIBOUmY8IjRf4Kf" />
-                        <span className="text-[10px] md:text-label-sm font-bold">BTC</span>
-                      </button>
-                      <button className="cursor-pointer border border-outline-variant hover:border-primary rounded-lg py-1.5 flex flex-col items-center gap-1 transition-all bg-surface-container-low">
-                        <img alt="ETH" className="w-5 h-5 md:w-6 md:h-6" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvmpvf1JkYXofTYNBRdN5Mfv7TfGAQtedeyZlPi6O32733-Qz32fC4cJguX2h9nAop_wo9u_6DUyjSigS7K0SacCWNCuz7HFwYYhdSWAS61KoTfrNfJ7vjbOygUjnEysJJKkIGOHDhUlTI9feiKyyxo8x4VZowppUlOwYdTOXmIVS6sXUPcO_V1ViVzHcIZxPRdV_xlj_PRD6Zg7lz42VTFnC-UD7Z5OUh2XNkb7YxESrzZ7T-VYwQcWokcCTQpzPZ0DG1Ux-dvk07" />
-                        <span className="text-[10px] md:text-label-sm font-bold">ETH</span>
-                      </button>
-                      <button className="cursor-pointer border border-outline-variant hover:border-primary rounded-lg py-1.5 flex flex-col items-center gap-1 transition-all bg-surface-container-low">
-                        <img alt="USDT" className="w-5 h-5 md:w-6 md:h-6" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkdr_eIehC8H090wsE1OaYFTqDALeFegJpnxFrs6kyPcI82wrcUWoDPJLr3HivsXHiPNKeixPTPJLxhraPSPquFLuhdERigsw8Dv_zwVNMEvD5SqTIdcg7sgmVBDFY15Kh1DOGO5IPM9kz238OCU7HPYCcfx2g2vsTkbk_5zjD1TxggVN5clx9laiW2nnBeLwxxQW5C7RQDLs5vGuBkVmxStrCuAGalKHbu0R0ibbZyYaP1NcIi3Dy6dQXeq7cpLUCOnddW5lXkeq_" />
-                        <span className="text-[10px] md:text-label-sm font-bold">USDT</span>
-                      </button>
+                      {[
+                        { key: 'btc', label: 'BTC', src: 'https://cryptologos.cc/logos/bitcoin-btc-logo.svg' },
+                        { key: 'eth', label: 'ETH', src: 'https://cryptologos.cc/logos/ethereum-eth-logo.svg' },
+                        { key: 'usdt', label: 'USDT', src: 'https://cryptologos.cc/logos/tether-usdt-logo.svg' },
+                      ].map(a => {
+                        const isActive = selectedAsset === a.key;
+                        return (
+                          <button
+                            key={a.key}
+                            onClick={() => setSelectedAsset(a.key)}
+                            className={`cursor-pointer rounded-lg py-1.5 flex flex-col items-center gap-1 transition-all ${isActive ? 'border border-primary bg-primary/10' : 'border border-outline-variant hover:border-primary bg-surface-container-low'}`}
+                          >
+                            <img alt={a.label} className="w-5 h-5 md:w-6 md:h-6" src={a.src} />
+                            <span className={`text-[10px] md:text-label-sm font-bold ${isActive ? 'text-primary' : 'text-on-surface'}`}>{a.label}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                   <div>
                     <label className="text-[10px] md:text-label-sm font-bold text-on-surface-variant mb-1.5 md:mb-2 block uppercase tracking-wide">TXID Hash Submission</label>
-                    <input className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-3 py-2 text-sm md:text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Enter transaction hash..." type="text" />
+                    <input
+                      value={txHash}
+                      onChange={(e) => setTxHash(e.target.value)}
+                      className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-3 py-2 text-sm md:text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                      placeholder="Enter transaction hash..."
+                      type="text"
+                    />
                   </div>
-                  <button className="cursor-pointer w-full bg-primary text-on-primary py-2.5 rounded-lg text-sm md:text-label-md font-bold hover:brightness-110 active:scale-[0.98] transition-all mt-1 shadow-sm shadow-primary/20">
-                    Confirm Deposit
+                  {depositMessage === 'success' ? (
+                    <div className="bg-tertiary/10 border border-tertiary/20 p-2.5 rounded-lg flex items-start gap-2">
+                      <span className="material-symbols-outlined text-tertiary text-[18px]">check_circle</span>
+                      <div>
+                        <p className="text-xs font-bold text-tertiary">Deposit report submitted!</p>
+                        <p className="text-[10px] text-on-surface-variant mt-0.5">We will confirm the transaction as soon as possible and credit your wallet.</p>
+                      </div>
+                    </div>
+                  ) : depositMessage ? (
+                    <div className="bg-error/10 border border-error/20 p-2 rounded-lg text-xs text-error font-medium">{depositMessage}</div>
+                  ) : null}
+                  <button
+                    onClick={handleConfirmDeposit}
+                    disabled={depositSubmitting}
+                    className="cursor-pointer w-full bg-primary text-on-primary py-2.5 rounded-lg text-sm md:text-label-md font-bold hover:brightness-110 active:scale-[0.98] transition-all mt-1 shadow-sm shadow-primary/20 disabled:opacity-50"
+                  >
+                    {depositSubmitting ? 'Submitting...' : 'Confirm Deposit'}
                   </button>
                 </div>
                 <div className="flex flex-col items-center justify-center p-1.5 md:p-4 bg-surface-container-lowest rounded-xl border border-dashed border-outline-variant mt-1.5 md:mt-0">
                   <div className="bg-white p-2 rounded-lg shadow-sm">
-                    <img alt="Deposit Address QR" className="w-20 h-20 md:w-24 md:h-24" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD834f1i3JEie417y4hzdtSZlk40EJjVMNRAxRQgT7RU5JaUri3sfIUacqRQb24oFUp-DWiUsvnpN14mWFFzocJtHYcbhWmE2G6O83h-fVGOL2qQ-GxvqeRwkgXn-fGCv0a2lbW4L4bHKyFNen8ooS6lz59nnlAvLvSbchLNob-UGp7VApWB9A9ZZ6eBuT7HL3bF1zfqaqQWffxXUZv70-inGXWDSCSAfH1lVMT8e0zew4nuMY8y4gLyzl4a9cT3b7PEyzoBXpxODVc" />
+                    {activeAddress ? (
+                      <img
+                        alt="Deposit QR Code"
+                        className="w-20 h-20 md:w-24 md:h-24"
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=6&data=${encodeURIComponent(activeAddress)}`}
+                      />
+                    ) : (
+                      <div className="w-20 h-20 md:w-24 md:h-24 flex items-center justify-center text-outline/40">
+                        <span className="material-symbols-outlined text-[32px]">qr_code_2</span>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-[10px] md:text-xs font-tabular-nums text-on-surface-variant mt-2 break-all text-center max-w-[140px] bg-surface-container-highest px-2 py-1 rounded">bc1qxy2kgdy6jrsqz7v...</p>
-                  <button className="cursor-pointer mt-1.5 text-primary text-[10px] md:text-label-sm font-bold hover:underline">Copy Address</button>
+                  <p className="text-[10px] md:text-xs font-tabular-nums text-on-surface-variant mt-2 break-all text-center max-w-[140px] bg-surface-container-highest px-2 py-1 rounded">
+                    {activeAddress ? `${activeAddress.substring(0,10)}…${activeAddress.slice(-6)}` : 'Not configured'}
+                  </p>
+                  <button
+                    onClick={handleCopy}
+                    disabled={!activeAddress}
+                    className="cursor-pointer mt-1.5 text-primary text-[10px] md:text-label-sm font-bold hover:underline disabled:opacity-40 disabled:no-underline"
+                  >
+                    {copied ? 'Copied!' : 'Copy Address'}
+                  </button>
                 </div>
               </div>
             </div>

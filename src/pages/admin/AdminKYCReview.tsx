@@ -31,6 +31,7 @@ export default function AdminKYCReview() {
   const [comments, setComments] = useState('');
   const [error, setError] = useState('');
   const [walletAmountStr, setWalletAmountStr] = useState('');
+  const [walletAddresses, setWalletAddresses] = useState<any[]>([]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let raw = e.target.value.replace(/[^0-9.]/g, '');
@@ -68,10 +69,23 @@ export default function AdminKYCReview() {
       
       const { data: profileData } = await supabase.from('profiles').select('*').eq('id', userId).single();
       if (profileData) setProfile(profileData);
+
+      const { data: addrData } = await supabase.from('wallet_addresses').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+      setWalletAddresses(addrData || []);
     } catch (err: any) {
       setError(err.message || 'Failed to load KYC data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleWalletStatus = async (addrId: string, status: 'verified' | 'rejected') => {
+    try {
+      const { error } = await supabase.from('wallet_addresses').update({ status }).eq('id', addrId);
+      if (error) throw error;
+      setWalletAddresses(prev => prev.map(a => a.id === addrId ? { ...a, status } : a));
+    } catch (err: any) {
+      alert('Error updating wallet status: ' + err.message);
     }
   };
 
@@ -398,6 +412,58 @@ export default function AdminKYCReview() {
                 <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Submitted At</label>
                 <p className="font-body-md text-body-md text-on-surface">{new Date(kyc.submitted_at).toLocaleString()}</p>
               </div>
+            </div>
+          </div>
+
+          {/* Verified Wallet Addresses */}
+          <div className="glass-card rounded-xl overflow-hidden mt-2 border border-outline-variant/20">
+            <div className="px-6 py-4 bg-surface-container-highest/20 border-b border-outline-variant/30 flex justify-between items-center">
+              <h3 className="font-headline-md text-headline-md font-bold text-on-surface flex items-center gap-2">
+                <span className="material-symbols-outlined">account_balance_wallet</span> Verified Wallets
+              </h3>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant bg-surface-container px-2 py-1 rounded">{walletAddresses.length} total</span>
+            </div>
+            <div className="p-6">
+              {walletAddresses.length === 0 ? (
+                <p className="text-sm text-on-surface-variant text-center">No wallet addresses added yet.</p>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {walletAddresses.map((w) => {
+                    const statusColor = w.status === 'verified' ? 'text-tertiary' : w.status === 'rejected' ? 'text-error' : 'text-primary';
+                    const statusBg = w.status === 'verified' ? 'bg-tertiary/10' : w.status === 'rejected' ? 'bg-error/10' : 'bg-primary/10';
+                    return (
+                      <div key={w.id} className="flex items-center justify-between p-3 rounded-lg bg-surface-container-lowest border border-outline-variant/20">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-on-surface text-sm capitalize">{w.network}</span>
+                            <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${statusBg} ${statusColor}`}>{w.status}</span>
+                          </div>
+                          <p className="text-xs text-on-surface-variant truncate">{w.label}</p>
+                          <code className="text-[11px] font-tabular-nums text-primary bg-surface-container px-1 py-0.5 rounded border border-outline-variant/20">{w.address}</code>
+                        </div>
+                        {w.status === 'pending' && (
+                          <div className="flex items-center gap-1 ml-2 shrink-0">
+                            <button
+                              onClick={() => handleWalletStatus(w.id, 'verified')}
+                              className="w-7 h-7 flex items-center justify-center rounded border border-tertiary/40 text-tertiary hover:bg-tertiary/10 transition-all"
+                              title="Verify"
+                            >
+                              <span className="material-symbols-outlined text-[14px]">check</span>
+                            </button>
+                            <button
+                              onClick={() => handleWalletStatus(w.id, 'rejected')}
+                              className="w-7 h-7 flex items-center justify-center rounded border border-error/40 text-error hover:bg-error/10 transition-all"
+                              title="Reject"
+                            >
+                              <span className="material-symbols-outlined text-[14px]">close</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 

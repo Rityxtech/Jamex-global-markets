@@ -28,6 +28,10 @@ const COUNTRIES = [
 ];
 
 export default function Kyc() {
+  const renderCount = useRef(0);
+  renderCount.current++;
+  console.log('[KYC] render #', renderCount.current);
+
   const { user } = useAuthStore();
   const { kyc, loading, uploading, uploadProgress, error, fetchKyc, submitKyc, subscribeToKyc } = useKycStore();
 
@@ -50,22 +54,34 @@ export default function Kyc() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const frontInputRef = useRef<HTMLInputElement>(null);
-  const backInputRef = useRef<HTMLInputElement>(null);
+  // Modal states for document upload
+  const [showFrontModal, setShowFrontModal] = useState(false);
+  const [showBackModal, setShowBackModal] = useState(false);
+  const [modalFrontFile, setModalFrontFile] = useState<File | null>(null);
+  const [modalFrontPreview, setModalFrontPreview] = useState<string | null>(null);
+  const [modalBackFile, setModalBackFile] = useState<File | null>(null);
+  const [modalBackPreview, setModalBackPreview] = useState<string | null>(null);
+  const modalFrontRef = useRef<HTMLInputElement>(null);
+  const modalBackRef = useRef<HTMLInputElement>(null);
 
   // Submit state
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   // On mount: fetch existing KYC and subscribe to real-time updates
   useEffect(() => {
+    console.log('[KYC] fetch effect running, user=', user?.id);
     if (!user) return;
     fetchKyc(user.id);
     const unsub = subscribeToKyc(user.id);
-    return () => unsub();
+    return () => {
+      console.log('[KYC] fetch effect cleanup');
+      unsub();
+    };
   }, [user]);
 
   // Pre-fill form if existing KYC data found
   useEffect(() => {
+    console.log('[KYC] kyc effect running, kyc=', kyc?.id, 'status=', kyc?.status);
     if (kyc) {
       setForm({
         first_name: kyc.first_name || '',
@@ -129,22 +145,66 @@ export default function Kyc() {
     return () => console.log('Kyc Component Unmounted.');
   }, [user]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, side: 'front' | 'back') => {
+  const openFrontModal = () => {
+    console.log('[KYC] openFrontModal');
+    setModalFrontFile(frontId);
+    setModalFrontPreview(frontPreview);
+    setShowFrontModal(true);
+  };
+  const openBackModal = () => {
+    console.log('[KYC] openBackModal');
+    setModalBackFile(backId);
+    setModalBackPreview(backPreview);
+    setShowBackModal(true);
+  };
+
+  const handleModalFileSelect = (e: React.ChangeEvent<HTMLInputElement>, side: 'front' | 'back') => {
+    console.log('[KYC] handleModalFileSelect side=', side, 'files=', e.target.files);
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log('[KYC] no file selected, returning');
+      return;
+    }
     const reader = new FileReader();
     reader.onloadend = () => {
+      console.log('[KYC] FileReader onloadend complete, size=', file.size);
       if (side === 'front') {
-        setFrontId(file);
-        setFrontPreview(reader.result as string);
+        setModalFrontFile(file);
+        setModalFrontPreview(reader.result as string);
       } else {
-        setBackId(file);
-        setBackPreview(reader.result as string);
+        setModalBackFile(file);
+        setModalBackPreview(reader.result as string);
       }
     };
+    reader.onerror = () => {
+      console.error('[KYC] FileReader error');
+    };
     reader.readAsDataURL(file);
-    // Reset input so the same file can be selected again if needed
-    e.target.value = '';
+  };
+
+  const saveFrontModal = () => {
+    console.log('[KYC] saveFrontModal');
+    setFrontId(modalFrontFile);
+    setFrontPreview(modalFrontPreview);
+    setShowFrontModal(false);
+  };
+  const saveBackModal = () => {
+    console.log('[KYC] saveBackModal');
+    setBackId(modalBackFile);
+    setBackPreview(modalBackPreview);
+    setShowBackModal(false);
+  };
+  const cancelFrontModal = () => {
+    console.log('[KYC] cancelFrontModal');
+    setModalFrontFile(null);
+    setModalFrontPreview(null);
+    setShowFrontModal(false);
+  };
+  const cancelBackModal = () => {
+    console.log('[KYC] cancelBackModal');
+    setModalBackFile(null);
+    setModalBackPreview(null);
+    setShowBackModal(false);
   };
 
   const isFormComplete = form.first_name && form.last_name && form.date_of_birth &&
@@ -187,6 +247,7 @@ export default function Kyc() {
   const inputClass = `bg-surface-container-lowest border border-outline-variant/50 rounded-lg p-2 md:p-3 text-xs md:text-base text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-medium disabled:opacity-60 disabled:cursor-not-allowed`;
 
   if (loading) {
+    console.log('[KYC] showing loading spinner');
     return (
       <div className="flex-1 flex items-center justify-center min-h-[60vh]">
         <span className="material-symbols-outlined animate-spin text-4xl text-primary">progress_activity</span>
@@ -313,10 +374,7 @@ export default function Kyc() {
                       <span className="material-symbols-outlined text-tertiary text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                       <span className="text-white text-[10px] font-bold">ID Front Ready</span>
                       {!isReadOnly && (
-                        <button type="button" onClick={() => {
-                          setFrontPreview(null);
-                          setFrontId(null);
-                        }}
+                        <button type="button" onClick={openFrontModal}
                           className="ml-auto bg-white/20 hover:bg-white/40 text-white text-[10px] font-bold px-2 py-0.5 rounded transition-colors">
                           Change
                         </button>
@@ -329,17 +387,10 @@ export default function Kyc() {
                     )}
                   </div>
                 )}
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,application/pdf"
-                  className="hidden"
-                  onChange={(e) => handleFileChange(e, 'front')}
-                  ref={frontInputRef}
-                />
                 {!isReadOnly && !frontPreview && (
                   <button
                     type="button"
-                    onClick={() => frontInputRef.current?.click()}
+                    onClick={openFrontModal}
                     className="w-full rounded-xl border-2 border-dashed border-outline-variant/40 bg-surface-container-lowest p-4 flex flex-col items-center justify-center gap-2 hover:border-primary/60 transition-all cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-primary text-[22px]">upload</span>
@@ -360,10 +411,7 @@ export default function Kyc() {
                       <span className="material-symbols-outlined text-tertiary text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                       <span className="text-white text-[10px] font-bold">Address Doc Ready</span>
                       {!isReadOnly && (
-                        <button type="button" onClick={() => {
-                          setBackPreview(null);
-                          setBackId(null);
-                        }}
+                        <button type="button" onClick={openBackModal}
                           className="ml-auto bg-white/20 hover:bg-white/40 text-white text-[10px] font-bold px-2 py-0.5 rounded transition-colors">
                           Change
                         </button>
@@ -376,17 +424,10 @@ export default function Kyc() {
                     )}
                   </div>
                 )}
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,application/pdf"
-                  className="hidden"
-                  onChange={(e) => handleFileChange(e, 'back')}
-                  ref={backInputRef}
-                />
                 {!isReadOnly && !backPreview && (
                   <button
                     type="button"
-                    onClick={() => backInputRef.current?.click()}
+                    onClick={openBackModal}
                     className="w-full rounded-xl border-2 border-dashed border-outline-variant/40 bg-surface-container-lowest p-4 flex flex-col items-center justify-center gap-2 hover:border-primary/60 transition-all cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-primary text-[22px]">upload</span>
@@ -484,6 +525,98 @@ export default function Kyc() {
           </div>
         </section>
       </div>
+
+      {/* Front ID Upload Modal */}
+      {showFrontModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={cancelFrontModal}>
+          <div className="bg-surface-container-highest rounded-xl border border-outline-variant/30 w-full max-w-md p-4 md:p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <h3 className="text-base md:text-lg font-bold text-on-surface">Upload Front ID</h3>
+              <button onClick={cancelFrontModal} className="text-on-surface-variant hover:text-error material-symbols-outlined">close</button>
+            </div>
+            <div className="space-y-4 md:space-y-6">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-full h-36 md:h-44 rounded-xl border-2 border-outline-variant/30 bg-surface-container flex items-center justify-center overflow-hidden relative">
+                  {modalFrontPreview ? (
+                    <img src={modalFrontPreview} alt="Front ID Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="material-symbols-outlined text-[48px] text-outline/30">badge</span>
+                  )}
+                </div>
+                <input ref={modalFrontRef} type="file" accept="image/png,image/jpeg,application/pdf" className="hidden" onChange={(e) => handleModalFileSelect(e, 'front')} />
+                <button
+                  onClick={() => modalFrontRef.current?.click()}
+                  className="text-primary text-sm font-bold flex items-center gap-1 hover:underline"
+                >
+                  <span className="material-symbols-outlined text-[18px]">photo_camera</span>
+                  {modalFrontPreview ? 'Change Photo' : 'Select Photo'}
+                </button>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={saveFrontModal}
+                  disabled={!modalFrontPreview}
+                  className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg text-sm font-bold hover:brightness-110 transition-all disabled:opacity-50"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={cancelFrontModal}
+                  className="flex-1 bg-surface-container-high text-on-surface py-2.5 rounded-lg text-sm font-bold border border-outline-variant/30 hover:bg-surface-variant transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Proof of Address Upload Modal */}
+      {showBackModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={cancelBackModal}>
+          <div className="bg-surface-container-highest rounded-xl border border-outline-variant/30 w-full max-w-md p-4 md:p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <h3 className="text-base md:text-lg font-bold text-on-surface">Upload Proof of Address</h3>
+              <button onClick={cancelBackModal} className="text-on-surface-variant hover:text-error material-symbols-outlined">close</button>
+            </div>
+            <div className="space-y-4 md:space-y-6">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-full h-36 md:h-44 rounded-xl border-2 border-outline-variant/30 bg-surface-container flex items-center justify-center overflow-hidden relative">
+                  {modalBackPreview ? (
+                    <img src={modalBackPreview} alt="Proof of Address Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="material-symbols-outlined text-[48px] text-outline/30">home</span>
+                  )}
+                </div>
+                <input ref={modalBackRef} type="file" accept="image/png,image/jpeg,application/pdf" className="hidden" onChange={(e) => handleModalFileSelect(e, 'back')} />
+                <button
+                  onClick={() => modalBackRef.current?.click()}
+                  className="text-primary text-sm font-bold flex items-center gap-1 hover:underline"
+                >
+                  <span className="material-symbols-outlined text-[18px]">photo_camera</span>
+                  {modalBackPreview ? 'Change Photo' : 'Select Photo'}
+                </button>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={saveBackModal}
+                  disabled={!modalBackPreview}
+                  className="flex-1 bg-primary text-on-primary py-2.5 rounded-lg text-sm font-bold hover:brightness-110 transition-all disabled:opacity-50"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={cancelBackModal}
+                  className="flex-1 bg-surface-container-high text-on-surface py-2.5 rounded-lg text-sm font-bold border border-outline-variant/30 hover:bg-surface-variant transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

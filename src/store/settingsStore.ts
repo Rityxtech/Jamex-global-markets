@@ -13,6 +13,7 @@ export interface NotificationPreferences {
 export interface UserSettings {
     user_id: string;
     two_factor_enabled: boolean;
+    withdrawal_whitelist_enabled: boolean;
     base_currency: string;
     timezone: string;
     date_format: string;
@@ -43,6 +44,7 @@ const defaultNotifications: NotificationPreferences = {
 
 const defaultSettings: Partial<UserSettings> = {
     two_factor_enabled: false,
+    withdrawal_whitelist_enabled: false,
     base_currency: 'USD - US Dollar',
     timezone: '(GMT -05:00) Eastern Time',
     date_format: 'MM/DD/YYYY',
@@ -116,6 +118,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
                     .upsert({
                         user_id: state.user_id,
                         two_factor_enabled: state.two_factor_enabled,
+                        withdrawal_whitelist_enabled: state.withdrawal_whitelist_enabled,
                         base_currency: state.base_currency,
                         timezone: state.timezone,
                         date_format: state.date_format,

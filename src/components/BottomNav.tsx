@@ -47,7 +47,7 @@ export default function BottomNav() {
 
             <nav className="relative w-full h-[68px] flex justify-between items-center px-1 pointer-events-auto pb-safe">
                 {renderLink('/dashboard', 'dashboard', 'Home')}
-                {renderLink('/invest', 'account_balance', 'Invest')}
+                {renderLink('/transactions', 'receipt_long', 'History')}
                 
                 {/* CENTER FAB */}
                 <Link to="/wallet" className="flex flex-col items-center justify-center w-[20%] h-full relative group">
@@ -57,7 +57,7 @@ export default function BottomNav() {
                     <span className={`text-[9px] font-bold uppercase tracking-wider absolute bottom-2 transition-colors ${isWalletActive ? 'text-primary' : 'text-on-surface-variant'}`}>Wallet</span>
                 </Link>
 
-                {renderLink('/transactions', 'receipt_long', 'History')}
+                {renderLink('/profile', 'account_circle', 'Profile')}
                 {renderLink('/support', 'headset_mic', 'Support')}
             </nav>
         </div>

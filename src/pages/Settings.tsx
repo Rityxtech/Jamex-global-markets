@@ -20,6 +20,8 @@ export default function Settings() {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [passwordMessage, setPasswordMessage] = useState('');
+    const [deactivateMsg, setDeactivateMsg] = useState('');
+    const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -46,6 +48,19 @@ export default function Settings() {
             setTimeout(() => setPasswordMessage(''), 3000);
         } catch (err: any) {
             setPasswordMessage(`Error: ${err.message}`);
+        }
+    };
+
+    const handleDeactivate = async () => {
+        if (!user) return;
+        try {
+            setDeactivateMsg('Deactivating...');
+            const { error } = await supabase.from('profiles').update({ account_status: 'suspended' }).eq('id', user.id);
+            if (error) throw error;
+            await supabase.auth.signOut();
+            setDeactivateMsg('Account deactivated.');
+        } catch (err: any) {
+            setDeactivateMsg(`Error: ${err.message}`);
         }
     };
 
@@ -96,6 +111,25 @@ export default function Settings() {
                                         style={{backgroundColor: twoFactor ? '#2563eb' : '#33394a'}}
                                     />
                                     <label className="block overflow-hidden h-4 md:h-6 rounded-full bg-surface-container-highest cursor-pointer border border-outline-variant/20" htmlFor="toggle-2fa"></label>
+                                </div>
+                            </div>
+
+                            {/* Withdrawal Whitelist Toggle */}
+                            <div className="flex items-center justify-between py-1 md:py-1.5 border-b border-outline-variant/10 pb-2 md:pb-3">
+                                <div>
+                                    <p className="text-sm md:text-base font-bold text-on-surface mb-0.5">Withdrawal Whitelist</p>
+                                    <p className="text-[11px] md:text-sm font-medium text-on-surface-variant">Only allow withdrawals to verified wallet addresses.</p>
+                                </div>
+                                <div className="relative inline-block w-8 h-4 md:w-12 md:h-6 transition duration-200 ease-in-out shrink-0">
+                                    <input 
+                                        checked={settings?.withdrawal_whitelist_enabled ?? false} 
+                                        onChange={(e) => updateSetting('withdrawal_whitelist_enabled', e.target.checked)}
+                                        className="absolute block w-4 h-4 md:w-6 md:h-6 rounded-full bg-surface-bright border-2 border-transparent appearance-none cursor-pointer z-10 transition-transform duration-200 checked:translate-x-4 md:checked:translate-x-6" 
+                                        id="toggle-whitelist" 
+                                        type="checkbox"
+                                        style={{backgroundColor: (settings?.withdrawal_whitelist_enabled ?? false) ? '#2563eb' : '#33394a'}}
+                                    />
+                                    <label className="block overflow-hidden h-4 md:h-6 rounded-full bg-surface-container-highest cursor-pointer border border-outline-variant/20" htmlFor="toggle-whitelist"></label>
                                 </div>
                             </div>
                             
@@ -289,8 +323,33 @@ export default function Settings() {
                     <div>
                         <p className="text-sm md:text-base font-bold text-on-surface mb-0.5">Deactivate Institutional Account</p>
                         <p className="text-[11px] md:text-sm font-medium text-on-surface-variant leading-snug">Temporarily disable access to all markets and wealth management tools.</p>
+                        {deactivateMsg && (
+                            <p className="text-xs font-medium text-error mt-1">{deactivateMsg}</p>
+                        )}
                     </div>
-                    <button className="bg-transparent border border-error/50 text-error px-4 py-2 rounded-lg text-[11px] md:text-sm font-bold uppercase tracking-wider hover:bg-error hover:text-on-error transition-all active:scale-95 w-full sm:w-auto whitespace-nowrap mt-1 sm:mt-0">Deactivate</button>
+                    {!showDeactivateConfirm ? (
+                        <button 
+                            onClick={() => setShowDeactivateConfirm(true)}
+                            className="bg-transparent border border-error/50 text-error px-4 py-2 rounded-lg text-[11px] md:text-sm font-bold uppercase tracking-wider hover:bg-error hover:text-on-error transition-all active:scale-95 w-full sm:w-auto whitespace-nowrap mt-1 sm:mt-0"
+                        >
+                            Deactivate
+                        </button>
+                    ) : (
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                            <button 
+                                onClick={handleDeactivate}
+                                className="flex-1 sm:flex-none bg-error text-on-error px-4 py-2 rounded-lg text-[11px] md:text-sm font-bold uppercase tracking-wider hover:brightness-110 transition-all active:scale-95"
+                            >
+                                Confirm
+                            </button>
+                            <button 
+                                onClick={() => { setShowDeactivateConfirm(false); setDeactivateMsg(''); }}
+                                className="flex-1 sm:flex-none bg-surface-container-high text-on-surface px-4 py-2 rounded-lg text-[11px] md:text-sm font-bold uppercase tracking-wider border border-outline-variant/30 hover:bg-surface-variant transition-all"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

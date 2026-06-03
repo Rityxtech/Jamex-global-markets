@@ -179,11 +179,27 @@ CREATE TABLE IF NOT EXISTS public.user_settings (
   timezone                 TEXT    DEFAULT '(GMT -05:00) Eastern Time',
   date_format              TEXT    DEFAULT 'MM/DD/YYYY',
   notification_preferences JSONB   DEFAULT '{"market_execution_email":true,"market_execution_push":true,"wallet_email":true,"wallet_push":false,"security_email":true,"security_push":true}'::jsonb,
+  withdrawal_whitelist_enabled BOOLEAN NOT NULL DEFAULT false,
   updated_at               TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- ================================================================
--- 12. SUPPORT TICKETS
+-- 12. WALLET ADDRESSES
+-- ================================================================
+CREATE TABLE IF NOT EXISTS public.wallet_addresses (
+  id          UUID        NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id     UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  network     TEXT        NOT NULL CHECK (network IN ('ethereum','bitcoin','usdt','bnb')),
+  label       TEXT        NOT NULL DEFAULT 'My Wallet',
+  address     TEXT        NOT NULL,
+  status      TEXT        NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','verified','rejected')),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_wallet_addr_user ON public.wallet_addresses (user_id);
+
+-- ================================================================
+-- 13. SUPPORT TICKETS
 -- ================================================================
 CREATE TABLE IF NOT EXISTS public.support_tickets (
   id          UUID        NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -270,6 +286,8 @@ DROP TRIGGER IF EXISTS trg_plans_upd          ON public.investment_plans;
 CREATE TRIGGER trg_plans_upd          BEFORE UPDATE ON public.investment_plans   FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
 DROP TRIGGER IF EXISTS trg_settings_upd       ON public.user_settings;
 CREATE TRIGGER trg_settings_upd       BEFORE UPDATE ON public.user_settings      FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
+DROP TRIGGER IF EXISTS trg_wallet_addr_upd   ON public.wallet_addresses;
+CREATE TRIGGER trg_wallet_addr_upd   BEFORE UPDATE ON public.wallet_addresses   FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
 DROP TRIGGER IF EXISTS trg_tickets_upd        ON public.support_tickets;
 CREATE TRIGGER trg_tickets_upd        BEFORE UPDATE ON public.support_tickets    FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
 DROP TRIGGER IF EXISTS trg_platform_upd       ON public.platform_config;
@@ -289,6 +307,7 @@ ALTER TABLE public.loan_repayments   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.referrals         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.referral_activity ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_settings     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.wallet_addresses  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.support_tickets   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.platform_config   ENABLE ROW LEVEL SECURITY;
 
@@ -380,6 +399,18 @@ DROP POLICY IF EXISTS "settings_admin_all"  ON public.user_settings;
 CREATE POLICY "settings_crud_own"  ON public.user_settings FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "settings_admin_all" ON public.user_settings FOR ALL TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
 
+-- ── WALLET ADDRESSES ──
+DROP POLICY IF EXISTS "wallet_addr_select_own" ON public.wallet_addresses;
+DROP POLICY IF EXISTS "wallet_addr_insert_own" ON public.wallet_addresses;
+DROP POLICY IF EXISTS "wallet_addr_update_own" ON public.wallet_addresses;
+DROP POLICY IF EXISTS "wallet_addr_delete_own" ON public.wallet_addresses;
+DROP POLICY IF EXISTS "wallet_addr_admin_all" ON public.wallet_addresses;
+CREATE POLICY "wallet_addr_select_own" ON public.wallet_addresses FOR SELECT TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY "wallet_addr_insert_own" ON public.wallet_addresses FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "wallet_addr_update_own" ON public.wallet_addresses FOR UPDATE TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY "wallet_addr_delete_own" ON public.wallet_addresses FOR DELETE TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY "wallet_addr_admin_all" ON public.wallet_addresses FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+
 -- ── SUPPORT TICKETS ──
 DROP POLICY IF EXISTS "tickets_crud_own"     ON public.support_tickets;
 DROP POLICY IF EXISTS "tickets_admin_all"    ON public.support_tickets;
@@ -405,6 +436,21 @@ DROP POLICY IF EXISTS "kyc_storage_upload" ON storage.objects;
 CREATE POLICY "kyc_storage_upload" ON storage.objects
   FOR INSERT TO authenticated
   WITH CHECK (bucket_id = 'kyc-documents' AND (storage.foldername(name))[1] = auth.uid()::text);
+
+-- Avatar storage bucket
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('avatars', 'avatars', true)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "avatars_upload_own" ON storage.objects;
+CREATE POLICY "avatars_upload_own" ON storage.objects
+  FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
+
+DROP POLICY IF EXISTS "avatars_select_own" ON storage.objects;
+CREATE POLICY "avatars_select_own" ON storage.objects
+  FOR SELECT TO authenticated
+  USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
 
 DROP POLICY IF EXISTS "kyc_storage_read" ON storage.objects;
 CREATE POLICY "kyc_storage_read" ON storage.objects

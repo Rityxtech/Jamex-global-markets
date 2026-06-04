@@ -231,6 +231,15 @@ DROP TRIGGER IF EXISTS trg_tickets_upd        ON public.support_tickets;
 CREATE TRIGGER trg_tickets_upd        BEFORE UPDATE ON public.support_tickets    FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
 
 -- ================================================================
+-- ================================================================
+-- Helper function for admin RLS policies (checks profiles.is_admin)
+-- Replace hardcoded email with this for consistent admin access across
+-- any account that has is_admin = true in the profiles table.
+-- ================================================================
+CREATE OR REPLACE FUNCTION public.is_admin_user()
+RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT COALESCE((SELECT is_admin FROM public.profiles WHERE id = auth.uid()), false);
+$$;
 -- 14. ROW LEVEL SECURITY
 --   Pattern: users see/edit only their own rows.
 --   Admin (akugbof@gmail.com) gets a separate FOR ALL policy that
@@ -265,7 +274,7 @@ DROP POLICY IF EXISTS "Public profiles are viewable by everyone." ON public.prof
 CREATE POLICY "profiles_select_own" ON public.profiles FOR SELECT TO authenticated USING (auth.uid() = id);
 CREATE POLICY "profiles_insert_own" ON public.profiles FOR INSERT TO authenticated WITH CHECK (auth.uid() = id);
 CREATE POLICY "profiles_update_own" ON public.profiles FOR UPDATE TO authenticated USING (auth.uid() = id);
-CREATE POLICY "profiles_admin_all"  ON public.profiles FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+CREATE POLICY "profiles_admin_all"  ON public.profiles FOR ALL    TO authenticated USING (public.is_admin_user());
 
 -- ── WALLETS ──
 DROP POLICY IF EXISTS "wallets_select_own"   ON public.wallets;
@@ -280,7 +289,7 @@ DROP POLICY IF EXISTS "admin_read_all_wallets"   ON public.wallets;
 CREATE POLICY "wallets_select_own" ON public.wallets FOR SELECT TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "wallets_insert_own" ON public.wallets FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "wallets_update_own" ON public.wallets FOR UPDATE TO authenticated USING (auth.uid() = user_id);
-CREATE POLICY "wallets_admin_all"  ON public.wallets FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+CREATE POLICY "wallets_admin_all"  ON public.wallets FOR ALL    TO authenticated USING (public.is_admin_user());
 
 -- ── TRANSACTIONS ──
 DROP POLICY IF EXISTS "transactions_select_own"  ON public.transactions;
@@ -293,14 +302,14 @@ DROP POLICY IF EXISTS "admin_read_all_transactions"     ON public.transactions;
 
 CREATE POLICY "transactions_select_own" ON public.transactions FOR SELECT TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "transactions_insert_own" ON public.transactions FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "transactions_admin_all"  ON public.transactions FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+CREATE POLICY "transactions_admin_all"  ON public.transactions FOR ALL    TO authenticated USING (public.is_admin_user());
 
 -- ── INVESTMENT PLANS ──
 DROP POLICY IF EXISTS "plans_select_all" ON public.investment_plans;
 DROP POLICY IF EXISTS "plans_admin_all"  ON public.investment_plans;
 
 CREATE POLICY "plans_select_all" ON public.investment_plans FOR SELECT TO authenticated USING (true);
-CREATE POLICY "plans_admin_all"  ON public.investment_plans FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+CREATE POLICY "plans_admin_all"  ON public.investment_plans FOR ALL    TO authenticated USING (public.is_admin_user());
 
 -- ── INVESTMENTS ──
 DROP POLICY IF EXISTS "investments_select_own"  ON public.investments;
@@ -313,7 +322,7 @@ DROP POLICY IF EXISTS "admin_read_all_investments"     ON public.investments;
 
 CREATE POLICY "investments_select_own" ON public.investments FOR SELECT TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "investments_insert_own" ON public.investments FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "investments_admin_all"  ON public.investments FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+CREATE POLICY "investments_admin_all"  ON public.investments FOR ALL    TO authenticated USING (public.is_admin_user());
 
 -- ── KYC SUBMISSIONS ──
 DROP POLICY IF EXISTS "kyc_select_own"   ON public.kyc_submissions;
@@ -329,7 +338,7 @@ DROP POLICY IF EXISTS "admin_read_all_kyc"     ON public.kyc_submissions;
 CREATE POLICY "kyc_select_own" ON public.kyc_submissions FOR SELECT TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "kyc_insert_own" ON public.kyc_submissions FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "kyc_update_own" ON public.kyc_submissions FOR UPDATE TO authenticated USING (auth.uid() = user_id);
-CREATE POLICY "kyc_admin_all"  ON public.kyc_submissions FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+CREATE POLICY "kyc_admin_all"  ON public.kyc_submissions FOR ALL    TO authenticated USING (public.is_admin_user());
 
 -- ── LOANS ──
 DROP POLICY IF EXISTS "loans_select_own"  ON public.loans;
@@ -341,7 +350,7 @@ DROP POLICY IF EXISTS "admin_all_loans"          ON public.loans;
 
 CREATE POLICY "loans_select_own" ON public.loans FOR SELECT TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "loans_insert_own" ON public.loans FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "loans_admin_all"  ON public.loans FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+CREATE POLICY "loans_admin_all"  ON public.loans FOR ALL    TO authenticated USING (public.is_admin_user());
 
 -- ── LOAN REPAYMENTS ──
 DROP POLICY IF EXISTS "repayments_select_own"  ON public.loan_repayments;
@@ -356,7 +365,7 @@ DROP POLICY IF EXISTS "admin_all_repayments"          ON public.loan_repayments;
 CREATE POLICY "repayments_select_own" ON public.loan_repayments FOR SELECT TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "repayments_insert_own" ON public.loan_repayments FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "repayments_update_own" ON public.loan_repayments FOR UPDATE TO authenticated USING (auth.uid() = user_id);
-CREATE POLICY "repayments_admin_all"  ON public.loan_repayments FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+CREATE POLICY "repayments_admin_all"  ON public.loan_repayments FOR ALL    TO authenticated USING (public.is_admin_user());
 
 -- ── REFERRALS ──
 DROP POLICY IF EXISTS "referrals_select_own"  ON public.referrals;
@@ -368,7 +377,7 @@ DROP POLICY IF EXISTS "admin_all_referrals"                              ON publ
 
 CREATE POLICY "referrals_select_own" ON public.referrals FOR SELECT TO authenticated USING (auth.uid() = referrer_id OR auth.uid() = referred_id);
 CREATE POLICY "referrals_insert_own" ON public.referrals FOR INSERT TO authenticated WITH CHECK (auth.uid() = referred_id);
-CREATE POLICY "referrals_admin_all"  ON public.referrals FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+CREATE POLICY "referrals_admin_all"  ON public.referrals FOR ALL    TO authenticated USING (public.is_admin_user());
 
 -- ── REFERRAL ACTIVITY ──
 DROP POLICY IF EXISTS "refact_select_own"  ON public.referral_activity;
@@ -377,7 +386,7 @@ DROP POLICY IF EXISTS "Users can view their own referral activities" ON public.r
 DROP POLICY IF EXISTS "admin_all_activity"                            ON public.referral_activity;
 
 CREATE POLICY "refact_select_own" ON public.referral_activity FOR SELECT TO authenticated USING (auth.uid() = user_id);
-CREATE POLICY "refact_admin_all"  ON public.referral_activity FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+CREATE POLICY "refact_admin_all"  ON public.referral_activity FOR ALL    TO authenticated USING (public.is_admin_user());
 
 -- ── USER SETTINGS ──
 DROP POLICY IF EXISTS "settings_crud_own"   ON public.user_settings;
@@ -388,7 +397,7 @@ DROP POLICY IF EXISTS "Users can insert their own settings" ON public.user_setti
 DROP POLICY IF EXISTS "admin_all_settings"                   ON public.user_settings;
 
 CREATE POLICY "settings_crud_own"  ON public.user_settings FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "settings_admin_all" ON public.user_settings FOR ALL TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+CREATE POLICY "settings_admin_all" ON public.user_settings FOR ALL TO authenticated USING (public.is_admin_user());
 
 -- ── SUPPORT TICKETS ──
 DROP POLICY IF EXISTS "tickets_crud_own"   ON public.support_tickets;
@@ -396,7 +405,7 @@ DROP POLICY IF EXISTS "tickets_admin_all"  ON public.support_tickets;
 DROP POLICY IF EXISTS "tickets_guest_insert" ON public.support_tickets;
 
 CREATE POLICY "tickets_crud_own"  ON public.support_tickets FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "tickets_admin_all" ON public.support_tickets FOR ALL TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+CREATE POLICY "tickets_admin_all" ON public.support_tickets FOR ALL TO authenticated USING (public.is_admin_user());
 CREATE POLICY "tickets_guest_insert" ON public.support_tickets FOR INSERT TO anon WITH CHECK (user_id IS NULL);
 
 -- ================================================================
@@ -418,7 +427,7 @@ CREATE POLICY "kyc_storage_read" ON storage.objects
     bucket_id = 'kyc-documents'
     AND (
       (storage.foldername(name))[1] = auth.uid()::text
-      OR (auth.jwt()->>'email') = 'akugbof@gmail.com'
+      OR public.is_admin_user()
     )
   );
 
@@ -461,7 +470,7 @@ ALTER TABLE public.platform_config ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "platform_config_admin" ON public.platform_config;
 CREATE POLICY "platform_config_admin" ON public.platform_config
   FOR ALL TO authenticated
-  USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
+  USING (public.is_admin_user());
 -- Allow all authenticated users to read platform config (deposit addresses, fees)
 DROP POLICY IF EXISTS "platform_config_read_all" ON public.platform_config;
 CREATE POLICY "platform_config_read_all" ON public.platform_config

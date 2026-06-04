@@ -51,6 +51,7 @@ export default function Kyc() {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [selfieBlob, setSelfieBlob] = useState<Blob | null>(null);
   const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
+  const selfieInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -138,6 +139,17 @@ export default function Kyc() {
       setSelfiePreview(canvas.toDataURL('image/jpeg'));
       closeCamera();
     }, 'image/jpeg', 0.9);
+  };
+
+  const handleSelfieFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setSelfieBlob(file);
+      setSelfiePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   useEffect(() => {
@@ -442,15 +454,30 @@ export default function Kyc() {
                 <div className="flex items-center justify-between mb-2.5 md:mb-4">
                   <div>
                     <p className="text-[10px] md:text-sm font-bold uppercase tracking-wide">Liveness Check</p>
-                    <p className="text-[8px] md:text-xs text-on-surface-variant mt-0.5 font-medium">Live facial verification required</p>
+                    <p className="text-[8px] md:text-xs text-on-surface-variant mt-0.5 font-medium">Optional facial verification</p>
                   </div>
                   {!isReadOnly && (
-                    <button
-                      onClick={isCameraOpen ? closeCamera : openCamera}
-                      className={`px-2.5 py-1 md:px-4 md:py-2 rounded-lg text-[8px] md:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border ${isCameraOpen ? 'bg-error/10 text-error border-error/20 hover:bg-error/20' : 'bg-primary border-primary text-on-primary hover:brightness-110 active:scale-95 shadow-sm'}`}
-                    >
-                      {isCameraOpen ? 'Close Cam' : selfiePreview ? 'Retake' : 'Open Cam'}
-                    </button>
+                    <div className="flex gap-2">
+                      <input 
+                        type="file" 
+                        accept="image/png,image/jpeg" 
+                        className="hidden" 
+                        ref={selfieInputRef}
+                        onChange={handleSelfieFileUpload} 
+                      />
+                      <button
+                        onClick={() => selfieInputRef.current?.click()}
+                        className="px-2.5 py-1 md:px-4 md:py-2 rounded-lg text-[8px] md:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border bg-surface-container-highest border-outline-variant/30 text-on-surface hover:bg-surface-variant"
+                      >
+                        Upload
+                      </button>
+                      <button
+                        onClick={isCameraOpen ? closeCamera : openCamera}
+                        className={`px-2.5 py-1 md:px-4 md:py-2 rounded-lg text-[8px] md:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border ${isCameraOpen ? 'bg-error/10 text-error border-error/20 hover:bg-error/20' : 'bg-primary border-primary text-on-primary hover:brightness-110 active:scale-95 shadow-sm'}`}
+                      >
+                        {isCameraOpen ? 'Close Cam' : selfiePreview ? 'Retake' : 'Open Cam'}
+                      </button>
+                    </div>
                   )}
                 </div>
 

@@ -327,8 +327,10 @@ CREATE POLICY "profiles_admin_all"  ON public.profiles FOR ALL    TO authenticat
 -- ── WALLETS ──
 DROP POLICY IF EXISTS "wallets_select_own"   ON public.wallets;
 DROP POLICY IF EXISTS "wallets_update_own"   ON public.wallets;
+DROP POLICY IF EXISTS "wallets_insert_own"   ON public.wallets;
 DROP POLICY IF EXISTS "wallets_admin_all"    ON public.wallets;
 CREATE POLICY "wallets_select_own" ON public.wallets FOR SELECT TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY "wallets_insert_own" ON public.wallets FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "wallets_update_own" ON public.wallets FOR UPDATE TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "wallets_admin_all"  ON public.wallets FOR ALL    TO authenticated USING ((auth.jwt()->>'email') = 'akugbof@gmail.com');
 

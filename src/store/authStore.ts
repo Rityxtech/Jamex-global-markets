@@ -45,7 +45,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     useInvestmentStore.getState().clearInvestments();
   },
   checkProfileStatus: async (userId: string) => {
-    const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+    
+    if (!profile) {
+      // Auto-create missing profile
+      const user = get().user || (await supabase.auth.getUser()).data.user;
+      if (!user) return null;
+      
+      const meta = user.user_metadata || {};
+      const newProfile = {
+        id: userId,
+        email: user.email,
+        full_name: meta.full_name || user.email?.split('@')[0] || 'User',
+        avatar_url: meta.avatar_url || null,
+        referral_code: 'ref-' + userId.replace(/-/g, '').substring(0, 8).toUpperCase(),
+        account_status: 'active',
+        is_admin: user.email?.toLowerCase() === 'admin@jamexglobalmarkets.com'
+      };
+
+      await supabase.from('profiles').upsert([newProfile], { onConflict: 'id' }).select().single();
+      await supabase.from('wallets').insert([{ user_id: userId }]).select().maybeSingle();
+      await supabase.from('user_settings').insert([{ user_id: userId }]).select().maybeSingle();
+
+      return newProfile;
+    }
+
     if (profile && profile.account_status === 'suspended') {
       await supabase.auth.signOut();
       set({ session: null, user: null, profile: null, authError: 'Your account has been suspended. Please contact support.', loading: false });

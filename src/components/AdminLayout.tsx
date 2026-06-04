@@ -10,6 +10,7 @@ export default function AdminLayout() {
   const { signOut } = useAuthStore();
   const [connStatus, setConnStatus] = useState<ConnStatus>('checking');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Prevent body scrolling when mobile menu is open
   useEffect(() => {
@@ -36,8 +37,15 @@ export default function AdminLayout() {
   }, []);
 
   const handleLogout = async () => {
-    await signOut();
-    navigate('/login');
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      await signOut();
+      navigate('/login');
+    } catch (err) {
+      console.error('Logout failed', err);
+      setIsLoggingOut(false);
+    }
   };
 
   const navItems = [
@@ -53,7 +61,7 @@ export default function AdminLayout() {
   return (
     <div className="font-body-md text-body-md overflow-x-hidden min-h-screen bg-surface-dim">
       {/* Top Navigation Anchor */}
-      <header className="bg-surface-container/80 backdrop-blur-xl text-primary font-headline-md text-headline-md border-b border-outline-variant/30 shadow-sm flex justify-between items-center h-16 px-margin-desktop w-full sticky top-0 z-50">
+      <header className="bg-surface-container/80 backdrop-blur-xl text-primary font-headline-md text-headline-md border-b border-green-500 shadow-sm flex justify-between items-center h-16 px-margin-desktop w-full fixed top-0 z-50">
         <div className="flex items-center gap-4">
           <span className="font-headline-md text-headline-md font-bold text-primary tracking-tight">Jamex Global</span>
           <div className="hidden md:flex gap-6 items-center">
@@ -101,7 +109,7 @@ export default function AdminLayout() {
         </div>
       </header>
 
-      <div className="flex">
+      <div className="flex pt-16">
         {/* Mobile Overlay */}
         {isMobileMenuOpen && (
           <div
@@ -133,16 +141,25 @@ export default function AdminLayout() {
           <div className="px-4 pb-4 mt-auto pt-4">
             <button 
               onClick={handleLogout}
-              className="w-full bg-error-container/20 text-error border border-error/30 py-2.5 rounded-lg font-label-md text-label-md hover:bg-error-container/40 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              disabled={isLoggingOut}
+              className={`w-full py-2.5 rounded-lg font-label-md text-label-md transition-colors flex items-center justify-center gap-2 ${
+                isLoggingOut 
+                  ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed border border-outline-variant/30'
+                  : 'bg-error-container/20 text-error border border-error/30 hover:bg-error-container/40 cursor-pointer'
+              }`}
             >
-              <span className="material-symbols-outlined text-sm">logout</span>
-              Secure Logout
+              {isLoggingOut ? (
+                <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+              ) : (
+                <span className="material-symbols-outlined text-sm">logout</span>
+              )}
+              {isLoggingOut ? 'Logging out...' : 'Secure Logout'}
             </button>
           </div>
         </aside>
 
         {/* Mobile Sidebar — same content, shown via flex on small screens */}
-        <aside className={`md:hidden flex-col py-2 border-r-4 border-green-500 bg-surface-container-lowest/95 backdrop-blur-xl fixed left-0 top-16 h-[calc(100vh-64px)] w-64 z-50 transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <aside className={`md:hidden flex flex-col py-2 border-r-4 border-green-500 bg-surface-container-lowest/95 backdrop-blur-xl fixed left-0 top-16 h-[calc(100vh-64px)] w-64 z-50 transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <nav className="px-4 space-y-1 flex-1 overflow-y-auto">
             {navItems.map(({ to, icon, label, end }) => (
               <NavLink
@@ -164,10 +181,19 @@ export default function AdminLayout() {
           <div className="px-4 pb-4 mt-auto pt-4">
             <button 
               onClick={handleLogout}
-              className="w-full bg-error-container/20 text-error border border-error/30 py-2.5 rounded-lg font-label-md text-label-md hover:bg-error-container/40 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              disabled={isLoggingOut}
+              className={`w-full py-2.5 rounded-lg font-label-md text-label-md transition-colors flex items-center justify-center gap-2 ${
+                isLoggingOut 
+                  ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed border border-outline-variant/30'
+                  : 'bg-error-container/20 text-error border border-error/30 hover:bg-error-container/40 cursor-pointer'
+              }`}
             >
-              <span className="material-symbols-outlined text-sm">logout</span>
-              Secure Logout
+              {isLoggingOut ? (
+                <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+              ) : (
+                <span className="material-symbols-outlined text-sm">logout</span>
+              )}
+              {isLoggingOut ? 'Logging out...' : 'Secure Logout'}
             </button>
           </div>
         </aside>

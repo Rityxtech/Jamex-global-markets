@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useInView, type Variants } from 'motion/react';
+import { useSiteSettingsStore } from '../store/siteSettingsStore';
 
 /* ─── Reusable scroll-reveal wrappers ─── */
 function Reveal({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
@@ -31,6 +32,7 @@ function StaggerItem({ children, className = '' }: { children: React.ReactNode; 
 
 export default function About() {
   const navigate = useNavigate();
+  const { siteName } = useSiteSettingsStore();
 
   const team = [
     { name: 'Alex Graham', role: 'Chief Executive Officer', seed: 'alexreed', img: 'https://fv5-5.files.fm/thumb_show.php?i=qsym2f6tww&view&v=1&PHPSESSID=e60b40f12ea71cb799f381ec1c9042d931626886' },
@@ -96,7 +98,7 @@ export default function About() {
               <span className="text-label-sm font-label-sm text-primary uppercase tracking-widest mb-1 block">Our Story</span>
               <h2 className="font-headline-lg text-headline-lg text-on-surface mb-2 md:mb-3">From Vision to Global Impact</h2>
               <div className="space-y-2 md:space-y-3 text-body-md font-body-md text-on-surface-variant">
-                <p>Jamex Global Markets was founded in 2019 with a clear mission: bridge the gap between everyday investors and institutional-grade wealth management.</p>
+                <p>{siteName} was founded in 2019 with a clear mission: bridge the gap between everyday investors and institutional-grade wealth management.</p>
                 <p>By 2021, we surpassed $1 billion in assets under management, validating our approach to transparent, high-yield investment strategies.</p>
                 <p>Today, we serve over 50,000 active investors across 50+ jurisdictions, offering everything from automated investment plans to crypto-backed lending.</p>
               </div>
@@ -223,7 +225,7 @@ export default function About() {
             <Reveal>
               <div className="bg-gradient-to-r from-primary/10 to-blue-500/10 rounded-2xl p-5 md:p-8 text-center border border-outline-variant/20">
                 <h2 className="font-headline-lg text-headline-lg text-on-surface mb-1 md:mb-2">Ready to grow your wealth?</h2>
-                <p className="text-body-md font-body-md text-on-surface-variant mb-3 md:mb-5 max-w-md mx-auto">Join 50,000+ investors who trust Jamex Global Markets.</p>
+                <p className="text-body-md font-body-md text-on-surface-variant mb-3 md:mb-5 max-w-md mx-auto">Join 50,000+ investors who trust {siteName}.</p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 md:gap-3">
                   <button onClick={() => navigate('/register')} className="w-full sm:w-auto cursor-pointer bg-[#2563eb] text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 transition-all">
                     Get Started

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useSiteSettingsStore } from '../store/siteSettingsStore';
 import { supabase } from '../lib/supabase';
 
 type ConnStatus = 'checking' | 'connected' | 'offline';
@@ -8,6 +9,7 @@ type ConnStatus = 'checking' | 'connected' | 'offline';
 export default function AdminLayout() {
   const navigate = useNavigate();
   const { signOut } = useAuthStore();
+  const { siteShortName } = useSiteSettingsStore();
   const [connStatus, setConnStatus] = useState<ConnStatus>('checking');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -63,7 +65,7 @@ export default function AdminLayout() {
       {/* Top Navigation Anchor */}
       <header className="bg-surface-container/80 backdrop-blur-xl text-primary font-headline-md text-headline-md border-b border-green-500 shadow-sm flex justify-between items-center h-16 px-margin-desktop w-full fixed top-0 z-50">
         <div className="flex items-center gap-4">
-          <span className="font-headline-md text-headline-md font-bold text-primary tracking-tight">Jamex Global</span>
+          <span className="font-headline-md text-headline-md font-bold text-primary tracking-tight truncate max-w-[200px]">{siteShortName}</span>
           <div className="hidden md:flex gap-6 items-center">
             <span className="text-on-surface-variant font-medium font-label-md text-label-md">Admin Panel</span>
           </div>

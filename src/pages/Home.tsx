@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useInView, type Variants } from 'motion/react';
 import { useMarketStore } from '../store/marketStore';
+import { useSiteSettingsStore } from '../store/siteSettingsStore';
 
 /* ─── Reusable scroll-reveal wrappers ─── */
 function Reveal({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number; key?: React.Key }) {
@@ -33,6 +34,7 @@ function StaggerItem({ children, className = '' }: { children: React.ReactNode; 
 export default function Home() {
   const navigate = useNavigate();
   const { tickers } = useMarketStore();
+  const { siteName, siteShortName } = useSiteSettingsStore();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const btc = tickers['BTCUSDT'];
@@ -113,7 +115,7 @@ export default function Home() {
               </div>
             </motion.div>
             <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="font-display-lg text-headline-lg md:text-display-lg text-on-surface mb-2 md:mb-5 tracking-tight leading-tight">
-              <span className="md:hidden">Grow Your Wealth With Jamex</span>
+              <span className="md:hidden">Grow Your Wealth With {siteShortName}</span>
               <span className="hidden md:inline">Grow Your Wealth With <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">Institutional-Grade</span> Investment Plans</span>
             </motion.h1>
             <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="font-body-md text-body-lg text-on-surface-variant max-w-2xl mx-auto mb-2.5 md:mb-8 leading-relaxed">
@@ -252,7 +254,7 @@ export default function Home() {
         {/* ─── PLATFORM FEATURES ─── */}
         <section className="py-4 md:py-10 px-4 sm:px-margin-desktop max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl mx-auto">
           <Reveal className="text-center mb-4 md:mb-8">
-            <span className="text-label-sm font-label-sm text-primary uppercase tracking-widest">Why Jamex</span>
+            <span className="text-label-sm font-label-sm text-primary uppercase tracking-widest">Why {siteShortName}</span>
             <h2 className="font-headline-lg text-headline-lg text-on-surface mt-2">Everything You Need</h2>
           </Reveal>
           <div className="flex flex-col lg:flex-row gap-4 md:gap-6 items-start">
@@ -453,8 +455,8 @@ export default function Home() {
       {/* ─── FOOTER ─── */}
       <footer className="w-full py-4 md:py-8 px-4 sm:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-2.5 md:gap-4 bg-surface-container-lowest border-t border-outline-variant/10">
         <div className="flex flex-col gap-1 text-center md:text-left">
-          <span className="text-headline-md font-headline-md font-bold text-primary">Jamex Global</span>
-          <p className="text-label-sm font-label-sm text-on-surface-variant max-w-sm">&copy; 2024 Jamex Global Markets. Regulated Institutional Wealth Management.</p>
+          <span className="text-headline-md font-headline-md font-bold text-primary">{siteShortName}</span>
+          <p className="text-label-sm font-label-sm text-on-surface-variant max-w-sm">&copy; 2024 {siteName}. Regulated Institutional Wealth Management.</p>
         </div>
         <div className="flex flex-wrap justify-center gap-3 md:gap-5">
           <button onClick={() => navigate('/')} className="text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">About us</button>

@@ -41,6 +41,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 import AdminReferrals from './pages/admin/AdminReferrals';
 import { useAuthStore } from './store/authStore';
 import { useMarketStore } from './store/marketStore';
+import { useSiteSettingsStore } from './store/siteSettingsStore';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -70,12 +71,24 @@ function RootRoute() {
 export default function App() {
   const { initialize } = useAuthStore();
   const { connect, disconnect } = useMarketStore();
+  const { siteName, fetchSettings, subscribe } = useSiteSettingsStore();
 
   useEffect(() => {
     initialize();
     connect();
     return () => disconnect();
   }, [initialize, connect, disconnect]);
+
+  useEffect(() => {
+    fetchSettings();
+    return subscribe();
+  }, [fetchSettings, subscribe]);
+
+  useEffect(() => {
+    if (siteName) {
+      document.title = `${siteName} | Institutional Wealth Management`;
+    }
+  }, [siteName]);
 
   console.log('[DEBUG] __BASE_PATH__ =', __BASE_PATH__);
   return (

@@ -4,6 +4,7 @@ import { motion, useInView, type Variants } from 'motion/react';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import { useInvestmentStore } from '../store/investmentStore';
+import { useSiteSettingsStore } from '../store/siteSettingsStore';
 
 /* ─── Reusable scroll-reveal wrappers ─── */
 function Reveal({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number; key?: React.Key }) {
@@ -123,6 +124,7 @@ const STATIC_PLANS = [
 export default function Plans() {
     const navigate = useNavigate();
     const { user } = useAuthStore();
+    const { siteName } = useSiteSettingsStore();
     const { investments, fetchInvestments } = useInvestmentStore();
     const [plans, setPlans] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -693,7 +695,7 @@ export default function Plans() {
                                 ) : (
                                     <>
                                         <h2 className="font-headline-lg text-headline-lg text-on-surface mb-1 md:mb-2">Ready to start earning?</h2>
-                                        <p className="text-body-md font-body-md text-on-surface-variant mb-3 md:mb-5 max-w-md mx-auto">Join 50,000+ investors building wealth with Jamex Global Markets.</p>
+                                        <p className="text-body-md font-body-md text-on-surface-variant mb-3 md:mb-5 max-w-md mx-auto">Join 50,000+ investors building wealth with {siteName}.</p>
                                         <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 md:gap-3">
                                             <button onClick={() => navigate('/register')} className="w-full sm:w-auto cursor-pointer bg-[#2563eb] text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 transition-all">
                                                 Get Started

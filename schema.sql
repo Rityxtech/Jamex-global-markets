@@ -457,6 +457,8 @@ CREATE TABLE IF NOT EXISTS public.platform_config (
   deposit_address_usdt  TEXT          NOT NULL DEFAULT '',
   deposit_address_eth   TEXT          NOT NULL DEFAULT '',
   deposit_address_btc   TEXT          NOT NULL DEFAULT '',
+  site_name             TEXT          NOT NULL DEFAULT 'Jamex Global Markets',
+  site_logo_url         TEXT          NOT NULL DEFAULT '',
   advanced_config       JSONB         DEFAULT '{}'::jsonb,
   updated_at            TIMESTAMPTZ   NOT NULL DEFAULT now()
 );
@@ -465,6 +467,8 @@ CREATE TABLE IF NOT EXISTS public.platform_config (
 ALTER TABLE public.platform_config ADD COLUMN IF NOT EXISTS deposit_address_usdt TEXT NOT NULL DEFAULT '';
 ALTER TABLE public.platform_config ADD COLUMN IF NOT EXISTS deposit_address_eth  TEXT NOT NULL DEFAULT '';
 ALTER TABLE public.platform_config ADD COLUMN IF NOT EXISTS deposit_address_btc  TEXT NOT NULL DEFAULT '';
+ALTER TABLE public.platform_config ADD COLUMN IF NOT EXISTS site_name          TEXT NOT NULL DEFAULT 'Jamex Global Markets';
+ALTER TABLE public.platform_config ADD COLUMN IF NOT EXISTS site_logo_url     TEXT NOT NULL DEFAULT '';
 
 ALTER TABLE public.platform_config ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "platform_config_admin" ON public.platform_config;

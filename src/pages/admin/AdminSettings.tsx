@@ -12,6 +12,8 @@ interface PlatformConfig {
   deposit_address_usdt: string;
   deposit_address_eth: string;
   deposit_address_btc: string;
+  site_name: string;
+  site_logo_url: string;
   advanced_config: Record<string, unknown>;
   updated_at: string | null;
 }
@@ -35,6 +37,8 @@ const DEFAULT_CONFIG: PlatformConfig = {
   deposit_address_usdt: '',
   deposit_address_eth: '',
   deposit_address_btc: '',
+  site_name: 'Jamex Global Markets',
+  site_logo_url: '',
   advanced_config: {},
   updated_at: null,
 };
@@ -93,6 +97,8 @@ export default function AdminSettings() {
           deposit_address_usdt:  data.deposit_address_usdt || '',
           deposit_address_eth:   data.deposit_address_eth  || '',
           deposit_address_btc:   data.deposit_address_btc  || '',
+          site_name:             data.site_name || 'Jamex Global Markets',
+          site_logo_url:         data.site_logo_url || '',
           advanced_config:       data.advanced_config || {},
           updated_at:            data.updated_at,
         });
@@ -134,6 +140,8 @@ export default function AdminSettings() {
       deposit_address_usdt:  config.deposit_address_usdt.trim(),
       deposit_address_eth:   config.deposit_address_eth.trim(),
       deposit_address_btc:   config.deposit_address_btc.trim(),
+      site_name:             config.site_name.trim(),
+      site_logo_url:         config.site_logo_url.trim(),
       advanced_config:       parsedJson,
       updated_at:            new Date().toISOString(),
     });
@@ -298,6 +306,42 @@ export default function AdminSettings() {
                 </div>
                 <div className="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
                   <div className="bg-primary h-full rounded-full transition-all" style={{ width: `${roiInstPct}%` }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Site Branding */}
+            <div className="glass-card rounded-xl overflow-hidden flex flex-col">
+              <div className="bg-surface-container-high/50 px-6 py-3 flex justify-between items-center border-b border-outline-variant/20">
+                <h3 className="font-label-md uppercase tracking-wider text-primary">Site Branding</h3>
+                <span className="material-symbols-outlined text-on-surface-variant text-sm">palette</span>
+              </div>
+              <div className="p-6 space-y-6">
+                <div className="space-y-2">
+                  <label className="font-label-sm text-label-sm text-on-surface-variant">Site Name</label>
+                  <input
+                    value={config.site_name}
+                    onChange={e => setConfig(c => ({ ...c, site_name: e.target.value }))}
+                    placeholder="e.g. Jamex Global Markets"
+                    className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all"
+                  />
+                  <p className="text-[10px] text-on-surface-variant">Displayed in header, footer, page titles, and across the platform.</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="font-label-sm text-label-sm text-on-surface-variant">Logo URL</label>
+                  <input
+                    value={config.site_logo_url}
+                    onChange={e => setConfig(c => ({ ...c, site_logo_url: e.target.value }))}
+                    placeholder="https://example.com/logo.png"
+                    className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all"
+                  />
+                  {config.site_logo_url && (
+                    <div className="flex items-center gap-3 mt-2">
+                      <img src={config.site_logo_url} alt="Logo preview" className="w-8 h-8 rounded object-contain border border-outline-variant/20" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      <span className="text-[10px] text-on-surface-variant font-mono truncate">{config.site_logo_url}</span>
+                    </div>
+                  )}
+                  <p className="text-[10px] text-on-surface-variant">Leave empty to use the default icon logo.</p>
                 </div>
               </div>
             </div>

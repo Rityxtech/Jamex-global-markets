@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useInView, type Variants } from 'motion/react';
 import { useAuthStore } from '../store/authStore';
 import { supabase } from '../lib/supabase';
+import { useSiteSettingsStore } from '../store/siteSettingsStore';
 
 function Reveal({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number; key?: React.Key }) {
   const ref = React.useRef<HTMLDivElement>(null);
@@ -33,6 +34,7 @@ function StaggerItem({ children, className = '' }: { children: React.ReactNode; 
 export default function Contact() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const { siteName } = useSiteSettingsStore();
   const [formData, setFormData] = useState({ name: '', email: '', subject: 'General Inquiry', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -299,7 +301,7 @@ export default function Contact() {
             <Reveal>
               <div className="bg-gradient-to-r from-primary/10 to-blue-500/10 rounded-2xl p-5 md:p-8 text-center border border-outline-variant/20">
                 <h2 className="font-headline-lg text-headline-lg text-on-surface mb-1 md:mb-2">Not sure where to start?</h2>
-                <p className="text-body-md font-body-md text-on-surface-variant mb-4 md:mb-5 max-w-md mx-auto">Explore our investment plans and see how Jamex Global Markets can grow your wealth.</p>
+                <p className="text-body-md font-body-md text-on-surface-variant mb-4 md:mb-5 max-w-md mx-auto">Explore our investment plans and see how {siteName} can grow your wealth.</p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 md:gap-3">
                   <button onClick={() => navigate('/plans')} className="w-full sm:w-auto cursor-pointer bg-primary text-on-primary px-6 py-2.5 rounded-xl font-bold text-sm shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 transition-all">View Investment Plans</button>
                   {!user && (

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useSiteSettingsStore } from '../store/siteSettingsStore';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const { user, profile, loading } = useAuthStore();
+  const { siteName, siteShortName, siteLogoUrl } = useSiteSettingsStore();
   const isLoggedIn = !!user;
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'U';
   const avatarUrl = profile?.avatar_url;
@@ -64,12 +66,16 @@ export default function Header() {
       {/* LEFT SIDE: Brand */}
       <div className="flex items-center gap-4 relative z-[70]">
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2563eb] to-[#b4c5ff] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-            <span className="material-symbols-outlined text-white text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>public</span>
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2563eb] to-[#b4c5ff] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform shrink-0">
+            {siteLogoUrl ? (
+              <img src={siteLogoUrl} alt={siteName} className="w-full h-full object-contain rounded-lg" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            ) : (
+              <span className="material-symbols-outlined text-white text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>public</span>
+            )}
           </div>
-          <span className="text-base md:text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300 tracking-tight">
-            <span className="md:hidden">Jamex</span>
-            <span className="hidden md:inline">Jamex Global</span>
+          <span className="text-base md:text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300 tracking-tight truncate max-w-[140px] md:max-w-[200px]">
+            <span className="md:hidden">{siteShortName}</span>
+            <span className="hidden md:inline">{siteShortName}</span>
           </span>
         </Link>
         

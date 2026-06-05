@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useKycStore } from '../store/kycStore';
 import { useAuthStore } from '../store/authStore';
+import { useSiteSettingsStore } from '../store/siteSettingsStore';
 
 const COUNTRIES = [
   'Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina','Armenia','Australia',
@@ -33,6 +34,7 @@ export default function Kyc() {
   console.log('[KYC] render #', renderCount.current);
 
   const { user } = useAuthStore();
+  const { siteName } = useSiteSettingsStore();
   const { kyc, loading, uploading, uploadProgress, error, fetchKyc, submitKyc, subscribeToKyc } = useKycStore();
 
   // Form state
@@ -248,7 +250,7 @@ export default function Kyc() {
     },
     approved: {
       icon: 'verified', color: 'text-tertiary', bg: 'bg-tertiary/10 border-tertiary/20',
-      label: 'Verified', message: 'Your identity has been successfully verified. You now have full access to all Jamex Global Markets features.'
+      label: 'Verified', message: `Your identity has been successfully verified. You now have full access to all ${siteName} features.`
     },
     rejected: {
       icon: 'cancel', color: 'text-error', bg: 'bg-error/10 border-error/20',

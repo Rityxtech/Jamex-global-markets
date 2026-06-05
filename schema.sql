@@ -450,6 +450,7 @@ DROP POLICY IF EXISTS "livechat_user_select"    ON public.livechat_messages;
 DROP POLICY IF EXISTS "livechat_user_insert"    ON public.livechat_messages;
 DROP POLICY IF EXISTS "livechat_admin_all"       ON public.livechat_messages;
 DROP POLICY IF EXISTS "livechat_guest_insert"    ON public.livechat_messages;
+DROP POLICY IF EXISTS "livechat_guest_select"    ON public.livechat_messages;
 
 -- Users can read their own messages
 CREATE POLICY "livechat_user_select" ON public.livechat_messages
@@ -470,6 +471,11 @@ CREATE POLICY "livechat_admin_all" ON public.livechat_messages
 CREATE POLICY "livechat_guest_insert" ON public.livechat_messages
   FOR INSERT TO anon
   WITH CHECK (user_id IS NULL AND sender_type = 'user');
+
+-- Guests can read messages in their session (client filters by session_id)
+CREATE POLICY "livechat_guest_select" ON public.livechat_messages
+  FOR SELECT TO anon
+  USING (user_id IS NULL);
 
 -- ================================================================
 -- 15. STORAGE BUCKET — kyc-documents

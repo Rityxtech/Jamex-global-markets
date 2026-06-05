@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 /* ── types ── */
 interface AdminUser {
   user_id: string;
+  email: string | null;
   display_name: string;
   kyc_status: 'approved' | 'pending' | 'rejected' | 'none';
   main_balance: number;
@@ -85,7 +86,7 @@ export default function AdminUserManagement() {
     setLoading(true);
     try {
       const [profileRes, kycRes, walletRes] = await Promise.all([
-        supabase.from('profiles').select('id, full_name'),
+        supabase.from('profiles').select('id, email, full_name'),
         supabase.from('kyc_submissions').select('user_id, first_name, last_name, status, country, submitted_at'),
         supabase.from('wallets').select('user_id, main_balance, profit_balance'),
       ]);
@@ -95,8 +96,8 @@ export default function AdminUserManagement() {
       const wallets = walletRes.data || [];
 
       /* build lookup maps */
-      const profileMap: Record<string, string> = {};
-      profiles.forEach(p => { if (p.id && p.full_name) profileMap[p.id] = p.full_name; });
+      const profileMap: Record<string, { full_name: string; email: string | null }> = {};
+      profiles.forEach(p => { if (p.id) profileMap[p.id] = { full_name: p.full_name || '', email: p.email || null }; });
 
       const kycMap: Record<string, typeof kycs[0]> = {};
       kycs.forEach(k => { kycMap[k.user_id] = k; });
@@ -115,12 +116,14 @@ export default function AdminUserManagement() {
       const merged: AdminUser[] = Array.from(allIds).map(uid => {
         const kyc = kycMap[uid];
         const wallet = walletMap[uid];
-        let display_name = profileMap[uid] || '';
+        const profile = profileMap[uid];
+        let display_name = profile?.full_name || '';
         if (!display_name && kyc) display_name = `${kyc.first_name} ${kyc.last_name}`.trim();
         if (!display_name) display_name = `User ${uid.substring(0, 8)}…`;
 
         return {
           user_id: uid,
+          email: profile?.email || null,
           display_name,
           kyc_status: (kyc?.status as AdminUser['kyc_status']) || 'none',
           main_balance: Number(wallet?.main_balance) || 0,
@@ -329,7 +332,7 @@ export default function AdminUserManagement() {
                         </div>
                         <div>
                           <p className="font-label-md text-label-md text-on-surface font-bold">{user.display_name}</p>
-                          <p className="text-[11px] font-tabular-nums text-on-surface-variant">{user.user_id.substring(0, 16)}…</p>
+                          <p className="text-[11px] font-tabular-nums text-on-surface-variant">{user.email || user.user_id.substring(0, 16) + '…'}</p>
                         </div>
                       </div>
                     </td>

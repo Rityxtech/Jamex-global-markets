@@ -7,6 +7,7 @@
 -- 1. PROFILES (auto-created on signup via trigger)
 CREATE TABLE IF NOT EXISTS public.profiles (
   id             UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email          TEXT,
   full_name      TEXT,
   avatar_url     TEXT,
   referral_code  TEXT UNIQUE,
@@ -15,6 +16,9 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Add email column to existing instances (idempotent)
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email TEXT;
 
 -- 2. WALLETS
 CREATE TABLE IF NOT EXISTS public.wallets (
@@ -187,9 +191,10 @@ CREATE INDEX IF NOT EXISTS idx_tickets_status ON public.support_tickets (status)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, avatar_url, referral_code, account_status)
+  INSERT INTO public.profiles (id, email, full_name, avatar_url, referral_code, account_status)
   VALUES (
     NEW.id,
+    NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email,'@',1)),
     NEW.raw_user_meta_data->>'avatar_url',
     'ref-' || UPPER(SUBSTRING(REPLACE(NEW.id::text,'-',''),1,8)),
@@ -529,13 +534,21 @@ INSERT INTO public.platform_config (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
 -- 17. BACKFILL — create missing rows for users who signed up before
 --     this schema was applied (profiles, wallets, settings).
 -- ================================================================
-INSERT INTO public.profiles (id, full_name, referral_code)
+INSERT INTO public.profiles (id, email, full_name, referral_code)
 SELECT
   id,
+  email,
   COALESCE(raw_user_meta_data->>'full_name', split_part(email,'@',1)),
   'ref-' || UPPER(SUBSTRING(REPLACE(id::text,'-',''),1,8))
 FROM auth.users
 ON CONFLICT (id) DO NOTHING;
+
+-- Backfill email for existing profiles that are missing it
+UPDATE public.profiles
+SET email = auth.users.email
+FROM auth.users
+WHERE public.profiles.id = auth.users.id
+  AND public.profiles.email IS NULL;
 
 INSERT INTO public.wallets (user_id)
 SELECT id FROM auth.users

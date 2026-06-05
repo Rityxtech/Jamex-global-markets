@@ -56,6 +56,8 @@ export default function AdminSettings() {
   const [saved, setSaved]       = useState(false);
   const [toast, setToast]       = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
   const [services, setServices] = useState<ServiceStatus[]>([]);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   /* ── health check ── */
   const pingServices = useCallback(async () => {
@@ -123,11 +125,39 @@ export default function AdminSettings() {
     return () => { clearInterval(interval); supabase.removeChannel(channel); };
   }, [fetchConfig, pingServices]);
 
+  /* ── logo upload ── */
+  async function uploadLogo(file: File): Promise<string | null> {
+    const ext = file.name.split('.').pop() || 'png';
+    const path = `logo/${Date.now()}.${ext}`;
+    const { data, error } = await supabase.storage.from('site-assets').upload(path, file, { upsert: true });
+    if (error) {
+      console.error('Logo upload error:', error.message);
+      return null;
+    }
+    const { data: urlData } = supabase.storage.from('site-assets').getPublicUrl(data.path);
+    return urlData.publicUrl;
+  }
+
   /* ── save ── */
   async function doSave() {
     setSaving(true);
     let parsedJson: Record<string, unknown> = {};
     try { parsedJson = JSON.parse(jsonText); } catch { parsedJson = config.advanced_config; }
+
+    let logoUrl = config.site_logo_url.trim();
+    if (logoFile) {
+      const uploadedUrl = await uploadLogo(logoFile);
+      if (uploadedUrl) {
+        logoUrl = uploadedUrl;
+        setConfig(c => ({ ...c, site_logo_url: logoUrl }));
+        setLogoFile(null);
+        setLogoPreview(null);
+      } else {
+        setToast({ type: 'error', msg: 'Logo upload failed. Please try again.' });
+        setSaving(false);
+        return;
+      }
+    }
 
     const { error } = await supabase.from('platform_config').upsert({
       id: 1,
@@ -141,7 +171,7 @@ export default function AdminSettings() {
       deposit_address_eth:   config.deposit_address_eth.trim(),
       deposit_address_btc:   config.deposit_address_btc.trim(),
       site_name:             config.site_name.trim(),
-      site_logo_url:         config.site_logo_url.trim(),
+      site_logo_url:         logoUrl,
       advanced_config:       parsedJson,
       updated_at:            new Date().toISOString(),
     });
@@ -328,20 +358,35 @@ export default function AdminSettings() {
                   <p className="text-[10px] text-on-surface-variant">Displayed in header, footer, page titles, and across the platform.</p>
                 </div>
                 <div className="space-y-2">
-                  <label className="font-label-sm text-label-sm text-on-surface-variant">Logo URL</label>
+                  <label className="font-label-sm text-label-sm text-on-surface-variant">Site Logo</label>
                   <input
-                    value={config.site_logo_url}
-                    onChange={e => setConfig(c => ({ ...c, site_logo_url: e.target.value }))}
-                    placeholder="https://example.com/logo.png"
-                    className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all"
+                    type="file"
+                    accept="image/*"
+                    onChange={e => {
+                      const file = e.target.files?.[0] || null;
+                      setLogoFile(file);
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => setLogoPreview(reader.result as string);
+                        reader.readAsDataURL(file);
+                      } else {
+                        setLogoPreview(null);
+                      }
+                    }}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                   />
-                  {config.site_logo_url && (
+                  {(logoPreview || config.site_logo_url) && (
                     <div className="flex items-center gap-3 mt-2">
-                      <img src={config.site_logo_url} alt="Logo preview" className="w-8 h-8 rounded object-contain border border-outline-variant/20" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                      <span className="text-[10px] text-on-surface-variant font-mono truncate">{config.site_logo_url}</span>
+                      <img
+                        src={logoPreview || config.site_logo_url}
+                        alt="Logo preview"
+                        className="w-10 h-10 rounded object-contain border border-outline-variant/20 bg-surface-container-lowest"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                      <span className="text-[10px] text-on-surface-variant font-mono truncate">{logoFile ? logoFile.name : 'Current logo'}</span>
                     </div>
                   )}
-                  <p className="text-[10px] text-on-surface-variant">Leave empty to use the default icon logo.</p>
+                  <p className="text-[10px] text-on-surface-variant">Upload a PNG/JPG/SVG logo. Leave empty to use the default icon.</p>
                 </div>
               </div>
             </div>

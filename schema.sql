@@ -432,6 +432,28 @@ CREATE POLICY "kyc_storage_read" ON storage.objects
   );
 
 -- ================================================================
+-- 15b. STORAGE BUCKET — site-assets (for site branding logo)
+-- ================================================================
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('site-assets', 'site-assets', true)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "site_assets_admin_upload" ON storage.objects;
+CREATE POLICY "site_assets_admin_upload" ON storage.objects
+  FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'site-assets' AND public.is_admin_user());
+
+DROP POLICY IF EXISTS "site_assets_admin_update" ON storage.objects;
+CREATE POLICY "site_assets_admin_update" ON storage.objects
+  FOR UPDATE TO authenticated
+  WITH CHECK (bucket_id = 'site-assets' AND public.is_admin_user());
+
+DROP POLICY IF EXISTS "site_assets_public_read" ON storage.objects;
+CREATE POLICY "site_assets_public_read" ON storage.objects
+  FOR SELECT TO authenticated
+  USING (bucket_id = 'site-assets');
+
+-- ================================================================
 -- 16. REALTIME PUBLICATIONS
 -- ================================================================
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.wallets;           EXCEPTION WHEN duplicate_object THEN NULL; END $$;

@@ -198,6 +198,42 @@ CREATE INDEX IF NOT EXISTS idx_livechat_user      ON public.livechat_messages (u
 CREATE INDEX IF NOT EXISTS idx_livechat_session   ON public.livechat_messages (session_id);
 CREATE INDEX IF NOT EXISTS idx_livechat_created   ON public.livechat_messages (created_at);
 
+-- 12c. LIVECHAT AUTO-REPLY — welcome message on first user message
+CREATE OR REPLACE FUNCTION public.handle_livechat_auto_reply()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+DECLARE
+  msg_count INT;
+  welcome_msg TEXT := 'Hi there! Thanks for reaching out. An admin will be with you shortly. How can we help you today?';
+BEGIN
+  -- Only react to user messages (ignore admin/auto inserts to avoid recursion)
+  IF NEW.sender_type != 'user' THEN
+    RETURN NEW;
+  END IF;
+
+  -- Count messages from this user/session (includes the newly inserted row)
+  SELECT COUNT(*) INTO msg_count
+  FROM public.livechat_messages
+  WHERE (
+    (NEW.user_id IS NOT NULL AND user_id = NEW.user_id)
+    OR
+    (NEW.session_id IS NOT NULL AND session_id = NEW.session_id)
+  );
+
+  -- If this is the very first message, send automated admin welcome reply
+  IF msg_count = 1 THEN
+    INSERT INTO public.livechat_messages (user_id, session_id, sender_type, message, read_by_admin, read_by_user)
+    VALUES (NEW.user_id, NEW.session_id, 'admin', welcome_msg, true, true);
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_livechat_auto_reply ON public.livechat_messages;
+CREATE TRIGGER trg_livechat_auto_reply
+  AFTER INSERT ON public.livechat_messages
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_livechat_auto_reply();
+
 -- ================================================================
 -- 13. FUNCTIONS & TRIGGERS
 -- ================================================================
@@ -613,3 +649,21 @@ ON CONFLICT (user_id) DO NOTHING;
 ALTER TABLE public.support_tickets ALTER COLUMN user_id DROP NOT NULL;
 ALTER TABLE public.support_tickets ADD COLUMN IF NOT EXISTS guest_name TEXT;
 ALTER TABLE public.support_tickets ADD COLUMN IF NOT EXISTS guest_email TEXT;
+
+-- ================================================================
+-- 19. LIVECHAT CLEANUP — auto-delete messages older than 24 hours
+-- ================================================================
+CREATE OR REPLACE FUNCTION public.cleanup_livechat_messages()
+RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  DELETE FROM public.livechat_messages WHERE created_at < now() - interval '24 hours';
+END;
+$$;
+
+-- Schedule hourly cleanup via pg_cron (ignored if extension not available)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron') THEN
+    PERFORM cron.schedule('cleanup-livechat-every-hour', '0 * * * *', 'SELECT public.cleanup_livechat_messages();');
+  END IF;
+END $$;

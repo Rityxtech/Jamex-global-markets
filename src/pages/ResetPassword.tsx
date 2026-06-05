@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 import AuthBackground from '../components/AuthBackground';
 
 export default function ResetPassword() {
@@ -13,8 +14,30 @@ export default function ResetPassword() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+    const [noSession, setNoSession] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    useEffect(() => {
+        const handleRecovery = async () => {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+
+            if (code) {
+                const { error } = await supabase.auth.exchangeCodeForSession(code);
+                if (error) {
+                    setErrorMsg('Invalid or expired reset link. Please try again.');
+                    setNoSession(true);
+                    return;
+                }
+            }
+
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) setNoSession(true);
+        };
+
+        handleRecovery();
+    }, []);
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isProcessing) return;
 
@@ -31,15 +54,27 @@ export default function ResetPassword() {
         setIsProcessing(true);
         setErrorMsg('');
 
-        // Simulate password reset API Call
-        setTimeout(() => {
+        try {
+            const { error } = await supabase.auth.updateUser({
+                password,
+            });
+
+            if (error) {
+                setIsProcessing(false);
+                setErrorMsg(error.message);
+                return;
+            }
+
             setIsProcessing(false);
             setIsSuccess(true);
-            // Auto navigate to login page after 2.5s
+            await supabase.auth.signOut();
             setTimeout(() => {
                 navigate('/login');
             }, 2500);
-        }, 1500);
+        } catch (err: any) {
+            setIsProcessing(false);
+            setErrorMsg(err.message || 'Failed to update password');
+        }
     };
 
     return (
@@ -76,6 +111,13 @@ export default function ResetPassword() {
                                 <div className="bg-error/10 border border-error/50 text-error px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 mb-3.5 animate-in fade-in duration-300">
                                     <span className="material-symbols-outlined text-[18px]">error</span>
                                     {errorMsg}
+                                </div>
+                            )}
+
+                            {noSession && (
+                                <div className="bg-error/10 border border-error/50 text-error px-4 py-3 rounded-lg text-sm font-bold flex flex-col items-center gap-2 mb-3.5 animate-in fade-in duration-300 text-center">
+                                    <span className="material-symbols-outlined text-[20px]">error</span>
+                                    <span>Invalid or expired reset session. Please start from <Link to="/forgot-password" className="underline">Forgot Password</Link>.</span>
                                 </div>
                             )}
 
@@ -134,9 +176,9 @@ export default function ResetPassword() {
                                     {/* Primary Action */}
                                     <button 
                                         className={`w-full font-medium text-sm py-2 sm:py-2.5 rounded shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 group cursor-pointer ${
-                                            isProcessing ? 'bg-primary-container brightness-75 text-on-primary-container cursor-wait' : 'bg-primary-container hover:bg-inverse-primary text-on-primary-container'
+                                            isProcessing || noSession ? 'bg-primary-container brightness-75 text-on-primary-container cursor-wait' : 'bg-primary-container hover:bg-inverse-primary text-on-primary-container'
                                         }`}
-                                        disabled={isProcessing} 
+                                        disabled={isProcessing || noSession} 
                                         type="submit"
                                     >
                                         {isProcessing ? (

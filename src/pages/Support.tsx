@@ -204,7 +204,7 @@ export default function Support() {
                                         </div>
                                     ))}
                                 </div>
-                                <button className="w-full py-2 md:py-3 text-[9px] md:text-xs font-bold text-on-surface-variant hover:text-primary transition-colors border-t border-outline-variant/10 uppercase tracking-wider bg-surface-container-highest/20">View All Tickets</button>
+                                <button onClick={() => navigate('/support/chat')} className="w-full py-2 md:py-3 text-[9px] md:text-xs font-bold text-on-surface-variant hover:text-primary transition-colors border-t border-outline-variant/10 uppercase tracking-wider bg-surface-container-highest/20 cursor-pointer">View All Tickets</button>
                             </section>
 
                             {/* Service Status Cards */}

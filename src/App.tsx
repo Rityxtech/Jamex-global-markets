@@ -20,6 +20,7 @@ import Kyc from './pages/Kyc';
 import Referral from './pages/Referral';
 import TransactionHistory from './pages/TransactionHistory';
 import Support from './pages/Support';
+import UserSupportChat from './pages/UserSupportChat';
 import Contact from './pages/Contact';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
@@ -93,8 +94,8 @@ export default function App() {
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
         </Route>
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Protected Routes — Sidebar & BottomNav live in AppLayout, mounted once */}
         <Route element={<ProtectedRoute />}>
@@ -108,6 +109,7 @@ export default function App() {
             <Route path="/referrals" element={<Referral />} />
             <Route path="/transactions" element={<TransactionHistory />} />
             <Route path="/support" element={<Support />} />
+            <Route path="/support/chat" element={<UserSupportChat />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/loans" element={<Loans />} />

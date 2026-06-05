@@ -58,22 +58,18 @@ export default function AdminKYCReview() {
 
   const fetchKyc = async (userId: string) => {
     setLoading(true);
+    setError('');
     try {
-      const { data, error } = await supabase
-        .from('kyc_submissions')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-      if (error) throw error;
-      setKyc(data as KycData);
-      
-      const { data: profileData } = await supabase.from('profiles').select('*').eq('id', userId).single();
-      if (profileData) setProfile(profileData);
-
-      const { data: addrData } = await supabase.from('wallet_addresses').select('*').eq('user_id', userId).order('created_at', { ascending: false });
-      setWalletAddresses(addrData || []);
+      const [kycRes, profileRes, addrRes] = await Promise.all([
+        supabase.from('kyc_submissions').select('*').eq('user_id', userId).maybeSingle(),
+        supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
+        supabase.from('wallet_addresses').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+      ]);
+      if (kycRes.data) setKyc(kycRes.data as KycData);
+      if (profileRes.data) setProfile(profileRes.data);
+      setWalletAddresses(addrRes.data || []);
     } catch (err: any) {
-      setError(err.message || 'Failed to load KYC data');
+      setError(err.message || 'Failed to load user data');
     } finally {
       setLoading(false);
     }
@@ -219,29 +215,11 @@ export default function AdminKYCReview() {
     );
   }
 
-  if (!kyc) {
-    return (
-      <div className="flex-1 flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <p className="text-on-surface-variant mb-4">No KYC submission found for this user.</p>
-          <button
-            onClick={() => navigate('/admin/users')}
-            className="px-4 py-2 bg-primary text-on-primary rounded-lg font-bold cursor-pointer"
-          >
-            Back to Users
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const statusConfig = {
     pending: { color: 'text-yellow-400', bg: 'bg-yellow-400/10 border-yellow-400/20', label: 'Under Review' },
     approved: { color: 'text-tertiary', bg: 'bg-tertiary/10 border-tertiary/20', label: 'Approved' },
     rejected: { color: 'text-error', bg: 'bg-error/10 border-error/20', label: 'Rejected' },
   };
-
-  const currentStatus = statusConfig[kyc.status];
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-64px)] -mx-6 lg:-mx-8 -mt-6 lg:-mt-8">
@@ -254,18 +232,32 @@ export default function AdminKYCReview() {
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
-          <h2 className="font-headline-md text-headline-md font-bold text-on-surface">KYC Review: {kyc.first_name} {kyc.last_name}</h2>
+          <h2 className="font-headline-md text-headline-md font-bold text-on-surface">
+            {kyc ? `KYC Review: ${kyc.first_name} ${kyc.last_name}` : `User Profile: ${profile?.full_name || profile?.email || 'Unknown User'}`}
+          </h2>
         </div>
-        <div className="flex items-center gap-6">
-          <div className={`flex items-center gap-2 px-3 py-1 rounded-full border ${currentStatus.bg}`}>
-            <span className={`w-2 h-2 rounded-full ${kyc.status === 'pending' ? 'bg-yellow-400 animate-pulse' : kyc.status === 'approved' ? 'bg-tertiary' : 'bg-error'}`}></span>
-            <span className={`font-label-sm text-label-sm ${currentStatus.color}`}>{currentStatus.label}</span>
+        {kyc && (
+          <div className="flex items-center gap-6">
+            {(() => {
+              const currentStatus = statusConfig[kyc.status];
+              return (
+                <div className={`flex items-center gap-2 px-3 py-1 rounded-full border ${currentStatus.bg}`}>
+                  <span className={`w-2 h-2 rounded-full ${kyc.status === 'pending' ? 'bg-yellow-400 animate-pulse' : kyc.status === 'approved' ? 'bg-tertiary' : 'bg-error'}`}></span>
+                  <span className={`font-label-sm text-label-sm ${currentStatus.color}`}>{currentStatus.label}</span>
+                </div>
+              );
+            })()}
           </div>
-        </div>
+        )}
       </header>
 
       {/* Main Content */}
       <div className="p-6 lg:p-8 grid grid-cols-12 gap-6 flex-grow overflow-y-auto pb-20 md:pb-8">
+        {error && (
+          <div className="col-span-12">
+            <div className="text-error text-xs font-medium bg-error/10 border border-error/20 p-3 rounded-lg">{error}</div>
+          </div>
+        )}
         {/* Left: Document Viewer */}
         <section className="col-span-12 lg:col-span-7 flex flex-col gap-6">
           {/* Document Switcher Tabs */}
@@ -299,24 +291,29 @@ export default function AdminKYCReview() {
           {/* Image Viewer */}
           <div className="glass-card rounded-xl overflow-hidden flex flex-col group relative">
             <div className="absolute top-4 right-4 flex gap-2 z-10">
-              {activeTab === 'passport' && kyc.front_id_url && (
+              {activeTab === 'passport' && kyc?.front_id_url && (
                 <a href={kyc.front_id_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-surface/80 backdrop-blur hover:bg-primary hover:text-on-primary rounded-lg transition-all shadow-lg border border-outline-variant/20 cursor-pointer text-on-surface">
                   <span className="material-symbols-outlined">open_in_new</span>
                 </a>
               )}
-              {activeTab === 'address' && kyc.back_id_url && (
+              {activeTab === 'address' && kyc?.back_id_url && (
                 <a href={kyc.back_id_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-surface/80 backdrop-blur hover:bg-primary hover:text-on-primary rounded-lg transition-all shadow-lg border border-outline-variant/20 cursor-pointer text-on-surface">
                   <span className="material-symbols-outlined">open_in_new</span>
                 </a>
               )}
-              {activeTab === 'face' && kyc.selfie_url && (
+              {activeTab === 'face' && kyc?.selfie_url && (
                 <a href={kyc.selfie_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-surface/80 backdrop-blur hover:bg-primary hover:text-on-primary rounded-lg transition-all shadow-lg border border-outline-variant/20 cursor-pointer text-on-surface">
                   <span className="material-symbols-outlined">open_in_new</span>
                 </a>
               )}
             </div>
             <div className="aspect-[16/10] bg-surface-container-lowest flex items-center justify-center p-8 overflow-hidden">
-              {activeTab === 'passport' && kyc.front_id_url ? (
+              {!kyc ? (
+                <div className="text-center">
+                  <span className="material-symbols-outlined text-outline text-6xl block mb-4">no_documents</span>
+                  <p className="text-on-surface-variant font-medium">No KYC submission found for this user.</p>
+                </div>
+              ) : activeTab === 'passport' && kyc.front_id_url ? (
                 <img src={kyc.front_id_url} alt="Front ID" className="w-full h-full object-contain rounded-lg" />
               ) : activeTab === 'address' && kyc.back_id_url ? (
                 <img src={kyc.back_id_url} alt="Proof of Address" className="w-full h-full object-contain rounded-lg" />
@@ -328,60 +325,63 @@ export default function AdminKYCReview() {
                 </div>
               )}
             </div>
-            <div className="p-4 bg-surface-container/50 border-t border-outline-variant/30 flex justify-between items-center">
-              <div>
-                <p className="font-label-md text-label-md text-on-surface">
-                  {activeTab === 'passport' ? 'Government ID / Passport' : activeTab === 'address' ? 'Proof of Address' : 'Face Match / Selfie'}
-                </p>
-                <p className="font-label-sm text-label-sm text-on-surface-variant">
-                  {activeTab === 'passport' && kyc.front_id_url ? 'Document uploaded' : 'No document uploaded'}
-                </p>
+            {kyc && (
+              <div className="p-4 bg-surface-container/50 border-t border-outline-variant/30 flex justify-between items-center">
+                <div>
+                  <p className="font-label-md text-label-md text-on-surface">
+                    {activeTab === 'passport' ? 'Government ID / Passport' : activeTab === 'address' ? 'Proof of Address' : 'Face Match / Selfie'}
+                  </p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant">
+                    {activeTab === 'passport' && kyc.front_id_url ? 'Document uploaded' : 'No document uploaded'}
+                  </p>
+                </div>
+                {(activeTab === 'passport' && kyc.front_id_url) || (activeTab === 'address' && kyc.back_id_url) || (activeTab === 'face' && kyc.selfie_url) ? (
+                  <span className="material-symbols-outlined text-tertiary">check_circle</span>
+                ) : (
+                  <span className="material-symbols-outlined text-outline">cancel</span>
+                )}
               </div>
-              {(activeTab === 'passport' && kyc.front_id_url) || (activeTab === 'address' && kyc.back_id_url) || (activeTab === 'face' && kyc.selfie_url) ? (
-                <span className="material-symbols-outlined text-tertiary">check_circle</span>
-              ) : (
-                <span className="material-symbols-outlined text-outline">cancel</span>
-              )}
-            </div>
+            )}
           </div>
 
-          {/* Secondary Document Preview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div
-              className={`glass-card p-4 rounded-xl flex items-center gap-4 cursor-pointer hover:border-primary transition-colors group ${activeTab === 'address' ? 'border-primary' : ''}`}
-              onClick={() => setActiveTab('address')}
-            >
-              <div className="w-16 h-16 bg-surface-container rounded-lg flex-shrink-0 flex items-center justify-center border border-outline-variant/20 group-hover:border-primary/50 transition-colors">
-                {kyc.back_id_url ? (
-                  <img src={kyc.back_id_url} alt="Proof of Address" className="w-full h-full object-cover rounded" />
-                ) : (
-                  <span className="material-symbols-outlined text-outline">receipt_long</span>
-                )}
+          {kyc && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div
+                className={`glass-card p-4 rounded-xl flex items-center gap-4 cursor-pointer hover:border-primary transition-colors group ${activeTab === 'address' ? 'border-primary' : ''}`}
+                onClick={() => setActiveTab('address')}
+              >
+                <div className="w-16 h-16 bg-surface-container rounded-lg flex-shrink-0 flex items-center justify-center border border-outline-variant/20 group-hover:border-primary/50 transition-colors">
+                  {kyc.back_id_url ? (
+                    <img src={kyc.back_id_url} alt="Proof of Address" className="w-full h-full object-cover rounded" />
+                  ) : (
+                    <span className="material-symbols-outlined text-outline">receipt_long</span>
+                  )}
+                </div>
+                <div>
+                  <p className="font-label-md text-label-md">Proof of Address</p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant">Utility bill, bank statement, etc.</p>
+                </div>
+                <span className="material-symbols-outlined ml-auto text-on-surface-variant group-hover:text-primary transition-colors">visibility</span>
               </div>
-              <div>
-                <p className="font-label-md text-label-md">Proof of Address</p>
-                <p className="font-label-sm text-label-sm text-on-surface-variant">Utility bill, bank statement, etc.</p>
+              <div
+                className={`glass-card p-4 rounded-xl flex items-center gap-4 cursor-pointer hover:border-primary transition-colors group ${activeTab === 'face' ? 'border-primary' : ''}`}
+                onClick={() => setActiveTab('face')}
+              >
+                <div className="w-16 h-16 bg-surface-container rounded-lg flex-shrink-0 flex items-center justify-center border border-outline-variant/20 group-hover:border-primary/50 transition-colors">
+                  {kyc.selfie_url ? (
+                    <img src={kyc.selfie_url} alt="Selfie" className="w-full h-full object-cover rounded" />
+                  ) : (
+                    <span className="material-symbols-outlined text-outline">face</span>
+                  )}
+                </div>
+                <div>
+                  <p className="font-label-md text-label-md">Selfie (Live)</p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant">Liveness Check</p>
+                </div>
+                <span className="material-symbols-outlined ml-auto text-on-surface-variant group-hover:text-primary transition-colors">visibility</span>
               </div>
-              <span className="material-symbols-outlined ml-auto text-on-surface-variant group-hover:text-primary transition-colors">visibility</span>
             </div>
-            <div
-              className={`glass-card p-4 rounded-xl flex items-center gap-4 cursor-pointer hover:border-primary transition-colors group ${activeTab === 'face' ? 'border-primary' : ''}`}
-              onClick={() => setActiveTab('face')}
-            >
-              <div className="w-16 h-16 bg-surface-container rounded-lg flex-shrink-0 flex items-center justify-center border border-outline-variant/20 group-hover:border-primary/50 transition-colors">
-                {kyc.selfie_url ? (
-                  <img src={kyc.selfie_url} alt="Selfie" className="w-full h-full object-cover rounded" />
-                ) : (
-                  <span className="material-symbols-outlined text-outline">face</span>
-                )}
-              </div>
-              <div>
-                <p className="font-label-md text-label-md">Selfie (Live)</p>
-                <p className="font-label-sm text-label-sm text-on-surface-variant">Liveness Check</p>
-              </div>
-              <span className="material-symbols-outlined ml-auto text-on-surface-variant group-hover:text-primary transition-colors">visibility</span>
-            </div>
-          </div>
+          )}
         </section>
 
         {/* Right: Data Review & Decision */}
@@ -392,32 +392,52 @@ export default function AdminKYCReview() {
               <h3 className="font-headline-md text-headline-md font-bold text-on-surface">Profile Data</h3>
             </div>
             <div className="p-6 flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-y-4">
-                <div>
-                  <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">First Name</label>
-                  <p className="font-body-md text-body-md font-medium text-on-surface">{kyc.first_name}</p>
-                </div>
-                <div>
-                  <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Last Name</label>
-                  <p className="font-body-md text-body-md font-medium text-on-surface">{kyc.last_name}</p>
-                </div>
-                <div>
-                  <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Date of Birth</label>
-                  <p className="font-tabular-nums text-tabular-nums text-on-surface">{kyc.date_of_birth}</p>
-                </div>
-                <div>
-                  <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Country</label>
-                  <p className="font-body-md text-body-md text-on-surface">{kyc.country}</p>
-                </div>
-              </div>
-              <div className="pt-4 border-t border-outline-variant/20">
-                <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Address</label>
-                <p className="font-body-md text-body-md mb-2 text-on-surface">{kyc.address}, {kyc.city}, {kyc.postal_code}</p>
-              </div>
-              <div className="pt-4 border-t border-outline-variant/20">
-                <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Submitted At</label>
-                <p className="font-body-md text-body-md text-on-surface">{new Date(kyc.submitted_at).toLocaleString()}</p>
-              </div>
+              {kyc ? (
+                <>
+                  <div className="grid grid-cols-2 gap-y-4">
+                    <div>
+                      <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">First Name</label>
+                      <p className="font-body-md text-body-md font-medium text-on-surface">{kyc.first_name}</p>
+                    </div>
+                    <div>
+                      <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Last Name</label>
+                      <p className="font-body-md text-body-md font-medium text-on-surface">{kyc.last_name}</p>
+                    </div>
+                    <div>
+                      <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Date of Birth</label>
+                      <p className="font-tabular-nums text-tabular-nums text-on-surface">{kyc.date_of_birth}</p>
+                    </div>
+                    <div>
+                      <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Country</label>
+                      <p className="font-body-md text-body-md text-on-surface">{kyc.country}</p>
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t border-outline-variant/20">
+                    <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Address</label>
+                    <p className="font-body-md text-body-md mb-2 text-on-surface">{kyc.address}, {kyc.city}, {kyc.postal_code}</p>
+                  </div>
+                  <div className="pt-4 border-t border-outline-variant/20">
+                    <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Submitted At</label>
+                    <p className="font-body-md text-body-md text-on-surface">{new Date(kyc.submitted_at).toLocaleString()}</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-y-4">
+                    <div>
+                      <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Full Name</label>
+                      <p className="font-body-md text-body-md font-medium text-on-surface">{profile?.full_name || '—'}</p>
+                    </div>
+                    <div>
+                      <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Email</label>
+                      <p className="font-body-md text-body-md font-medium text-on-surface">{profile?.email || '—'}</p>
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t border-outline-variant/20">
+                    <p className="text-on-surface-variant text-sm">No KYC data available for this user.</p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -608,7 +628,7 @@ export default function AdminKYCReview() {
                     const { data: walletData, error: walletError } = await supabase
                       .from('wallets')
                       .select(typeEl.value)
-                      .eq('user_id', kyc.user_id)
+                      .eq('user_id', id)
                       .single();
 
                     if (walletError) throw walletError;
@@ -627,7 +647,7 @@ export default function AdminKYCReview() {
                     const { error: updateError } = await supabase
                       .from('wallets')
                       .update({ [typeEl.value]: newBalance })
-                      .eq('user_id', kyc.user_id);
+                      .eq('user_id', id);
 
                     if (updateError) throw updateError;
 
@@ -635,7 +655,7 @@ export default function AdminKYCReview() {
                     const { error: txError } = await supabase
                       .from('transactions')
                       .insert({
-                        user_id: kyc.user_id,
+                        user_id: id,
                         type: actionEl.value,
                         amount: amount,
                         status: 'completed',
@@ -659,46 +679,48 @@ export default function AdminKYCReview() {
           </div>
 
           {/* Decision Panel */}
-          <div className="glass-card rounded-xl overflow-hidden mt-auto">
-            <div className="p-6 flex flex-col gap-4">
-              {error && (
-                <div className="text-error text-xs font-medium bg-error/10 border border-error/20 p-2 rounded-lg">{error}</div>
-              )}
-              {kyc.status === 'rejected' && kyc.rejection_reason && (
-                <div className="text-error text-xs font-medium bg-error/10 border border-error/20 p-2 rounded-lg">
-                  <p className="font-bold mb-1">Rejection Reason:</p>
-                  <p>{kyc.rejection_reason}</p>
+          {kyc && (
+            <div className="glass-card rounded-xl overflow-hidden mt-auto">
+              <div className="p-6 flex flex-col gap-4">
+                {error && (
+                  <div className="text-error text-xs font-medium bg-error/10 border border-error/20 p-2 rounded-lg">{error}</div>
+                )}
+                {kyc.status === 'rejected' && kyc.rejection_reason && (
+                  <div className="text-error text-xs font-medium bg-error/10 border border-error/20 p-2 rounded-lg">
+                    <p className="font-bold mb-1">Rejection Reason:</p>
+                    <p>{kyc.rejection_reason}</p>
+                  </div>
+                )}
+                <label className="block font-label-md text-label-md text-on-surface-variant">Reviewer Comments</label>
+                <textarea
+                  className="w-full h-24 bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-4 font-body-md text-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all resize-none placeholder:text-on-surface-variant/30"
+                  placeholder="State reason for approval or document rejection..."
+                  value={comments}
+                  onChange={(e) => setComments(e.target.value)}
+                  disabled={kyc.status !== 'pending' || processing}
+                ></textarea>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={handleReject}
+                    disabled={kyc.status !== 'pending' || processing}
+                    className="flex items-center justify-center gap-2 py-3 bg-surface-container-highest border border-error/50 text-error rounded-xl font-label-md text-label-md hover:bg-error/10 transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="material-symbols-outlined">block</span>
+                    {processing ? 'Processing...' : 'Reject Case'}
+                  </button>
+                  <button
+                    onClick={handleApprove}
+                    disabled={kyc.status !== 'pending' || processing}
+                    className="flex items-center justify-center gap-2 py-3 bg-primary text-on-primary rounded-xl font-label-md text-label-md hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="material-symbols-outlined">task_alt</span>
+                    {processing ? 'Processing...' : 'Approve KYC'}
+                  </button>
                 </div>
-              )}
-              <label className="block font-label-md text-label-md text-on-surface-variant">Reviewer Comments</label>
-              <textarea
-                className="w-full h-24 bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-4 font-body-md text-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all resize-none placeholder:text-on-surface-variant/30"
-                placeholder="State reason for approval or document rejection..."
-                value={comments}
-                onChange={(e) => setComments(e.target.value)}
-                disabled={kyc.status !== 'pending' || processing}
-              ></textarea>
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={handleReject}
-                  disabled={kyc.status !== 'pending' || processing}
-                  className="flex items-center justify-center gap-2 py-3 bg-surface-container-highest border border-error/50 text-error rounded-xl font-label-md text-label-md hover:bg-error/10 transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <span className="material-symbols-outlined">block</span>
-                  {processing ? 'Processing...' : 'Reject Case'}
-                </button>
-                <button
-                  onClick={handleApprove}
-                  disabled={kyc.status !== 'pending' || processing}
-                  className="flex items-center justify-center gap-2 py-3 bg-primary text-on-primary rounded-xl font-label-md text-label-md hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <span className="material-symbols-outlined">task_alt</span>
-                  {processing ? 'Processing...' : 'Approve KYC'}
-                </button>
+                <p className="text-center font-label-sm text-label-sm text-on-surface-variant opacity-50">Decision will be logged as audit trail</p>
               </div>
-              <p className="text-center font-label-sm text-label-sm text-on-surface-variant opacity-50">Decision will be logged as audit trail</p>
             </div>
-          </div>
+          )}
         </aside>
       </div>
     </div>

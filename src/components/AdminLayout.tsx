@@ -9,7 +9,7 @@ type ConnStatus = 'checking' | 'connected' | 'offline';
 export default function AdminLayout() {
   const navigate = useNavigate();
   const { signOut } = useAuthStore();
-  const { siteShortName } = useSiteSettingsStore();
+  const { siteShortName, siteLogoUrl } = useSiteSettingsStore();
   const [connStatus, setConnStatus] = useState<ConnStatus>('checking');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -64,7 +64,14 @@ export default function AdminLayout() {
     <div className="font-body-md text-body-md overflow-x-hidden min-h-screen bg-surface-dim">
       {/* Top Navigation Anchor */}
       <header className="bg-surface-container/80 backdrop-blur-xl text-primary font-headline-md text-headline-md border-b border-green-500 shadow-sm flex justify-between items-center h-16 px-margin-desktop w-full fixed top-0 z-50">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2563eb] to-[#b4c5ff] flex items-center justify-center shadow-lg shrink-0">
+            {siteLogoUrl ? (
+              <img src={siteLogoUrl} alt={siteShortName} className="w-full h-full object-contain rounded-lg" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            ) : (
+              <span className="material-symbols-outlined text-white text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>public</span>
+            )}
+          </div>
           <span className="font-headline-md text-headline-md font-bold text-primary tracking-tight truncate max-w-[200px]">{siteShortName}</span>
           <div className="hidden md:flex gap-6 items-center">
             <span className="text-on-surface-variant font-medium font-label-md text-label-md">Admin Panel</span>

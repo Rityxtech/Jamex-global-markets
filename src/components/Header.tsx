@@ -111,10 +111,10 @@ export default function Header() {
           </div>
         ) : !isLoggedIn ? (
           <div className="flex items-center gap-1 sm:gap-3">
-            <Link to="/login" className="px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white hover:text-gray-300 transition-colors">
+            <Link to="/login" className="hidden sm:inline-block px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white hover:text-gray-300 transition-colors">
               Sign In
             </Link>
-            <Link to="/register" className="px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold bg-[#2563eb] text-white rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 transition-all">
+            <Link to="/register" className="px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold bg-[#2563eb] text-white rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 transition-all whitespace-nowrap">
               Get Started
             </Link>
             <button

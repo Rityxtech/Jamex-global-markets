@@ -240,6 +240,22 @@ CREATE OR REPLACE FUNCTION public.is_admin_user()
 RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
   SELECT COALESCE((SELECT is_admin FROM public.profiles WHERE id = auth.uid()), false);
 $$;
+
+-- ================================================================
+-- Admin RPC: delete a user and their auth record
+-- SECURITY DEFINER is required because auth.users is not directly
+-- accessible to normal users.
+-- ================================================================
+CREATE OR REPLACE FUNCTION public.delete_user(target_user_id UUID)
+RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  IF NOT public.is_admin_user() THEN
+    RAISE EXCEPTION 'Permission denied: admin only';
+  END IF;
+  DELETE FROM auth.users WHERE id = target_user_id;
+END;
+$$;
+
 -- 14. ROW LEVEL SECURITY
 --   Pattern: users see/edit only their own rows.
 --   Admin (akugbof@gmail.com) gets a separate FOR ALL policy that

@@ -183,6 +183,21 @@ CREATE TABLE IF NOT EXISTS public.support_tickets (
 CREATE INDEX IF NOT EXISTS idx_tickets_user   ON public.support_tickets (user_id);
 CREATE INDEX IF NOT EXISTS idx_tickets_status ON public.support_tickets (status);
 
+-- 12b. LIVECHAT MESSAGES (real-time chat between users and admins)
+CREATE TABLE IF NOT EXISTS public.livechat_messages (
+  id            UUID        NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id       UUID        REFERENCES auth.users(id) ON DELETE CASCADE,
+  session_id    TEXT,
+  sender_type   TEXT        NOT NULL CHECK (sender_type IN ('user','admin')),
+  message       TEXT        NOT NULL,
+  read_by_admin BOOLEAN     NOT NULL DEFAULT false,
+  read_by_user  BOOLEAN     NOT NULL DEFAULT false,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_livechat_user      ON public.livechat_messages (user_id);
+CREATE INDEX IF NOT EXISTS idx_livechat_session   ON public.livechat_messages (session_id);
+CREATE INDEX IF NOT EXISTS idx_livechat_created   ON public.livechat_messages (created_at);
+
 -- ================================================================
 -- 13. FUNCTIONS & TRIGGERS
 -- ================================================================
@@ -280,6 +295,7 @@ ALTER TABLE public.referrals         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.referral_activity ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_settings     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.support_tickets   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.livechat_messages ENABLE ROW LEVEL SECURITY;
 
 -- ── PROFILES ──
 DROP POLICY IF EXISTS "profiles_select_own"  ON public.profiles;
@@ -429,6 +445,32 @@ CREATE POLICY "tickets_crud_own"  ON public.support_tickets FOR ALL TO authentic
 CREATE POLICY "tickets_admin_all" ON public.support_tickets FOR ALL TO authenticated USING (public.is_admin_user());
 CREATE POLICY "tickets_guest_insert" ON public.support_tickets FOR INSERT TO anon WITH CHECK (user_id IS NULL);
 
+--- ── LIVECHAT MESSAGES ──
+DROP POLICY IF EXISTS "livechat_user_select"    ON public.livechat_messages;
+DROP POLICY IF EXISTS "livechat_user_insert"    ON public.livechat_messages;
+DROP POLICY IF EXISTS "livechat_admin_all"       ON public.livechat_messages;
+DROP POLICY IF EXISTS "livechat_guest_insert"    ON public.livechat_messages;
+
+-- Users can read their own messages
+CREATE POLICY "livechat_user_select" ON public.livechat_messages
+  FOR SELECT TO authenticated
+  USING (user_id = auth.uid());
+
+-- Users can send messages
+CREATE POLICY "livechat_user_insert" ON public.livechat_messages
+  FOR INSERT TO authenticated
+  WITH CHECK (user_id = auth.uid() AND sender_type = 'user');
+
+-- Admins can do everything
+CREATE POLICY "livechat_admin_all" ON public.livechat_messages
+  FOR ALL TO authenticated
+  USING (public.is_admin_user());
+
+-- Guests (not logged in) can send messages using a session_id
+CREATE POLICY "livechat_guest_insert" ON public.livechat_messages
+  FOR INSERT TO anon
+  WITH CHECK (user_id IS NULL AND sender_type = 'user');
+
 -- ================================================================
 -- 15. STORAGE BUCKET — kyc-documents
 -- ================================================================
@@ -485,6 +527,7 @@ DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.referrals;     
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.referral_activity; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.user_settings;     EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.support_tickets;   EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.livechat_messages;   EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ================================================================
 -- 13b. PLATFORM CONFIG  (single-row admin settings store)

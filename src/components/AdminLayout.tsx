@@ -57,6 +57,7 @@ export default function AdminLayout() {
     { to: '/admin/financials', icon: 'payments', label: 'Financials' },
     { to: '/admin/referrals', icon: 'share', label: 'Referrals' },
     { to: '/admin/support', icon: 'contact_support', label: 'Support' },
+    { to: '/admin/livechat', icon: 'chat', label: 'Live Chat' },
     { to: '/admin/settings', icon: 'settings', label: 'Settings' },
   ];
 

@@ -6,7 +6,8 @@ import { useKycStore } from '../store/kycStore';
 export default function Sidebar() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { user } = useAuthStore();
+    const { user, signOut } = useAuthStore();
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const { kyc, fetchKyc } = useKycStore();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -204,13 +205,33 @@ export default function Sidebar() {
                                 <span className="material-symbols-outlined text-[20px]" style={getIconStyle("/support")}>headset_mic</span>
                                 <span className="text-sm">Support</span>
                             </Link>
-                            <button onClick={async () => {
-                                setIsMobileMenuOpen(false);
-                                await useAuthStore.getState().signOut();
-                                navigate('/');
-                            }} className="w-full flex items-center gap-3 px-4 h-10 mt-2 text-error bg-error/10 hover:bg-error/20 transition-all duration-300 rounded-xl font-bold text-left shadow-sm border border-error/20">
-                                <span className="material-symbols-outlined text-[20px]">logout</span>
-                                <span className="text-sm">Logout</span>
+                            <button
+                                onClick={async (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (isLoggingOut) return;
+                                    setIsLoggingOut(true);
+                                    setIsMobileMenuOpen(false);
+                                    try {
+                                        await signOut();
+                                        navigate('/');
+                                    } catch (err) {
+                                        console.error('Logout failed', err);
+                                    } finally {
+                                        setIsLoggingOut(false);
+                                    }
+                                }}
+                                disabled={isLoggingOut}
+                                className={`w-full flex items-center gap-3 px-4 h-10 mt-2 font-bold text-left shadow-sm border rounded-xl transition-all duration-300 ${
+                                    isLoggingOut
+                                        ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed border-outline-variant/30'
+                                        : 'text-error bg-error/10 hover:bg-error/20 border-error/20'
+                                }`}
+                            >
+                                <span className={`material-symbols-outlined text-[20px] ${isLoggingOut ? 'animate-spin' : ''}`}>
+                                    {isLoggingOut ? 'sync' : 'logout'}
+                                </span>
+                                <span className="text-sm">{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
                             </button>
                         </div>
                     </div>

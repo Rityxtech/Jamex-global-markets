@@ -114,7 +114,7 @@ export default function LiveChatWidget() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-[100] flex flex-col items-end">
+    <div className="fixed bottom-20 right-4 z-[100] flex flex-col items-end md:bottom-4">
       {/* Chat Panel */}
       {open && (
         <div className="mb-3 w-[340px] max-w-[90vw] h-[480px] bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant/30 flex flex-col overflow-hidden">

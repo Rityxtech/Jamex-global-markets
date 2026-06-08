@@ -53,6 +53,13 @@ function ScrollToTop() {
   return null;
 }
 
+function LiveChatWidgetWrapper() {
+  const { pathname } = useLocation();
+  const hideOnPaths = ['/admin', '/login', '/register', '/forgot-password', '/reset-password', '/admin-login'];
+  if (hideOnPaths.some((p) => pathname.startsWith(p))) return null;
+  return <LiveChatWidget />;
+}
+
 /** Shows Home for guests; redirects authenticated users to /dashboard */
 function RootRoute() {
   const { user, loading, profile } = useAuthStore();
@@ -97,7 +104,7 @@ export default function App() {
     <BrowserRouter basename={__BASE_PATH__}>
       <ScrollToTop />
       <Header />
-      <LiveChatWidget />
+      <LiveChatWidgetWrapper />
       <Routes>
         <Route path="/" element={<RootRoute />} />
         <Route path="/about" element={<About />} />

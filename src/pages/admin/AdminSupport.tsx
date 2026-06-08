@@ -14,6 +14,7 @@ interface Ticket {
   admin_reply: string | null;
   guest_name: string | null;
   guest_email: string | null;
+  read_by_admin: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -75,7 +76,7 @@ export default function AdminSupport() {
     try {
       const [txRes, profileRes] = await Promise.all([
         supabase.from('support_tickets')
-          .select('id,user_id,subject,message,status,priority,category,admin_reply,guest_name,guest_email,created_at,updated_at')
+          .select('id,user_id,subject,message,status,priority,category,admin_reply,guest_name,guest_email,read_by_admin,created_at,updated_at')
           .order('created_at', { ascending: false }),
         supabase.from('profiles').select('id,full_name'),
       ]);
@@ -107,6 +108,15 @@ export default function AdminSupport() {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [selectedId]);
 
+  // Mark ticket as read when selected
+  useEffect(() => {
+    if (!selectedId) return;
+    const ticket = tickets.find(t => t.id === selectedId);
+    if (ticket && !ticket.read_by_admin) {
+      supabase.from('support_tickets').update({ read_by_admin: true }).eq('id', selectedId).then(() => fetchAll());
+    }
+  }, [selectedId, tickets, fetchAll]);
+
   const selected = tickets.find(t => t.id === selectedId) ?? null;
   const displayed = tickets.filter(t => tabFilter(t, tab));
 
@@ -115,7 +125,7 @@ export default function AdminSupport() {
     setReplying(true);
     const newStatus = selected.status === 'open' ? 'in_progress' : selected.status;
     const { error } = await supabase.from('support_tickets')
-      .update({ admin_reply: inputText.trim(), status: newStatus }).eq('id', selected.id);
+      .update({ admin_reply: inputText.trim(), status: newStatus, read_by_admin: true }).eq('id', selected.id);
     if (!error) {
       setInputText('');
       setTickets(prev => prev.map(t => t.id === selected.id

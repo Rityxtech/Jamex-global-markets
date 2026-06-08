@@ -52,9 +52,11 @@ export default function ConfirmInvestment() {
         try {
             const { error: invErr } = await supabase.from('investments').insert({
                 user_id: user.id,
+                plan_id: plan?.id || null,
                 plan_name: PLAN_NAME,
                 amount,
                 expected_roi: DAILY_ROI,
+                duration_days: DURATION || 30,
                 status: 'active',
                 next_payout_date: new Date(Date.now() + 86400000).toISOString(),
             });

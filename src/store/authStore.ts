@@ -37,7 +37,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setLoading: (loading) => set({ loading }),
   setAuthError: (authError) => set({ authError }),
   signOut: async () => {
-    await supabase.auth.signOut();
+    try {
+      // 5-second timeout so a hanging network request doesn't block logout
+      const signOutPromise = supabase.auth.signOut();
+      const timeoutPromise = new Promise<void>((_, reject) =>
+        setTimeout(() => reject(new Error('signOut timeout')), 5000)
+      );
+      await Promise.race([signOutPromise, timeoutPromise]);
+    } catch (err) {
+      console.warn('supabase.auth.signOut() failed or timed out, clearing local state anyway:', err);
+    }
     set({ session: null, user: null, profile: null, authError: null });
     // LOW EGRESS: Clear cache on sign out
     useWalletStore.getState().reset();
@@ -115,8 +124,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return updatedProfile;
   },
   initialize: async () => {
+    set({ loading: true });
     const { data: { session } } = await supabase.auth.getSession();
-    set({ session, user: session?.user || null, loading: false });
+    set({ session, user: session?.user || null });
 
     // Trigger initial fetch if logged in
     if (session?.user) {
@@ -130,9 +140,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         useInvestmentStore.getState().fetchInvestments(session.user.id);
       }
     }
+    set({ loading: false });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      set({ session, user: session?.user || null, loading: false });
+      set({ loading: true });
+      set({ session, user: session?.user || null });
 
       // Handle cache loading and clearing based on auth events
       if (session?.user) {
@@ -151,6 +163,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         useTransactionStore.getState().reset();
         useInvestmentStore.getState().clearInvestments();
       }
+      set({ loading: false });
     });
 
     // We can't return the unsubscribe function directly from an async function in zustand, 

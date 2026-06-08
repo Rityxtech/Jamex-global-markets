@@ -112,13 +112,13 @@ export default function Login() {
 
     return (
         <div 
-            className="auth-page text-on-surface font-body-md selection:bg-primary/30 selection:text-primary h-screen overflow-hidden flex flex-col dark relative"
+            className="auth-page text-on-surface font-body-md selection:bg-primary/30 selection:text-primary min-h-screen overflow-auto flex flex-col dark relative"
             style={{ transition: 'background-image 0.2s ease-out' }}
         >
             <AuthBackground />
             {/* Main Content Canvas */}
-            <main className="flex-grow flex items-center justify-center py-2 px-3 sm:py-4 sm:px-4 relative z-10">
-                <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <main className="flex-grow flex items-center justify-center py-6 px-4 sm:py-8 sm:px-6 relative z-10">
+                <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700 -translate-y-[45px] sm:translate-y-0">
                     
                     {/* Institutional Security Badge */}
                     <div className="hidden sm:flex justify-center mb-3">
@@ -129,7 +129,7 @@ export default function Login() {
                     </div>
 
                     {/* Login Card */}
-                    <div className="bg-[#111827]/50 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-2xl relative">
+                    <div className="bg-[#111827]/85 backdrop-blur-xl border border-white/15 rounded-xl overflow-hidden shadow-2xl relative">
                         {/* Card Header */}
                         <div className="bg-[#1f293b]/25 border-b border-outline-variant/10 px-4 py-2.5 sm:px-6 sm:py-3.5">
                             <h1 className="text-xl md:text-2xl font-bold text-on-surface">Terminal Access</h1>
@@ -138,7 +138,7 @@ export default function Login() {
                         
                         {/* Form */}
                         <div className="p-5 sm:p-6">
-                            <form className="space-y-3 sm:space-y-4" onSubmit={handleSubmit}>
+                            <form className="space-y-4" onSubmit={handleSubmit}>
                                 {(errorMsg || storeAuthError) && (
                                     <div className="bg-error/10 border border-error/50 text-error px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
                                         <span className="material-symbols-outlined">error</span>
@@ -146,13 +146,13 @@ export default function Login() {
                                     </div>
                                 )}
                                 {/* Email Field */}
-                                <div className="space-y-0.5 sm:space-y-1">
+                                <div className="space-y-1">
                                     <label className="text-xs font-medium text-on-surface-variant flex items-center gap-1.5" htmlFor="email">
                                         <span className="material-symbols-outlined text-[16px]">alternate_email</span>
                                         Institutional Email
                                     </label>
                                     <input 
-                                        className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-1.5 sm:py-2 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all placeholder:text-outline/50 text-sm" 
+                                        className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2.5 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all placeholder:text-outline/50 text-sm" 
                                         id="email" 
                                         name="email" 
                                         placeholder="name@firm.com" 
@@ -164,7 +164,7 @@ export default function Login() {
                                 </div>
                                 
                                 {/* Password Field */}
-                                <div className="space-y-0.5 sm:space-y-1">
+                                <div className="space-y-1">
                                     <div className="flex justify-between items-center">
                                         <label className="text-xs font-medium text-on-surface-variant flex items-center gap-1.5" htmlFor="password">
                                             <span className="material-symbols-outlined text-[16px]">lock</span>
@@ -174,7 +174,7 @@ export default function Login() {
                                     </div>
                                     <div className="relative">
                                         <input 
-                                            className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-1.5 sm:py-2 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all placeholder:text-outline/50 pr-10 text-sm" 
+                                            className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2.5 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all placeholder:text-outline/50 pr-10 text-sm" 
                                             id="password" 
                                             name="password" 
                                             placeholder="••••••••••••" 
@@ -194,15 +194,15 @@ export default function Login() {
                                 </div>
                                 
                                 {/* Remember Me */}
-                                <div className="flex items-center gap-2 py-0">
-                                    <input className="w-3.5 h-3.5 rounded border-outline-variant bg-surface-container-lowest text-primary focus:ring-primary cursor-pointer" id="remember" type="checkbox"/>
-                                    <label className="text-[11px] font-bold text-on-surface-variant cursor-pointer" htmlFor="remember">Recognize this device for 30 days</label>
+                                <div className="flex items-center gap-2 py-1">
+                                    <input className="w-4 h-4 rounded border-outline-variant bg-surface-container-lowest text-primary focus:ring-primary cursor-pointer" id="remember" type="checkbox"/>
+                                    <label className="text-xs font-bold text-on-surface-variant cursor-pointer" htmlFor="remember">Recognize this device for 30 days</label>
                                 </div>
                                 
                                 {/* Primary Button */}
                                 <button 
                                     disabled={isProcessing || isSuccess || !isFormValid}
-                                    className={`w-full font-bold text-base py-2 sm:py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-md group transition-all ${
+                                    className={`w-full font-bold text-base py-3 rounded-lg flex items-center justify-center gap-2 shadow-md group transition-all ${
                                         isProcessing || isSuccess ? 'bg-primary-container text-on-primary-container brightness-75 cursor-wait' :
                                         !isFormValid ? 'bg-surface-container-lowest text-on-surface-variant/50 cursor-not-allowed border border-outline-variant/30' :
                                         'bg-primary-container hover:bg-primary-container/90 active:scale-[0.98] text-on-primary-container cursor-pointer'
@@ -232,7 +232,7 @@ export default function Login() {
                             </form>
                             
                             {/* Divider */}
-                            <div className="relative my-2.5 sm:my-3">
+                            <div className="relative my-3 sm:my-4">
                                 <div className="absolute inset-0 flex items-center">
                                     <span className="w-full border-t border-outline-variant/30"></span>
                                 </div>
@@ -246,7 +246,7 @@ export default function Login() {
                                 <button
                                     onClick={handleGoogleSignIn}
                                     disabled={googleLoading}
-                                    className={`flex items-center justify-center gap-1.5 py-1 sm:py-1.5 px-3 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors text-xs font-medium text-on-surface cursor-pointer ${googleLoading ? 'opacity-70 cursor-wait' : ''}`}
+                                    className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors text-xs font-medium text-on-surface cursor-pointer ${googleLoading ? 'opacity-70 cursor-wait' : ''}`}
                                 >
                                     {googleLoading ? (
                                         <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
@@ -260,20 +260,17 @@ export default function Login() {
                                     )}
                                     {googleLoading ? 'Redirecting...' : 'Google SSO'}
                                 </button>
-                                <button className="flex items-center justify-center gap-1.5 py-1 sm:py-1.5 px-3 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors text-xs font-medium text-on-surface cursor-pointer">
+                                <button className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors text-xs font-medium text-on-surface cursor-pointer">
                                     <span className="material-symbols-outlined text-[18px]">passkey</span>
                                     Passkey
                                 </button>
                             </div>
                             
                             {/* Footer Links */}
-                            <div className="mt-2.5 sm:mt-3 text-center space-y-1">
+                            <div className="mt-3 sm:mt-4 text-center space-y-1.5">
                                 <p className="text-xs font-medium text-on-surface-variant">
                                     Don't have an account?
                                     <Link className="text-primary font-bold hover:underline ml-1 transition-colors" to="/register">Request Access</Link>
-                                </p>
-                                <p className="text-[11px] font-medium text-on-surface-variant/70">
-                                    <Link className="text-error font-bold hover:underline transition-colors" to="/admin-login">Administrator Login</Link>
                                 </p>
                             </div>
                         </div>

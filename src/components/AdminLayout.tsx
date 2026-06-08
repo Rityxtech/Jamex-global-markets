@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useSiteSettingsStore } from '../store/siteSettingsStore';
@@ -13,6 +13,35 @@ export default function AdminLayout() {
   const [connStatus, setConnStatus] = useState<ConnStatus>('checking');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [livechatUnread, setLivechatUnread] = useState(0);
+  const [ticketUnread, setTicketUnread] = useState(0);
+
+  const fetchUnreadCounts = useCallback(async () => {
+    try {
+      const [lcRes, tkRes] = await Promise.all([
+        supabase.from('livechat_messages').select('id').eq('sender_type', 'user').eq('read_by_admin', false),
+        supabase.from('support_tickets').select('id').eq('read_by_admin', false),
+      ]);
+      setLivechatUnread((lcRes.data || []).length);
+      setTicketUnread((tkRes.data || []).length);
+    } catch (err) {
+      console.error('[AdminLayout] Unread count error:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUnreadCounts();
+    const lcCh = supabase.channel('admin_lc_unread')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'livechat_messages' }, fetchUnreadCounts)
+      .subscribe();
+    const tkCh = supabase.channel('admin_tk_unread')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_tickets' }, fetchUnreadCounts)
+      .subscribe();
+    return () => {
+      supabase.removeChannel(lcCh);
+      supabase.removeChannel(tkCh);
+    };
+  }, [fetchUnreadCounts]);
 
   // Prevent body scrolling when mobile menu is open
   useEffect(() => {
@@ -46,6 +75,7 @@ export default function AdminLayout() {
       navigate('/login');
     } catch (err) {
       console.error('Logout failed', err);
+    } finally {
       setIsLoggingOut(false);
     }
   };
@@ -56,8 +86,8 @@ export default function AdminLayout() {
     { to: '/admin/plans', icon: 'account_balance_wallet', label: 'Plan Management' },
     { to: '/admin/financials', icon: 'payments', label: 'Financials' },
     { to: '/admin/referrals', icon: 'share', label: 'Referrals' },
-    { to: '/admin/support', icon: 'contact_support', label: 'Support' },
-    { to: '/admin/livechat', icon: 'chat', label: 'Live Chat' },
+    { to: '/admin/support', icon: 'contact_support', label: 'Support', badge: ticketUnread },
+    { to: '/admin/livechat', icon: 'chat', label: 'Live Chat', badge: livechatUnread },
     { to: '/admin/settings', icon: 'settings', label: 'Settings' },
   ];
 
@@ -131,7 +161,7 @@ export default function AdminLayout() {
         {/* Sidebar Navigation — desktop fixed + mobile slide-out */}
         <aside className={`flex-col py-2 border-r-4 border-green-500 bg-surface-container-lowest/90 backdrop-blur-xl fixed left-0 top-16 h-[calc(100vh-64px)] w-64 z-50 transition-transform duration-300 ease-in-out md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:flex hidden`}>
           <nav className="px-4 space-y-1 flex-1">
-            {navItems.map(({ to, icon, label, end }) => (
+            {navItems.map(({ to, icon, label, end, badge }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -145,6 +175,11 @@ export default function AdminLayout() {
               >
                 <span className="material-symbols-outlined">{icon}</span>
                 <span className="font-label-md text-label-md">{label}</span>
+                {typeof badge === 'number' && badge > 0 && (
+                  <span className="ml-auto min-w-[20px] h-5 bg-error rounded-full text-white text-[10px] font-bold flex items-center justify-center px-1.5 shadow-sm">
+                    {badge > 99 ? '99+' : badge}
+                  </span>
+                )}
               </NavLink>
             ))}
           </nav>
@@ -171,7 +206,7 @@ export default function AdminLayout() {
         {/* Mobile Sidebar — same content, shown via flex on small screens */}
         <aside className={`md:hidden flex flex-col py-2 border-r-4 border-green-500 bg-surface-container-lowest/95 backdrop-blur-xl fixed left-0 top-16 h-[calc(100vh-64px)] w-64 z-50 transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <nav className="px-4 space-y-1 flex-1 overflow-y-auto">
-            {navItems.map(({ to, icon, label, end }) => (
+            {navItems.map(({ to, icon, label, end, badge }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -185,6 +220,11 @@ export default function AdminLayout() {
               >
                 <span className="material-symbols-outlined">{icon}</span>
                 <span className="font-label-md text-label-md">{label}</span>
+                {typeof badge === 'number' && badge > 0 && (
+                  <span className="ml-auto min-w-[20px] h-5 bg-error rounded-full text-white text-[10px] font-bold flex items-center justify-center px-1.5 shadow-sm">
+                    {badge > 99 ? '99+' : badge}
+                  </span>
+                )}
               </NavLink>
             ))}
           </nav>

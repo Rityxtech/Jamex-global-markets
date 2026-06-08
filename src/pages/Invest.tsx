@@ -370,12 +370,10 @@ export default function Invest() {
                                             </tr>
                                         ) : (
                                             activeInvestments.map(inv => {
-                                                const start = new Date(inv.created_at).getTime();
-                                                const now = Date.now();
-                                                const totalDays = 365; // Standard mock duration
-                                                const durationMs = totalDays * 24 * 60 * 60 * 1000;
-                                                let progress = Math.min(100, Math.max(0, ((now - start) / durationMs) * 100));
-                                                const daysPassed = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+                                                const totalDays = inv.duration_days || 365;
+                                                const daysPassed = inv.days_elapsed || 0;
+                                                const dailyYield = inv.amount * inv.expected_roi;
+                                                let progress = Math.min(100, Math.max(0, (daysPassed / totalDays) * 100));
                                                 
                                                 return (
                                                     <tr key={inv.id} className="hover:bg-white/5 transition-colors group">
@@ -392,7 +390,7 @@ export default function Invest() {
                                                         </td>
                                                         <td className="px-2.5 py-2 md:px-6 md:py-4 font-tabular-nums font-bold text-on-surface text-[10px] sm:text-[11px] md:text-sm">{formatCurrency(inv.amount)}</td>
                                                         <td className="px-2.5 py-2 md:px-6 md:py-4">
-                                                            <span className="text-tertiary font-tabular-nums font-bold text-[10px] sm:text-[11px] md:text-sm">+{formatCurrency(inv.expected_roi)}</span>
+                                                            <span className="text-tertiary font-tabular-nums font-bold text-[10px] sm:text-[11px] md:text-sm">+{formatCurrency(dailyYield)}</span>
                                                             <p className="text-[8px] sm:text-[9px] font-bold text-on-surface-variant uppercase tracking-wider mt-0.5">Est. Daily Yield</p>
                                                         </td>
                                                         <td className="px-2.5 py-2 md:px-6 md:py-4">

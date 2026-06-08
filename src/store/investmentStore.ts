@@ -5,8 +5,12 @@ export interface Investment {
   id: string;
   user_id: string;
   plan_name: string;
+  plan_id?: string;
   amount: number;
   expected_roi: number;
+  duration_days?: number;
+  days_elapsed?: number;
+  total_profit_earned?: number;
   status: 'pending' | 'active' | 'completed';
   next_payout_date: string | null;
   created_at: string;

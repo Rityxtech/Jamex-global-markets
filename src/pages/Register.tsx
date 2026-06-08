@@ -198,17 +198,29 @@ export default function Register() {
         }
     };
 
-    const inputClasses = "w-full bg-[#0B1120] border border-outline-variant/50 rounded text-on-surface pl-9 py-1.5 sm:py-2.5 font-body-md focus:ring-0 focus:outline-none focus:shadow-[0_0_12px_rgba(37,99,235,0.3)] focus:border-primary transition-all placeholder:text-outline/50 text-sm";
+    const inputClasses = "w-full bg-[#0B1120] border border-outline-variant/50 rounded text-on-surface pl-9 py-2.5 font-body-md focus:ring-0 focus:outline-none focus:shadow-[0_0_12px_rgba(37,99,235,0.3)] focus:border-primary transition-all placeholder:text-outline/50 text-sm";
     const getIconColor = (id: string) => focusedInput === id ? 'text-primary' : 'text-on-surface-variant';
 
+    function getPasswordStrength(pw: string) {
+        let score = 0;
+        if (!pw || pw.length < 4) return { score: 0, label: '' };
+        if (pw.length >= 8) score++;
+        if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+        if (/\d/.test(pw)) score++;
+        if (/[^a-zA-Z0-9]/.test(pw)) score++;
+        const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+        const colors = ['bg-error', 'bg-yellow-500', 'bg-primary', 'bg-emerald-500'];
+        return { score, label: labels[score - 1] || '', color: colors[score - 1] || 'bg-error' };
+    }
+
     return (
-        <div className="auth-page h-screen overflow-hidden flex flex-col font-body-md text-on-surface selection:bg-primary-container selection:text-white dark relative"
+        <div className="auth-page min-h-screen overflow-auto flex flex-col font-body-md text-on-surface selection:bg-primary-container selection:text-white dark relative"
              style={{ overflowX: 'hidden' }}>
             <AuthBackground />
 
-            <main className="flex-grow flex items-center justify-center px-4 py-2 sm:py-6 relative z-10">
+            <main className="flex-grow flex items-center justify-center px-4 py-6 sm:py-8 relative z-10">
                 {/* Center Registration Card */}
-                <div className="w-full max-w-[460px] bg-[#111827]/50 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-2xl relative">
+                <div className="w-full max-w-[460px] bg-[#111827]/85 backdrop-blur-xl border border-white/15 rounded-xl overflow-hidden shadow-2xl relative -translate-y-[20px] sm:translate-y-0">
                     
                     {/* Glass Header */}
                     <div className="bg-white/5 px-4 py-2.5 sm:px-6 sm:py-4 border-b border-outline-variant/30 relative z-10">
@@ -225,7 +237,7 @@ export default function Register() {
 
                     {step === 'form' ? (
                         /* ====== REGISTRATION FORM ====== */
-                        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-3 sm:space-y-4 relative z-10">
+                        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 relative z-10">
                             {errorMsg && (
                                 <div className="bg-error/10 border border-error/50 text-error px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
                                     <span className="material-symbols-outlined text-[18px]">error</span>
@@ -234,7 +246,7 @@ export default function Register() {
                             )}
                             
                             {/* Full Name */}
-                            <div className="space-y-0.5 sm:space-y-1">
+                            <div className="space-y-1">
                                 <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant" htmlFor="fullName">Full Legal Name</label>
                                 <div className="relative">
                                     <span className={`material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] transition-colors ${getIconColor('fullName')}`}>person</span>
@@ -253,7 +265,7 @@ export default function Register() {
                             </div>
 
                             {/* Email Address */}
-                            <div className="space-y-0.5 sm:space-y-1">
+                            <div className="space-y-1">
                                 <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant" htmlFor="email">Institutional Email</label>
                                 <div className="relative">
                                     <span className={`material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] transition-colors ${getIconColor('email')}`}>mail</span>
@@ -273,7 +285,7 @@ export default function Register() {
 
                             {/* Password Group */}
                             <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                                <div className="space-y-0.5 sm:space-y-1">
+                                <div className="space-y-1">
                                     <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant" htmlFor="password">Password</label>
                                     <div className="relative">
                                         <span className={`material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] transition-colors ${getIconColor('password')}`}>lock</span>
@@ -289,8 +301,18 @@ export default function Register() {
                                             onBlur={() => setFocusedInput(null)}
                                         />
                                     </div>
+                                    {formData.password && (
+                                        <div>
+                                            <div className="flex gap-0.5 mt-0.5">
+                                                {[1,2,3,4].map(i => (
+                                                    <div key={i} className={`h-[3px] flex-1 rounded-full transition-colors ${i <= getPasswordStrength(formData.password).score ? getPasswordStrength(formData.password).color : 'bg-surface-container-highest'}`} />
+                                                ))}
+                                            </div>
+                                            <p className="text-[10px] font-bold text-on-surface-variant mt-0.5 leading-none">{getPasswordStrength(formData.password).label}</p>
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="space-y-0.5 sm:space-y-1">
+                                <div className="space-y-1">
                                     <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant" htmlFor="confirmPassword">Confirm</label>
                                     <div className="relative">
                                         <span className={`material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] transition-colors ${getIconColor('confirmPassword')}`}>verified_user</span>
@@ -311,7 +333,7 @@ export default function Register() {
 
                             {/* Referral Code (Optional) */}
                             {!showReferral ? (
-                                <div className="flex justify-start py-0.5">
+                                <div className="flex justify-start py-1">
                                     <button 
                                         type="button" 
                                         onClick={() => setShowReferral(true)}
@@ -322,7 +344,7 @@ export default function Register() {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="space-y-0.5 sm:space-y-1 animate-in fade-in duration-300">
+                                <div className="space-y-1 animate-in fade-in duration-300">
                                     <div className="flex justify-between items-center">
                                         <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant" htmlFor="referral">Referral Code</label>
                                         <button 
@@ -350,10 +372,10 @@ export default function Register() {
                             )}
 
                             {/* Consent */}
-                            <div className="flex items-start gap-2.5 py-0.5">
+                            <div className="flex items-start gap-2.5 py-1">
                                 <div className="flex items-center h-4 mt-0.5">
                                     <input 
-                                        className="h-3.5 w-3.5 rounded border-outline-variant/50 bg-[#0B1120] text-primary focus:ring-primary/20 cursor-pointer" 
+                                        className="w-4 h-4 rounded border-outline-variant/50 bg-[#0B1120] text-primary focus:ring-primary/20 cursor-pointer" 
                                         id="terms" 
                                         required 
                                         type="checkbox"
@@ -367,7 +389,7 @@ export default function Register() {
                             </div>
 
                             {/* Divider */}
-                            <div className="relative my-2.5 sm:my-3">
+                            <div className="relative my-3 sm:my-4">
                                 <div className="absolute inset-0 flex items-center">
                                     <span className="w-full border-t border-outline-variant/30"></span>
                                 </div>
@@ -381,7 +403,7 @@ export default function Register() {
                                 <button
                                     onClick={handleGoogleSignIn}
                                     disabled={googleLoading}
-                                    className={`flex items-center justify-center gap-1.5 py-1 sm:py-1.5 px-3 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors text-xs font-medium text-on-surface cursor-pointer ${googleLoading ? 'opacity-70 cursor-wait' : ''}`}
+                                    className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors text-xs font-medium text-on-surface cursor-pointer ${googleLoading ? 'opacity-70 cursor-wait' : ''}`}
                                 >
                                     {googleLoading ? (
                                         <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
@@ -395,17 +417,17 @@ export default function Register() {
                                     )}
                                     {googleLoading ? 'Redirecting...' : 'Google SSO'}
                                 </button>
-                                <button className="flex items-center justify-center gap-1.5 py-1 sm:py-1.5 px-3 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors text-xs font-medium text-on-surface cursor-pointer">
+                                <button className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors text-xs font-medium text-on-surface cursor-pointer">
                                     <span className="material-symbols-outlined text-[18px]">passkey</span>
                                     Passkey
                                 </button>
                             </div>
 
                             {/* Actions */}
-                            <div className="space-y-2 pt-0.5">
+                            <div className="space-y-3 pt-1">
                                 <button 
                                     disabled={isProcessing || isSuccess || !isFormValid}
-                                    className={`w-full font-bold text-sm py-2 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 ${
+                                    className={`w-full font-bold text-sm py-3 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 ${
                                         isProcessing || isSuccess ? 'bg-primary-container text-on-primary-container brightness-75 cursor-wait' :
                                         !isFormValid ? 'bg-surface-container-lowest text-on-surface-variant/50 cursor-not-allowed border border-outline-variant/30' :
                                         'bg-primary-container text-on-primary-container hover:brightness-110 active:scale-[0.98]'
@@ -477,7 +499,7 @@ export default function Register() {
                             {/* Verify Button */}
                             <button 
                                 disabled={isProcessing || isSuccess}
-                                className={`w-full font-bold text-sm py-2 sm:py-2.5 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 ${
+                                className={`w-full font-bold text-sm py-3 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 ${
                                     isProcessing || isSuccess ? 'bg-primary-container brightness-75 text-on-primary-container cursor-wait' : 
                                     'bg-primary-container hover:brightness-110 active:scale-[0.98] text-on-primary-container'
                                 }`}

@@ -78,12 +78,12 @@ export default function ResetPassword() {
     };
 
     return (
-        <div className="auth-page h-screen overflow-hidden flex flex-col font-body-md text-on-surface selection:bg-primary-container selection:text-white dark relative">
+        <div className="auth-page min-h-screen overflow-auto flex flex-col font-body-md text-on-surface selection:bg-primary-container selection:text-white dark relative">
             {/* Custom Background Image */}
             <AuthBackground />
 
             {/* Main Content Canvas */}
-            <main className="flex-grow flex items-center justify-center py-2 px-3 sm:py-4 sm:px-4 relative z-10">
+            <main className="flex-grow flex items-center justify-center py-6 px-4 sm:py-8 sm:px-6 relative z-10">
                 <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
                     
                     {/* Institutional Security Badge */}
@@ -95,7 +95,7 @@ export default function ResetPassword() {
                     </div>
 
                     {/* Reset Password Card */}
-                    <div className="bg-[#111827]/50 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-2xl relative">
+                    <div className="bg-[#111827]/85 backdrop-blur-xl border border-white/15 rounded-xl overflow-hidden shadow-2xl relative">
                         
                         {/* Card Header */}
                         <div className="bg-[#1f293b]/25 border-b border-outline-variant/10 px-4 py-2.5 sm:px-6 sm:py-3.5">
@@ -106,7 +106,7 @@ export default function ResetPassword() {
                         </div>
                         
                         {/* Form Content */}
-                        <div className="p-4 sm:p-5">
+                        <div className="p-5 sm:p-6">
                             {errorMsg && (
                                 <div className="bg-error/10 border border-error/50 text-error px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 mb-3.5 animate-in fade-in duration-300">
                                     <span className="material-symbols-outlined text-[18px]">error</span>
@@ -122,7 +122,7 @@ export default function ResetPassword() {
                             )}
 
                             {!isSuccess ? (
-                                <form className="space-y-3.5" onSubmit={handleSubmit}>
+                                <form className="space-y-4" onSubmit={handleSubmit}>
                                     
                                     {/* New Password Field */}
                                     <div className="space-y-1">
@@ -134,7 +134,7 @@ export default function ResetPassword() {
                                         </label>
                                         <div className="relative">
                                             <input 
-                                                className="w-full bg-surface-container-lowest border border-outline-variant rounded px-3 py-1.5 sm:py-2 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all placeholder:text-outline/50 text-sm" 
+                                                className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2.5 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all placeholder:text-outline/50 text-sm" 
                                                 id="password" 
                                                 name="password" 
                                                 placeholder="Minimum 8 characters" 
@@ -162,7 +162,7 @@ export default function ResetPassword() {
                                             Confirm New Password
                                         </label>
                                         <input 
-                                            className="w-full bg-surface-container-lowest border border-outline-variant rounded px-3 py-1.5 sm:py-2 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all placeholder:text-outline/50 text-sm" 
+                                            className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2.5 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all placeholder:text-outline/50 text-sm" 
                                             id="confirmPassword" 
                                             name="confirmPassword" 
                                             placeholder="Retype password" 
@@ -175,7 +175,7 @@ export default function ResetPassword() {
 
                                     {/* Primary Action */}
                                     <button 
-                                        className={`w-full font-medium text-sm py-2 sm:py-2.5 rounded shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 group cursor-pointer ${
+                                        className={`w-full font-medium text-sm py-3 rounded-lg shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 group cursor-pointer ${
                                             isProcessing || noSession ? 'bg-primary-container brightness-75 text-on-primary-container cursor-wait' : 'bg-primary-container hover:bg-inverse-primary text-on-primary-container'
                                         }`}
                                         disabled={isProcessing || noSession} 
@@ -198,7 +198,7 @@ export default function ResetPassword() {
                                     </button>
                                     
                                     {/* Secondary Action */}
-                                    <div className="pt-2 text-center">
+                                    <div className="pt-3 text-center">
                                         <Link className="text-xs font-semibold text-primary hover:underline flex items-center justify-center gap-1.5 transition-all" to="/login">
                                             <span className="material-symbols-outlined text-[16px]">arrow_back</span>
                                             Back to Login

@@ -205,7 +205,7 @@ export default function AdminLiveChat() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar bg-surface-container-lowest">
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar bg-surface-container-lowest">
               {selectedMsgs.map((msg, idx) => {
                 const showDate = idx === 0 || fmtDate(msg.created_at) !== fmtDate(selectedMsgs[idx - 1].created_at);
                 return (

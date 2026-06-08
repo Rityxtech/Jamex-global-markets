@@ -29,6 +29,9 @@ export default function Support() {
     const [submitted, setSubmitted] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [myTickets, setMyTickets] = useState<MyTicket[]>([]);
+    const [allTickets, setAllTickets] = useState<MyTicket[]>([]);
+    const [activeTab, setActiveTab] = useState<'new' | 'tickets'>('new');
+    const [selectedTicket, setSelectedTicket] = useState<MyTicket | null>(null);
 
     const fetchMyTickets = async () => {
         if (!user) return;
@@ -41,7 +44,17 @@ export default function Support() {
         setMyTickets(data || []);
     };
 
+    const fetchAllTickets = async () => {
+        if (!user) return;
+        const { data } = await supabase.from('support_tickets')
+            .select('id, subject, status, created_at, updated_at')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+        setAllTickets(data || []);
+    };
+
     useEffect(() => { fetchMyTickets(); }, [user]);
+    useEffect(() => { if (activeTab === 'tickets') fetchAllTickets(); }, [activeTab, user]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -71,12 +84,35 @@ export default function Support() {
 
     return (
         <div className="flex-1 p-2.5 md:p-margin-desktop max-w-[1400px] mx-auto w-full mb-6">
-                    
+
+                    {/* Mobile Tab Switcher */}
+                    <div className="md:hidden flex bg-surface-container-high/60 rounded-xl border border-outline-variant/20 mb-3 p-1">
+                        <button
+                            onClick={() => setActiveTab('new')}
+                            className={`flex-1 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                                activeTab === 'new'
+                                    ? 'bg-primary text-on-primary shadow-sm'
+                                    : 'text-on-surface-variant hover:text-on-surface'
+                            }`}
+                        >
+                            Open Ticket
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('tickets')}
+                            className={`flex-1 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                                activeTab === 'tickets'
+                                    ? 'bg-primary text-on-primary shadow-sm'
+                                    : 'text-on-surface-variant hover:text-on-surface'
+                            }`}
+                        >
+                            View Tickets
+                        </button>
+                    </div>
 
                     {/* Bento Grid Layout */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 md:gap-gutter">
                         {/* Left Column: New Ticket & FAQ */}
-                        <div className="lg:col-span-8 space-y-2.5 md:space-y-gutter">
+                        <div className={`lg:col-span-8 space-y-2.5 md:space-y-gutter ${activeTab === 'tickets' ? 'hidden md:block' : ''}`}>
                             {/* New Ticket Interface */}
                             <section className="glass-card rounded-xl overflow-hidden border border-outline-variant/20">
                                 <div className="bg-surface-container-high/40 px-2.5 md:px-card-padding py-2 md:py-3 border-b border-outline-variant/10 flex justify-between items-center">
@@ -178,7 +214,7 @@ export default function Support() {
                         </div>
 
                         {/* Right Column: Active Tickets & Service Status */}
-                        <div className="lg:col-span-4 space-y-2.5 md:space-y-gutter">
+                        <div className="lg:col-span-4 space-y-2.5 md:space-y-gutter hidden md:block">
                             {/* Active Tickets List */}
                             <section className="glass-card rounded-xl border border-outline-variant/20">
                                 <div className="bg-surface-container-high/40 px-2.5 md:px-card-padding py-2 md:py-3 border-b border-outline-variant/10">
@@ -242,6 +278,103 @@ export default function Support() {
                                 <div className="absolute bottom-2 left-2.5 md:bottom-4 md:left-4">
                                     <p className="text-[8px] md:text-[10px] font-bold text-primary uppercase tracking-wider mb-0.5">24/7 Dedicated Support</p>
                                     <h4 className="text-xs md:text-body-md font-bold text-white tracking-wide">Institutional Concierge</h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Mobile View Tickets Tab */}
+                        {activeTab === 'tickets' && (
+                            <div className="md:hidden space-y-3">
+                                <section className="glass-card rounded-xl border border-outline-variant/20 overflow-hidden">
+                                    <div className="bg-surface-container-high/40 px-3 py-3 border-b border-outline-variant/10">
+                                        <h3 className="text-sm font-bold text-on-surface uppercase tracking-wide">My Tickets</h3>
+                                    </div>
+                                    <div className="divide-y divide-outline-variant/5">
+                                        {allTickets.length === 0 ? (
+                                            <div className="p-8 text-center">
+                                                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-surface-container-high flex items-center justify-center border border-outline-variant/20">
+                                                    <span className="material-symbols-outlined text-3xl text-outline">receipt_long</span>
+                                                </div>
+                                                <h4 className="text-sm font-bold text-on-surface mb-1">No Support History</h4>
+                                                <p className="text-xs text-on-surface-variant mb-4 leading-relaxed">
+                                                    You haven't opened any tickets or chats yet. Our support team is ready to help.
+                                                </p>
+                                                <button
+                                                    onClick={() => setActiveTab('new')}
+                                                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-on-primary text-xs font-bold uppercase tracking-wider shadow-sm shadow-primary/20 hover:brightness-110 transition-all"
+                                                >
+                                                    <span className="material-symbols-outlined text-[14px]">add</span>
+                                                    Open a Ticket
+                                                </button>
+                                            </div>
+                                        ) : allTickets.map(ticket => (
+                                            <div key={ticket.id} onClick={() => setSelectedTicket(ticket)} className="p-3 hover:bg-white/5 transition-all cursor-pointer group">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <span className="text-[10px] font-bold font-tabular-nums text-on-surface-variant bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/20">
+                                                        #{ticket.id.substring(0, 8).toUpperCase()}
+                                                    </span>
+                                                    <span className={`text-[10px] font-bold uppercase tracking-wider ${STATUS_STYLE[ticket.status] || 'text-outline'}`}>
+                                                        {ticket.status.replace('_', ' ')}
+                                                    </span>
+                                                </div>
+                                                <h4 className="text-sm font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">{ticket.subject}</h4>
+                                                <div className="flex justify-between items-center mt-1">
+                                                    <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+                                                        Updated {new Date(ticket.updated_at).toLocaleDateString()}
+                                                    </span>
+                                                    <span className="material-symbols-outlined text-primary text-[16px]">chevron_right</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            </div>
+                        )}
+
+                        {/* Mobile Ticket Detail Drawer */}
+                        <div className={`fixed inset-y-0 right-0 w-full bg-surface-container-lowest transform transition-transform duration-300 ease-in-out md:hidden z-[100] flex flex-col ${
+                            selectedTicket ? 'translate-x-0' : 'translate-x-full'
+                        }`}>
+                            {/* Header */}
+                            <div className="bg-gradient-to-r from-[#2563eb] to-[#b4c5ff] px-4 py-3 flex items-center justify-between shrink-0">
+                                <div className="flex items-center gap-2 min-w-0">
+                                    <button onClick={() => setSelectedTicket(null)} className="text-white/80 hover:text-white transition-colors shrink-0">
+                                        <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+                                    </button>
+                                    <span className="text-white font-bold text-sm truncate">Ticket #{selectedTicket?.id.substring(0, 8).toUpperCase()}</span>
+                                </div>
+                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white/20 text-white`}>
+                                    {selectedTicket?.status.replace('_', ' ')}
+                                </span>
+                            </div>
+
+                            {/* Ticket Info */}
+                            <div className="p-4 border-b border-outline-variant/10 bg-surface-container-high/30">
+                                <h3 className="text-base font-bold text-on-surface mb-1">{selectedTicket?.subject}</h3>
+                                <p className="text-xs text-on-surface-variant">
+                                    Opened on {selectedTicket ? new Date(selectedTicket.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                                </p>
+                            </div>
+
+                            {/* Chat Messages Placeholder */}
+                            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-surface-container-lowest">
+                                <div className="flex flex-col items-center justify-center text-center py-8 text-on-surface-variant">
+                                    <span className="material-symbols-outlined text-4xl opacity-30 mb-2">chat</span>
+                                    <p className="text-xs font-medium">Conversation history will appear here.</p>
+                                </div>
+                            </div>
+
+                            {/* Input */}
+                            <div className="p-3 border-t border-outline-variant/20 bg-surface-container-low shrink-0">
+                                <div className="flex items-center gap-2 bg-surface-container-lowest rounded-xl border border-outline-variant/30 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all px-3 py-2">
+                                    <input
+                                        className="flex-1 bg-transparent border-none outline-none text-sm text-on-surface placeholder-on-surface-variant"
+                                        placeholder="Type a reply..."
+                                        type="text"
+                                    />
+                                    <button className="bg-primary p-1.5 rounded-lg text-on-primary hover:brightness-110 transition-all">
+                                        <span className="material-symbols-outlined text-[18px]">send</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>

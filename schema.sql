@@ -177,6 +177,7 @@ CREATE TABLE IF NOT EXISTS public.support_tickets (
   admin_reply TEXT,
   guest_name  TEXT,
   guest_email TEXT,
+  read_by_admin BOOLEAN NOT NULL DEFAULT false,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -241,6 +242,9 @@ CREATE TRIGGER trg_livechat_auto_reply
 -- Auto-create profile + wallet + settings on every new signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_referrer_id UUID;
+  v_referral_code TEXT;
 BEGIN
   INSERT INTO public.profiles (id, email, full_name, avatar_url, referral_code, account_status)
   VALUES (
@@ -257,6 +261,21 @@ BEGIN
 
   INSERT INTO public.user_settings (user_id) VALUES (NEW.id)
   ON CONFLICT (user_id) DO NOTHING;
+
+  -- Process referral code if provided during sign-up
+  v_referral_code := NEW.raw_user_meta_data->>'referral_code';
+  IF v_referral_code IS NOT NULL AND LENGTH(TRIM(v_referral_code)) > 0 THEN
+    SELECT id INTO v_referrer_id
+    FROM public.profiles
+    WHERE referral_code = TRIM(v_referral_code)
+    LIMIT 1;
+
+    IF v_referrer_id IS NOT NULL THEN
+      INSERT INTO public.referrals (referrer_id, referred_id, status)
+      VALUES (v_referrer_id, NEW.id, 'pending')
+      ON CONFLICT (referred_id) DO NOTHING;
+    END IF;
+  END IF;
 
   RETURN NEW;
 END;
@@ -513,6 +532,18 @@ CREATE POLICY "livechat_guest_select" ON public.livechat_messages
   FOR SELECT TO anon
   USING (user_id IS NULL);
 
+-- Users can mark their own messages as read
+DROP POLICY IF EXISTS "livechat_user_update" ON public.livechat_messages;
+CREATE POLICY "livechat_user_update" ON public.livechat_messages
+  FOR UPDATE TO authenticated
+  USING (user_id = auth.uid());
+
+-- Guests can mark session messages as read
+DROP POLICY IF EXISTS "livechat_guest_update" ON public.livechat_messages;
+CREATE POLICY "livechat_guest_update" ON public.livechat_messages
+  FOR UPDATE TO anon
+  USING (user_id IS NULL);
+
 -- ================================================================
 -- 15. STORAGE BUCKET — kyc-documents
 -- ================================================================
@@ -649,6 +680,17 @@ ON CONFLICT (user_id) DO NOTHING;
 ALTER TABLE public.support_tickets ALTER COLUMN user_id DROP NOT NULL;
 ALTER TABLE public.support_tickets ADD COLUMN IF NOT EXISTS guest_name TEXT;
 ALTER TABLE public.support_tickets ADD COLUMN IF NOT EXISTS guest_email TEXT;
+ALTER TABLE public.support_tickets ADD COLUMN IF NOT EXISTS read_by_admin BOOLEAN NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_tickets_read_admin ON public.support_tickets (read_by_admin);
+
+-- ================================================================
+-- 18b. MIGRATIONS — Investment plan tracking columns
+-- ================================================================
+ALTER TABLE public.investments ADD COLUMN IF NOT EXISTS plan_id UUID REFERENCES public.investment_plans(id) ON DELETE SET NULL;
+ALTER TABLE public.investments ADD COLUMN IF NOT EXISTS duration_days INTEGER DEFAULT 30;
+ALTER TABLE public.investments ADD COLUMN IF NOT EXISTS days_elapsed INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE public.investments ADD COLUMN IF NOT EXISTS total_profit_earned NUMERIC(18,2) NOT NULL DEFAULT 0;
+CREATE INDEX IF NOT EXISTS idx_inv_plan ON public.investments (plan_id);
 
 -- ================================================================
 -- 19. LIVECHAT CLEANUP — auto-delete messages older than 24 hours
@@ -665,5 +707,108 @@ DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron') THEN
     PERFORM cron.schedule('cleanup-livechat-every-hour', '0 * * * *', 'SELECT public.cleanup_livechat_messages();');
+  END IF;
+END $$;
+
+-- ================================================================
+-- 19b. INVESTMENT PAYOUT ENGINE — daily profit distribution
+-- ================================================================
+CREATE OR REPLACE FUNCTION public.process_investment_payouts()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_inv RECORD;
+  v_daily_profit NUMERIC(18,2);
+  v_plan_duration INTEGER;
+BEGIN
+  -- Process all active investments that are due for payout
+  FOR v_inv IN
+    SELECT
+      i.id,
+      i.user_id,
+      i.amount,
+      i.expected_roi,
+      i.days_elapsed,
+      i.plan_id,
+      i.duration_days,
+      COALESCE(i.duration_days, p.duration_days, 30) AS computed_duration
+    FROM public.investments i
+    LEFT JOIN public.investment_plans p ON i.plan_id = p.id
+    WHERE i.status = 'active'
+      AND i.next_payout_date <= now()
+  LOOP
+    v_daily_profit := ROUND(v_inv.amount * v_inv.expected_roi, 2);
+    v_plan_duration := v_inv.computed_duration;
+
+    -- Check if this is the final payout day (duration reached)
+    IF (v_inv.days_elapsed + 1) >= v_plan_duration THEN
+      -- Final day: mark completed and return principal
+      UPDATE public.investments
+      SET
+        status = 'completed',
+        days_elapsed = days_elapsed + 1,
+        total_profit_earned = total_profit_earned + v_daily_profit,
+        next_payout_date = NULL
+      WHERE id = v_inv.id;
+
+      -- Return principal to main wallet
+      UPDATE public.wallets
+      SET main_balance = main_balance + v_inv.amount
+      WHERE user_id = v_inv.user_id;
+
+      -- Insert transaction for principal return
+      INSERT INTO public.transactions (user_id, type, amount, status, description)
+      VALUES (v_inv.user_id, 'deposit', v_inv.amount, 'completed', 'Principal returned from investment plan');
+    ELSE
+      -- Normal daily payout: advance next date
+      UPDATE public.investments
+      SET
+        days_elapsed = days_elapsed + 1,
+        total_profit_earned = total_profit_earned + v_daily_profit,
+        next_payout_date = next_payout_date + interval '1 day'
+      WHERE id = v_inv.id;
+    END IF;
+
+    -- Credit daily profit to profit wallet (for both normal and final day)
+    UPDATE public.wallets
+    SET profit_balance = profit_balance + v_daily_profit
+    WHERE user_id = v_inv.user_id;
+
+    -- Insert transaction record for daily profit
+    INSERT INTO public.transactions (user_id, type, amount, status, description)
+    VALUES (v_inv.user_id, 'profit', v_daily_profit, 'completed', 'Daily profit from investment plan');
+  END LOOP;
+END;
+$$;
+
+-- Schedule daily payout at midnight UTC via pg_cron (ignored if extension not available)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron') THEN
+    PERFORM cron.schedule('investment-payout-daily', '0 0 * * *', 'SELECT public.process_investment_payouts();');
+  END IF;
+END $$;
+
+-- ================================================================
+-- 20. PASSWORD RESET CODES (for Resend-based OTP flow)
+-- ================================================================
+CREATE TABLE IF NOT EXISTS public.password_reset_codes (
+  email       TEXT PRIMARY KEY,
+  code        TEXT NOT NULL,
+  expires_at  TIMESTAMPTZ NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Enable RLS so only backend (service role) can access this table
+ALTER TABLE public.password_reset_codes ENABLE ROW LEVEL SECURITY;
+
+-- Cleanup expired codes every hour via pg_cron (ignored if extension not available)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron') THEN
+    PERFORM cron.schedule('cleanup-reset-codes-every-hour', '0 * * * *', 'DELETE FROM public.password_reset_codes WHERE expires_at < now();');
   END IF;
 END $$;

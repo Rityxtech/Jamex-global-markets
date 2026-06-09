@@ -8,6 +8,7 @@ interface AdminUser {
   email: string | null;
   display_name: string;
   kyc_status: 'approved' | 'pending' | 'rejected' | 'none';
+  kyc_level: number;
   main_balance: number;
   profit_balance: number;
   country: string | null;
@@ -32,29 +33,30 @@ function fmtDate(iso: string | null): string {
 }
 
 /* ── sub-components ── */
-function KycBadge({ status }: { status: AdminUser['kyc_status'] }) {
+function KycBadge({ status, level }: { status: AdminUser['kyc_status']; level: number }) {
+  const levelLabel = level === 0 ? 'None' : level === 1 ? 'Basic' : level === 2 ? 'Verified' : 'Advanced';
   if (status === 'approved') return (
     <div className="flex items-center text-tertiary">
       <span className="material-symbols-outlined text-sm mr-1" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-      <span className="font-label-sm text-label-sm">Approved</span>
+      <span className="font-label-sm text-label-sm">Approved · {levelLabel}</span>
     </div>
   );
   if (status === 'pending') return (
     <div className="flex items-center text-primary">
       <span className="material-symbols-outlined text-sm mr-1">history</span>
-      <span className="font-label-sm text-label-sm">Pending</span>
+      <span className="font-label-sm text-label-sm">Pending · {levelLabel}</span>
     </div>
   );
   if (status === 'rejected') return (
     <div className="flex items-center text-error">
       <span className="material-symbols-outlined text-sm mr-1">cancel</span>
-      <span className="font-label-sm text-label-sm">Rejected</span>
+      <span className="font-label-sm text-label-sm">Rejected · {levelLabel}</span>
     </div>
   );
   return (
     <div className="flex items-center text-outline">
       <span className="material-symbols-outlined text-sm mr-1">person_off</span>
-      <span className="font-label-sm text-label-sm">No KYC</span>
+      <span className="font-label-sm text-label-sm">No KYC · {levelLabel}</span>
     </div>
   );
 }
@@ -70,6 +72,7 @@ export default function AdminUserManagement() {
 
   /* filters */
   const [kycFilter, setKycFilter] = useState('all');
+  const [kycLevelFilter, setKycLevelFilter] = useState('all');
   const [minBalance, setMinBalance] = useState('');
   const [maxBalance, setMaxBalance] = useState('');
   const [countryFilter, setCountryFilter] = useState('');
@@ -86,7 +89,7 @@ export default function AdminUserManagement() {
     setLoading(true);
     try {
       const [profileRes, kycRes, walletRes] = await Promise.all([
-        supabase.from('profiles').select('id, email, full_name'),
+        supabase.from('profiles').select('id, email, full_name, kyc_level'),
         supabase.from('kyc_submissions').select('user_id, first_name, last_name, status, country, submitted_at'),
         supabase.from('wallets').select('user_id, main_balance, profit_balance'),
       ]);
@@ -96,8 +99,8 @@ export default function AdminUserManagement() {
       const wallets = walletRes.data || [];
 
       /* build lookup maps */
-      const profileMap: Record<string, { full_name: string; email: string | null }> = {};
-      profiles.forEach(p => { if (p.id) profileMap[p.id] = { full_name: p.full_name || '', email: p.email || null }; });
+      const profileMap: Record<string, { full_name: string; email: string | null; kyc_level: number }> = {};
+      profiles.forEach(p => { if (p.id) profileMap[p.id] = { full_name: p.full_name || '', email: p.email || null, kyc_level: p.kyc_level || 0 }; });
 
       const kycMap: Record<string, typeof kycs[0]> = {};
       kycs.forEach(k => { kycMap[k.user_id] = k; });
@@ -126,6 +129,7 @@ export default function AdminUserManagement() {
           email: profile?.email || null,
           display_name,
           kyc_status: (kyc?.status as AdminUser['kyc_status']) || 'none',
+          kyc_level: profile?.kyc_level || 0,
           main_balance: Number(wallet?.main_balance) || 0,
           profit_balance: Number(wallet?.profit_balance) || 0,
           country: kyc?.country || null,
@@ -149,6 +153,7 @@ export default function AdminUserManagement() {
 
   function resetFilters() {
     setKycFilter('all');
+    setKycLevelFilter('all');
     setMinBalance('');
     setMaxBalance('');
     setCountryFilter('');
@@ -160,6 +165,7 @@ export default function AdminUserManagement() {
   const filtered = useMemo(() => {
     return allUsers.filter(u => {
       if (kycFilter !== 'all' && u.kyc_status !== kycFilter) return false;
+      if (kycLevelFilter !== 'all' && String(u.kyc_level) !== kycLevelFilter) return false;
       const total = u.main_balance + u.profit_balance;
       if (minBalance !== '' && total < Number(minBalance)) return false;
       if (maxBalance !== '' && total > Number(maxBalance)) return false;
@@ -167,7 +173,7 @@ export default function AdminUserManagement() {
       if (kycDateFrom && u.kyc_date && u.kyc_date < kycDateFrom) return false;
       return true;
     });
-  }, [allUsers, kycFilter, minBalance, maxBalance, countryFilter, kycDateFrom]);
+  }, [allUsers, kycFilter, kycLevelFilter, minBalance, maxBalance, countryFilter, kycDateFrom]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -246,6 +252,21 @@ export default function AdminUserManagement() {
               <option value="pending">Pending</option>
               <option value="rejected">Rejected</option>
               <option value="none">No KYC</option>
+            </select>
+          </div>
+          {/* KYC Level */}
+          <div className="space-y-2">
+            <label className="font-label-sm text-label-sm text-on-surface-variant uppercase">KYC Level</label>
+            <select
+              value={kycLevelFilter}
+              onChange={e => { setKycLevelFilter(e.target.value); setPage(1); }}
+              className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-2 px-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary/30 outline-none text-on-surface"
+            >
+              <option value="all">All Levels</option>
+              <option value="0">None (0)</option>
+              <option value="1">Basic (1)</option>
+              <option value="2">Verified (2)</option>
+              <option value="3">Advanced (3)</option>
             </select>
           </div>
           {/* Country */}
@@ -340,7 +361,7 @@ export default function AdminUserManagement() {
                       <span className="font-label-sm text-label-sm text-on-surface-variant">{user.country || '—'}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <KycBadge status={user.kyc_status} />
+                      <KycBadge status={user.kyc_status} level={user.kyc_level} />
                     </td>
                     <td className="px-6 py-4">
                       <p className="font-tabular-nums text-label-md text-on-surface">{fmtMoney(user.main_balance + user.profit_balance)}</p>

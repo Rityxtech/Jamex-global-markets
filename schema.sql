@@ -13,12 +13,14 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   referral_code  TEXT UNIQUE,
   account_status TEXT NOT NULL DEFAULT 'active' CHECK (account_status IN ('active', 'suspended', 'blocked')),
   is_admin       BOOLEAN NOT NULL DEFAULT false,
+  kyc_level      INTEGER NOT NULL DEFAULT 0 CHECK (kyc_level IN (0, 1, 2, 3)),
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Add email column to existing instances (idempotent)
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS kyc_level INTEGER NOT NULL DEFAULT 0 CHECK (kyc_level IN (0, 1, 2, 3));
 
 -- 2. WALLETS
 CREATE TABLE IF NOT EXISTS public.wallets (
@@ -72,15 +74,20 @@ ON CONFLICT (name) DO NOTHING;
 CREATE TABLE IF NOT EXISTS public.investments (
   id               UUID          NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id          UUID          NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  plan_id          UUID          REFERENCES public.investment_plans(id) ON DELETE SET NULL,
   plan_name        TEXT          NOT NULL,
   amount           NUMERIC(18,2) NOT NULL,
   expected_roi     NUMERIC(8,4)  NOT NULL DEFAULT 0,
+  duration_days    INTEGER       DEFAULT 30,
+  days_elapsed     INTEGER       NOT NULL DEFAULT 0,
+  total_profit_earned NUMERIC(18,2) NOT NULL DEFAULT 0,
   status           TEXT          NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','active','completed')),
   next_payout_date TIMESTAMPTZ,
   created_at       TIMESTAMPTZ   NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_inv_user   ON public.investments (user_id);
 CREATE INDEX IF NOT EXISTS idx_inv_status ON public.investments (status);
+CREATE INDEX IF NOT EXISTS idx_inv_plan   ON public.investments (plan_id);
 
 -- 6. KYC SUBMISSIONS
 CREATE TABLE IF NOT EXISTS public.kyc_submissions (
@@ -201,7 +208,7 @@ CREATE INDEX IF NOT EXISTS idx_livechat_created   ON public.livechat_messages (c
 
 -- 12c. LIVECHAT AUTO-REPLY — welcome message on first user message
 CREATE OR REPLACE FUNCTION public.handle_livechat_auto_reply()
-RETURNS TRIGGER LANGUAGE plpgsql AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE
   msg_count INT;
   welcome_msg TEXT := 'Hi there! Thanks for reaching out. An admin will be with you shortly. How can we help you today?';

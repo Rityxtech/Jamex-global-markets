@@ -143,7 +143,9 @@ export default function LiveChatWidget() {
     else payload.session_id = sessionId;
 
     const { error } = await supabase.from('livechat_messages').insert(payload);
-    if (!error) {
+    if (error) {
+      console.error('[LiveChat] send error:', error);
+    } else {
       setInput('');
       await fetchMessages();
     }

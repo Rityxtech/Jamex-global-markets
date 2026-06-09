@@ -30,6 +30,7 @@ export default function AdminKYCReview() {
   const [processing, setProcessing] = useState(false);
   const [comments, setComments] = useState('');
   const [error, setError] = useState('');
+  const [kycLevel, setKycLevel] = useState(0);
   const [walletAmountStr, setWalletAmountStr] = useState('');
   const [walletAddresses, setWalletAddresses] = useState<any[]>([]);
 
@@ -66,7 +67,10 @@ export default function AdminKYCReview() {
         supabase.from('wallet_addresses').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
       ]);
       if (kycRes.data) setKyc(kycRes.data as KycData);
-      if (profileRes.data) setProfile(profileRes.data);
+      if (profileRes.data) {
+        setProfile(profileRes.data);
+        setKycLevel(profileRes.data.kyc_level || 0);
+      }
       setWalletAddresses(addrRes.data || []);
     } catch (err: any) {
       setError(err.message || 'Failed to load user data');
@@ -89,16 +93,38 @@ export default function AdminKYCReview() {
     if (!kyc) return;
     setProcessing(true);
     try {
-      const { error } = await supabase
+      const { error: kycErr } = await supabase
         .from('kyc_submissions')
         .update({ status: 'approved', rejection_reason: null, updated_at: new Date().toISOString() })
         .eq('id', kyc.id);
-      if (error) throw error;
+      if (kycErr) throw kycErr;
+
+      // Also bump profile kyc_level to verified (2) on approval
+      if (id) {
+        const { error: profileErr } = await supabase
+          .from('profiles')
+          .update({ kyc_level: 2 })
+          .eq('id', id);
+        if (!profileErr) setKycLevel(2);
+      }
+
       setKyc({ ...kyc, status: 'approved' });
     } catch (err: any) {
       setError(err.message || 'Failed to approve KYC');
     } finally {
       setProcessing(false);
+    }
+  };
+
+  const handleSetKycLevel = async (level: number) => {
+    if (!id) return;
+    try {
+      const { error } = await supabase.from('profiles').update({ kyc_level: level }).eq('id', id);
+      if (error) throw error;
+      setKycLevel(level);
+      setProfile((prev: any) => ({ ...prev, kyc_level: level }));
+    } catch (err: any) {
+      alert('Error updating KYC level: ' + err.message);
     }
   };
 
@@ -258,74 +284,69 @@ export default function AdminKYCReview() {
             <div className="text-error text-xs font-medium bg-error/10 border border-error/20 p-3 rounded-lg">{error}</div>
           </div>
         )}
-        {/* Left: Document Viewer */}
-        <section className="col-span-12 lg:col-span-7 flex flex-col gap-6">
-          {/* Document Switcher Tabs */}
-          <div className="flex gap-2 p-1 bg-surface-container-highest/30 rounded-xl border border-outline-variant/20 w-fit overflow-x-auto max-w-full">
-            <button
-              onClick={() => setActiveTab('passport')}
-              className={`px-6 py-2 rounded-lg font-label-md text-label-md transition-all whitespace-nowrap cursor-pointer ${
-                activeTab === 'passport' ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:bg-surface-variant/20'
-              }`}
-            >
-              Passport / ID
-            </button>
-            <button
-              onClick={() => setActiveTab('address')}
-              className={`px-6 py-2 rounded-lg font-label-md text-label-md transition-all whitespace-nowrap cursor-pointer ${
-                activeTab === 'address' ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:bg-surface-variant/20'
-              }`}
-            >
-              Proof of Address
-            </button>
-            <button
-              onClick={() => setActiveTab('face')}
-              className={`px-6 py-2 rounded-lg font-label-md text-label-md transition-all whitespace-nowrap cursor-pointer ${
-                activeTab === 'face' ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:bg-surface-variant/20'
-              }`}
-            >
-              Face Match
-            </button>
-          </div>
+        {/* Document Viewer — only when a KYC submission exists */}
+        {kyc && (
+          <section className="col-span-12 lg:col-span-8 flex flex-col gap-6">
+            {/* Document Switcher Tabs */}
+            <div className="flex gap-2 p-1 bg-surface-container-highest/30 rounded-xl border border-outline-variant/20 w-fit overflow-x-auto max-w-full">
+              <button
+                onClick={() => setActiveTab('passport')}
+                className={`px-6 py-2 rounded-lg font-label-md text-label-md transition-all whitespace-nowrap cursor-pointer ${
+                  activeTab === 'passport' ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:bg-surface-variant/20'
+                }`}
+              >
+                Passport / ID
+              </button>
+              <button
+                onClick={() => setActiveTab('address')}
+                className={`px-6 py-2 rounded-lg font-label-md text-label-md transition-all whitespace-nowrap cursor-pointer ${
+                  activeTab === 'address' ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:bg-surface-variant/20'
+                }`}
+              >
+                Proof of Address
+              </button>
+              <button
+                onClick={() => setActiveTab('face')}
+                className={`px-6 py-2 rounded-lg font-label-md text-label-md transition-all whitespace-nowrap cursor-pointer ${
+                  activeTab === 'face' ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:bg-surface-variant/20'
+                }`}
+              >
+                Face Match
+              </button>
+            </div>
 
-          {/* Image Viewer */}
-          <div className="glass-card rounded-xl overflow-hidden flex flex-col group relative">
-            <div className="absolute top-4 right-4 flex gap-2 z-10">
-              {activeTab === 'passport' && kyc?.front_id_url && (
-                <a href={kyc.front_id_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-surface/80 backdrop-blur hover:bg-primary hover:text-on-primary rounded-lg transition-all shadow-lg border border-outline-variant/20 cursor-pointer text-on-surface">
-                  <span className="material-symbols-outlined">open_in_new</span>
-                </a>
-              )}
-              {activeTab === 'address' && kyc?.back_id_url && (
-                <a href={kyc.back_id_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-surface/80 backdrop-blur hover:bg-primary hover:text-on-primary rounded-lg transition-all shadow-lg border border-outline-variant/20 cursor-pointer text-on-surface">
-                  <span className="material-symbols-outlined">open_in_new</span>
-                </a>
-              )}
-              {activeTab === 'face' && kyc?.selfie_url && (
-                <a href={kyc.selfie_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-surface/80 backdrop-blur hover:bg-primary hover:text-on-primary rounded-lg transition-all shadow-lg border border-outline-variant/20 cursor-pointer text-on-surface">
-                  <span className="material-symbols-outlined">open_in_new</span>
-                </a>
-              )}
-            </div>
-            <div className="aspect-[16/10] bg-surface-container-lowest flex items-center justify-center p-8 overflow-hidden">
-              {!kyc ? (
-                <div className="text-center">
-                  <span className="material-symbols-outlined text-outline text-6xl block mb-4">no_documents</span>
-                  <p className="text-on-surface-variant font-medium">No KYC submission found for this user.</p>
-                </div>
-              ) : activeTab === 'passport' && kyc.front_id_url ? (
-                <img src={kyc.front_id_url} alt="Front ID" className="w-full h-full object-contain rounded-lg" />
-              ) : activeTab === 'address' && kyc.back_id_url ? (
-                <img src={kyc.back_id_url} alt="Proof of Address" className="w-full h-full object-contain rounded-lg" />
-              ) : activeTab === 'face' && kyc.selfie_url ? (
-                <img src={kyc.selfie_url} alt="Selfie" className="w-full h-full object-contain rounded-lg" />
-              ) : (
-                <div className="w-full h-full border border-outline-variant/50 rounded-lg shadow-2xl bg-surface-container flex items-center justify-center">
-                  <span className="material-symbols-outlined text-outline text-6xl">no_documents</span>
-                </div>
-              )}
-            </div>
-            {kyc && (
+            {/* Image Viewer */}
+            <div className="glass-card rounded-xl overflow-hidden flex flex-col group relative">
+              <div className="absolute top-4 right-4 flex gap-2 z-10">
+                {activeTab === 'passport' && kyc?.front_id_url && (
+                  <a href={kyc.front_id_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-surface/80 backdrop-blur hover:bg-primary hover:text-on-primary rounded-lg transition-all shadow-lg border border-outline-variant/20 cursor-pointer text-on-surface">
+                    <span className="material-symbols-outlined">open_in_new</span>
+                  </a>
+                )}
+                {activeTab === 'address' && kyc?.back_id_url && (
+                  <a href={kyc.back_id_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-surface/80 backdrop-blur hover:bg-primary hover:text-on-primary rounded-lg transition-all shadow-lg border border-outline-variant/20 cursor-pointer text-on-surface">
+                    <span className="material-symbols-outlined">open_in_new</span>
+                  </a>
+                )}
+                {activeTab === 'face' && kyc?.selfie_url && (
+                  <a href={kyc.selfie_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-surface/80 backdrop-blur hover:bg-primary hover:text-on-primary rounded-lg transition-all shadow-lg border border-outline-variant/20 cursor-pointer text-on-surface">
+                    <span className="material-symbols-outlined">open_in_new</span>
+                  </a>
+                )}
+              </div>
+              <div className="aspect-[16/10] bg-surface-container-lowest flex items-center justify-center p-8 overflow-hidden">
+                {activeTab === 'passport' && kyc.front_id_url ? (
+                  <img src={kyc.front_id_url} alt="Front ID" className="w-full h-full object-contain rounded-lg" />
+                ) : activeTab === 'address' && kyc.back_id_url ? (
+                  <img src={kyc.back_id_url} alt="Proof of Address" className="w-full h-full object-contain rounded-lg" />
+                ) : activeTab === 'face' && kyc.selfie_url ? (
+                  <img src={kyc.selfie_url} alt="Selfie" className="w-full h-full object-contain rounded-lg" />
+                ) : (
+                  <div className="w-full h-full border border-outline-variant/50 rounded-lg shadow-2xl bg-surface-container flex items-center justify-center">
+                    <span className="material-symbols-outlined text-outline text-6xl">no_documents</span>
+                  </div>
+                )}
+              </div>
               <div className="p-4 bg-surface-container/50 border-t border-outline-variant/30 flex justify-between items-center">
                 <div>
                   <p className="font-label-md text-label-md text-on-surface">
@@ -341,10 +362,8 @@ export default function AdminKYCReview() {
                   <span className="material-symbols-outlined text-outline">cancel</span>
                 )}
               </div>
-            )}
-          </div>
+            </div>
 
-          {kyc && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div
                 className={`glass-card p-4 rounded-xl flex items-center gap-4 cursor-pointer hover:border-primary transition-colors group ${activeTab === 'address' ? 'border-primary' : ''}`}
@@ -381,11 +400,24 @@ export default function AdminKYCReview() {
                 <span className="material-symbols-outlined ml-auto text-on-surface-variant group-hover:text-primary transition-colors">visibility</span>
               </div>
             </div>
-          )}
-        </section>
+          </section>
+        )}
 
-        {/* Right: Data Review & Decision */}
-        <aside className="col-span-12 lg:col-span-5 flex flex-col gap-6">
+        {/* No KYC submission banner — only when absent */}
+        {!kyc && (
+          <div className="col-span-12">
+            <div className="glass-card p-5 rounded-xl flex items-center gap-4 border border-outline-variant/20">
+              <span className="material-symbols-outlined text-outline text-3xl">no_documents</span>
+              <div>
+                <p className="font-label-md text-label-md text-on-surface font-medium">No KYC submission found for this user.</p>
+                <p className="font-label-sm text-label-sm text-on-surface-variant">You can still manage their account, wallet, and KYC level below.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Action Panels */}
+        <div className={`grid gap-6 ${kyc ? 'col-span-12 lg:col-span-4 grid-cols-1' : 'col-span-12 grid-cols-1 md:grid-cols-2'}`}>
           {/* Extracted Data Panel */}
           <div className="glass-card rounded-xl overflow-hidden">
             <div className="px-6 py-4 bg-surface-container-highest/20 border-b border-outline-variant/30">
@@ -494,7 +526,7 @@ export default function AdminKYCReview() {
           </div>
 
           {/* Account Management Actions */}
-          <div className="glass-card rounded-xl overflow-hidden mt-2 border border-error/20">
+          <div className={`glass-card rounded-xl overflow-hidden mt-2 border border-error/20 ${!kyc ? 'md:col-span-2' : ''}`}>
             <div className="px-6 py-4 bg-error/10 border-b border-error/20 flex justify-between items-center">
               <h3 className="font-headline-md text-headline-md font-bold text-error flex items-center gap-2">
                 <span className="material-symbols-outlined">gpp_maybe</span> Danger Zone
@@ -678,6 +710,44 @@ export default function AdminKYCReview() {
             </div>
           </div>
 
+          {/* KYC Level Management — visible for all users */}
+          <div className="glass-card rounded-xl overflow-hidden">
+            <div className="px-6 py-4 bg-surface-container-highest/20 border-b border-outline-variant/30">
+              <h3 className="font-headline-md text-headline-md font-bold text-on-surface">KYC Level</h3>
+            </div>
+            <div className="p-6 flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-label-md text-label-md text-on-surface">
+                    {kycLevel === 0 ? 'Unverified' : kycLevel === 1 ? 'Basic' : kycLevel === 2 ? 'Verified' : 'Advanced'}
+                  </p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">
+                    Current verification tier
+                  </p>
+                </div>
+                <span className={`material-symbols-outlined text-2xl ${kycLevel === 0 ? 'text-outline' : kycLevel === 1 ? 'text-primary' : kycLevel === 2 ? 'text-tertiary' : 'text-yellow-400'}`}>
+                  {kycLevel === 0 ? 'person_off' : kycLevel === 1 ? 'person' : kycLevel === 2 ? 'verified' : 'workspace_premium'}
+                </span>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {[0, 1, 2, 3].map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => handleSetKycLevel(level)}
+                    className={`py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border ${
+                      kycLevel === level
+                        ? 'bg-primary text-on-primary border-primary'
+                        : 'bg-surface-container-lowest text-on-surface-variant border-outline-variant/30 hover:border-primary hover:text-primary'
+                    }`}
+                  >
+                    {level === 0 ? 'None' : level === 1 ? 'Basic' : level === 2 ? 'Verified' : 'Advanced'}
+                  </button>
+                ))}
+              </div>
+              <p className="text-center font-label-sm text-label-sm text-on-surface-variant opacity-50">Click to assign or upgrade KYC tier instantly</p>
+            </div>
+          </div>
+
           {/* Decision Panel */}
           {kyc && (
             <div className="glass-card rounded-xl overflow-hidden mt-auto">
@@ -721,7 +791,7 @@ export default function AdminKYCReview() {
               </div>
             </div>
           )}
-        </aside>
+        </div>
       </div>
     </div>
   );

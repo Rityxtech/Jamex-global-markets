@@ -13,7 +13,7 @@ export default function ConfirmInvestment() {
     const navigate = useNavigate();
     const location = useLocation();
     const { user } = useAuthStore();
-    const { mainBalance, profitBalance, fetchWallet, reset } = useWalletStore();
+    const { mainBalance, profitBalance, lockedProfitBalance, fetchWallet, reset } = useWalletStore();
 
     const plan = (location.state as any)?.plan;
 
@@ -37,7 +37,7 @@ export default function ConfirmInvestment() {
     const totalProfit = dailyProfit * DURATION;
     const totalReturn = amount + totalProfit;
 
-    const availableBalance = paymentSource === 'main' ? mainBalance : profitBalance;
+    const availableBalance = paymentSource === 'main' ? mainBalance : Math.max(0, profitBalance - lockedProfitBalance);
     const isValidAmount =
         amount >= MIN_AMOUNT &&
         (MAX_AMOUNT === null || amount <= MAX_AMOUNT) &&
@@ -285,8 +285,9 @@ export default function ConfirmInvestment() {
                                             </div>
                                             <div className="flex-grow">
                                                 <div className="text-on-surface font-bold text-[11px] md:text-sm">Profit Wallet</div>
-                                                <div className={`text-[9px] md:text-xs font-tabular-nums font-medium mt-0.5 ${profitBalance < amount && paymentSource === 'profit' ? 'text-error' : 'text-on-surface-variant'}`}>
-                                                    {formatCurrency(profitBalance)} Available
+                                                <div className={`text-[9px] md:text-xs font-tabular-nums font-medium mt-0.5 ${availableBalance < amount && paymentSource === 'profit' ? 'text-error' : 'text-on-surface-variant'}`}>
+                                                    {formatCurrency(availableBalance)} Available
+                                                    {lockedProfitBalance > 0 && <span className="ml-1.5 text-on-surface-variant/60">({formatCurrency(lockedProfitBalance)} locked)</span>}
                                                 </div>
                                             </div>
                                             <div className={`w-4 h-4 md:w-5 md:h-5 border-2 rounded-full flex items-center justify-center shrink-0 ${paymentSource === 'profit' ? 'border-primary' : 'border-outline-variant/50'}`}>

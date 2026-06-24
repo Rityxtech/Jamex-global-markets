@@ -16,6 +16,7 @@ export default function Invest() {
 
     const activeInvestments = investments.filter(inv => inv.status === 'active');
     const activeCount = activeInvestments.length;
+    const totalEstPayout = activeInvestments.reduce((acc, inv) => acc + (inv.amount * inv.expected_roi), 0);
 
     const totalInvested = investments.reduce((acc, inv) => acc + inv.amount, 0);
     const roiToDate = totalInvested > 0 ? ((profitBalance / totalInvested) * 100).toFixed(2) : '0.00';
@@ -156,7 +157,7 @@ export default function Invest() {
                                 <p className="text-[9px] md:text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-0.5 md:mb-1">Next Payout</p>
                                 <p className="text-lg sm:text-xl md:text-headline-md font-bold font-tabular-nums text-primary tracking-tight">{timeLeft}</p>
                                 <p className="text-[9px] md:text-label-sm font-bold text-tertiary mt-1 flex items-center gap-0.5">
-                                    <span className="material-symbols-outlined text-[12px] md:text-[14px]">arrow_drop_up</span> {nextPayoutInvestment ? `+${formatCurrency(nextPayoutInvestment.expected_roi)}` : '--'} Est.
+                                    <span className="material-symbols-outlined text-[12px] md:text-[14px]">arrow_drop_up</span> {totalEstPayout > 0 ? `+${formatCurrency(totalEstPayout)}` : '--'} Est.
                                 </p>
                             </div>
                             <div className="relative w-16 h-10 md:w-20 md:h-12 z-10 flex items-center justify-end gap-2">

@@ -17,6 +17,7 @@ export default function Dashboard() {
   const pendingInvestments = investments.filter(inv => inv.status === 'pending');
   const activeCount = activeInvestments.length;
   const pendingCount = pendingInvestments.length;
+  const totalEstPayout = activeInvestments.reduce((acc, inv) => acc + (inv.amount * inv.expected_roi), 0);
 
   const nextPayoutInvestment = [...activeInvestments]
     .filter(inv => inv.next_payout_date && new Date(inv.next_payout_date).getTime() > Date.now())
@@ -143,7 +144,7 @@ export default function Dashboard() {
               <div className="flex flex-col items-end relative z-10">
                 <p className="text-[9px] md:text-label-sm font-bold text-on-surface-variant">Est. Payout</p>
                 <p className="text-xs sm:text-base md:text-[24px] font-tabular-nums text-tertiary font-bold animate-pulse">
-                  {nextPayoutInvestment ? `+${formatCurrency(nextPayoutInvestment.expected_roi)}` : '--'}
+                  {totalEstPayout > 0 ? `+${formatCurrency(totalEstPayout)}` : '--'}
                 </p>
               </div>
             </div>

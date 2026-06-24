@@ -24,12 +24,13 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS kyc_level INTEGER NOT NULL 
 
 -- 2. WALLETS
 CREATE TABLE IF NOT EXISTS public.wallets (
-  id             UUID         NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id        UUID         NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
-  main_balance   NUMERIC(18,2) NOT NULL DEFAULT 0.00,
-  profit_balance NUMERIC(18,2) NOT NULL DEFAULT 0.00,
-  created_at     TIMESTAMPTZ  NOT NULL DEFAULT now(),
-  updated_at     TIMESTAMPTZ  NOT NULL DEFAULT now()
+  id                    UUID         NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id               UUID         NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+  main_balance          NUMERIC(18,2) NOT NULL DEFAULT 0.00,
+  profit_balance        NUMERIC(18,2) NOT NULL DEFAULT 0.00,
+  locked_profit_balance NUMERIC(18,2) NOT NULL DEFAULT 0.00,
+  created_at            TIMESTAMPTZ  NOT NULL DEFAULT now(),
+  updated_at            TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
 
 -- 3. TRANSACTIONS
@@ -674,6 +675,8 @@ FROM auth.users
 WHERE public.profiles.id = auth.users.id
   AND public.profiles.email IS NULL;
 
+ALTER TABLE public.wallets ADD COLUMN IF NOT EXISTS locked_profit_balance NUMERIC(18,2) NOT NULL DEFAULT 0.00;
+
 INSERT INTO public.wallets (user_id)
 SELECT id FROM auth.users
 ON CONFLICT (user_id) DO NOTHING;
@@ -762,9 +765,12 @@ BEGIN
         next_payout_date = NULL
       WHERE id = v_inv.id;
 
-      -- Return principal to main wallet
+      -- Return principal to main wallet and unlock it from profit balance
       UPDATE public.wallets
-      SET main_balance = main_balance + v_inv.amount
+      SET
+        main_balance = main_balance + v_inv.amount,
+        profit_balance = profit_balance - v_inv.amount,
+        locked_profit_balance = locked_profit_balance - v_inv.amount
       WHERE user_id = v_inv.user_id;
 
       -- Insert transaction for principal return
@@ -836,7 +842,7 @@ BEGIN
   END IF;
 
   -- Lock wallet row and read current balance directly from the DB
-  SELECT main_balance, profit_balance INTO v_wallet
+  SELECT main_balance, profit_balance, locked_profit_balance INTO v_wallet
   FROM public.wallets
   WHERE user_id = p_user_id
   FOR UPDATE;
@@ -845,7 +851,10 @@ BEGIN
     RAISE EXCEPTION 'Wallet not found';
   END IF;
 
-  v_current_balance := CASE WHEN p_payment_source = 'main' THEN v_wallet.main_balance ELSE v_wallet.profit_balance END;
+  v_current_balance := CASE
+    WHEN p_payment_source = 'main' THEN v_wallet.main_balance
+    ELSE v_wallet.profit_balance - v_wallet.locked_profit_balance
+  END;
 
   IF v_current_balance < p_amount THEN
     RAISE EXCEPTION 'Insufficient balance for this investment';
@@ -874,11 +883,14 @@ BEGIN
     now() + interval '1 day'
   ) RETURNING id INTO v_investment_id;
 
-  -- Deduct from the correct wallet column atomically
+  -- Move invested amount into profit balance and lock it until maturity.
+  -- When paying from main: deduct from main and credit profit (locked).
+  -- When paying from profit: the funds are already in profit; just lock them.
   UPDATE public.wallets
   SET
-    main_balance = CASE WHEN p_payment_source = 'main' THEN v_new_balance ELSE main_balance END,
-    profit_balance = CASE WHEN p_payment_source = 'profit' THEN v_new_balance ELSE profit_balance END
+    main_balance = CASE WHEN p_payment_source = 'main' THEN v_wallet.main_balance - p_amount ELSE main_balance END,
+    profit_balance = CASE WHEN p_payment_source = 'main' THEN v_wallet.profit_balance + p_amount ELSE profit_balance END,
+    locked_profit_balance = v_wallet.locked_profit_balance + p_amount
   WHERE user_id = p_user_id;
 
   -- Record transaction for history

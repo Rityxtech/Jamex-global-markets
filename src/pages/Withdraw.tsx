@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase';
 export default function Withdraw() {
     const navigate = useNavigate();
     const { user } = useAuthStore();
-    const { mainBalance, profitBalance } = useWalletStore();
+    const { mainBalance, profitBalance, lockedProfitBalance } = useWalletStore();
     const { transactions } = useTransactionStore();
     const selectedAccount: 'profit' = 'profit';
     const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -18,6 +18,7 @@ export default function Withdraw() {
     const [isWithdrawn, setIsWithdrawn] = useState(false);
 
     const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+    const availableProfitBalance = Math.max(0, profitBalance - lockedProfitBalance);
 
     const handleWithdraw = async () => {
         if (!user) return;
@@ -25,6 +26,7 @@ export default function Withdraw() {
         const balance = profitBalance;
         setWithdrawError('');
         if (!withdrawAmount || amount <= 0) { setWithdrawError('Enter a valid amount.'); return; }
+        if (amount > availableProfitBalance) { setWithdrawError(`This amount includes locked funds. ${formatCurrency(lockedProfitBalance)} is locked in active investment plans and cannot be withdrawn until the plans are completed.`); return; }
         if (amount > balance) { setWithdrawError('Insufficient balance.'); return; }
         if (!destinationAddress.trim()) { setWithdrawError('Enter a destination wallet address.'); return; }
         setIsWithdrawing(true);
@@ -160,6 +162,11 @@ export default function Withdraw() {
                                                     Profit Wallet
                                                 </p>
                                                 <p className="text-sm sm:text-lg md:text-2xl font-mono text-tertiary font-extrabold tracking-tight group-hover/profit:text-tertiary/80 transition-colors">{formatCurrency(profitBalance)}</p>
+                                                {lockedProfitBalance > 0 && (
+                                                    <p className="text-[9px] md:text-[10px] text-on-surface-variant font-bold mt-1">
+                                                        Locked: {formatCurrency(lockedProfitBalance)} (Available: {formatCurrency(availableProfitBalance)})
+                                                    </p>
+                                                )}
                                             </div>
                                             <div className="mt-2.5 flex items-center gap-1 text-[8px] md:text-[10px] text-tertiary/80 font-bold uppercase">
                                                 <span className="material-symbols-outlined text-[10px] md:text-[12px] font-bold">payments</span>
@@ -185,11 +192,11 @@ export default function Withdraw() {
                                 <div className="space-y-2 md:space-y-4 pt-1 md:pt-0">
                                     <div className="flex justify-between items-end">
                                         <label className="block text-[10px] md:text-label-md font-bold text-on-surface uppercase tracking-wider">Amount to Withdraw</label>
-                                        <span className="text-[9px] md:text-xs text-on-surface-variant font-bold">Available: {formatCurrency(profitBalance)}</span>
+                                        <span className="text-[9px] md:text-xs text-on-surface-variant font-bold">Available: {formatCurrency(availableProfitBalance)}</span>
                                     </div>
                                     <div className="relative group">
                                         <input value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} className="w-full bg-surface-container-lowest border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_10px_rgba(37,99,235,0.2)] focus:outline-none rounded-lg px-2.5 py-2 md:px-4 md:py-3.5 text-lg md:text-3xl font-mono text-on-surface transition-all font-bold" placeholder="0.00" type="number"/>
-                                        <button type="button" onClick={() => setWithdrawAmount(String(profitBalance))} className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 px-2.5 py-1 md:px-3 md:py-1 bg-primary/10 text-primary text-[10px] md:text-xs rounded border border-primary/20 hover:bg-primary hover:text-on-primary transition-all font-bold tracking-wider">MAX</button>
+                                        <button type="button" onClick={() => setWithdrawAmount(String(availableProfitBalance))} className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 px-2.5 py-1 md:px-3 md:py-1 bg-primary/10 text-primary text-[10px] md:text-xs rounded border border-primary/20 hover:bg-primary hover:text-on-primary transition-all font-bold tracking-wider">MAX</button>
                                         <span className="absolute left-2.5 -top-2 bg-surface-container-lowest px-1 md:px-2 text-[8px] md:text-[10px] text-primary uppercase tracking-widest font-bold">USD Equivalent</span>
                                     </div>
                                 </div>

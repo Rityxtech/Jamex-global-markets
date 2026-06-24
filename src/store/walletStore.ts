@@ -15,6 +15,7 @@ function withTimeout<T>(promise: PromiseLike<T>, ms: number, context: string): P
 interface WalletState {
     mainBalance: number;
     profitBalance: number;
+    lockedProfitBalance: number;
     isLoading: boolean;
     hasFetched: boolean; // Flag to prevent multiple fetches
     fetchWallet: (userId: string) => Promise<void>;
@@ -24,6 +25,7 @@ interface WalletState {
 export const useWalletStore = create<WalletState>((set, get) => ({
     mainBalance: 0,
     profitBalance: 0,
+    lockedProfitBalance: 0,
     isLoading: false,
     hasFetched: false,
 
@@ -37,7 +39,7 @@ export const useWalletStore = create<WalletState>((set, get) => ({
             const { data, error } = await withTimeout(
                 supabase
                     .from('wallets')
-                    .select('main_balance, profit_balance')
+                    .select('main_balance, profit_balance, locked_profit_balance')
                     .eq('user_id', userId)
                     .single(),
                 FETCH_TIMEOUT_MS,
@@ -54,6 +56,7 @@ export const useWalletStore = create<WalletState>((set, get) => ({
                 set({ 
                     mainBalance: Number(data.main_balance) || 0,
                     profitBalance: Number(data.profit_balance) || 0,
+                    lockedProfitBalance: Number(data.locked_profit_balance) || 0,
                     hasFetched: true,
                     isLoading: false
                 });
@@ -64,5 +67,5 @@ export const useWalletStore = create<WalletState>((set, get) => ({
         }
     },
 
-    reset: () => set({ mainBalance: 0, profitBalance: 0, hasFetched: false, isLoading: false })
+    reset: () => set({ mainBalance: 0, profitBalance: 0, lockedProfitBalance: 0, hasFetched: false, isLoading: false })
 }));

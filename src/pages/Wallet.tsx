@@ -12,7 +12,7 @@ const ASSET_LABEL: Record<string, string> = {
 
 export default function Wallet() {
   const navigate = useNavigate();
-  const { mainBalance, profitBalance } = useWalletStore();
+  const { mainBalance, profitBalance, lockedProfitBalance } = useWalletStore();
   const { transactions, fetchRecentTransactions } = useTransactionStore();
 
   const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
@@ -187,7 +187,7 @@ export default function Wallet() {
                 <div className="mt-1.5 flex items-center justify-between border-t border-outline-variant/5 pt-1">
                   <div className="flex items-center gap-2 text-on-surface-variant text-[10px] md:text-label-sm font-semibold">
                     <span className="w-1 h-1 rounded-full bg-outline-variant"></span>
-                    <span>Locked for withdrawal: $0.00</span>
+                    <span>Locked for withdrawal: {formatCurrency(lockedProfitBalance)}</span>
                   </div>
                   <span className="text-[8px] md:text-[9px] font-mono text-on-surface-variant/60">ID: WP-4902-YLD</span>
                 </div>

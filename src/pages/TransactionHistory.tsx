@@ -10,6 +10,7 @@ interface TxRow {
     asset: string;
     status: string;
     destination_address: string | null;
+    description: string | null;
     created_at: string;
 }
 
@@ -18,6 +19,7 @@ const TYPE_META: Record<string, { icon: string; iconColor: string; bgIconColor: 
     withdrawal: { icon: 'payments',              iconColor: 'text-secondary', bgIconColor: 'bg-secondary-container/20 border-secondary/20', label: 'Withdrawal' },
     profit:     { icon: 'trending_up',           iconColor: 'text-tertiary',  bgIconColor: 'bg-tertiary-container/20 border-tertiary/20',   label: 'Profit' },
     transfer:   { icon: 'swap_horiz',            iconColor: 'text-outline',   bgIconColor: 'bg-surface-variant/20 border-outline-variant/30', label: 'Transfer' },
+    investment: { icon: 'trending_up',           iconColor: 'text-primary',   bgIconColor: 'bg-primary/10 border-primary/30',             label: 'Investment' },
 };
 
 const STATUS_META: Record<string, { label: string; color: string }> = {
@@ -47,7 +49,7 @@ export default function TransactionHistory() {
         setLoading(true);
         let q = supabase
             .from('transactions')
-            .select('id, type, amount, asset, status, destination_address, created_at')
+            .select('id, type, amount, asset, status, destination_address, description, created_at')
             .eq('user_id', user.id)
             .order('created_at', { ascending: false })
             .limit(100);
@@ -61,7 +63,7 @@ export default function TransactionHistory() {
                 .reduce((sum, tx) => sum + tx.amount, 0);
             
             const totalOutflow = txData
-                .filter(tx => tx.type === 'withdrawal' && tx.status === 'completed')
+                .filter(tx => (tx.type === 'withdrawal' || tx.type === 'investment') && tx.status === 'completed')
                 .reduce((sum, tx) => sum + tx.amount, 0);
             
             const netReturns = txData
@@ -333,7 +335,7 @@ export default function TransactionHistory() {
                                     ) : filtered.map((txn) => {
                                         const meta = TYPE_META[txn.type] || TYPE_META.transfer;
                                         const sMeta = STATUS_META[txn.status] || STATUS_META.pending;
-                                        const isOut = txn.type === 'withdrawal';
+                                        const isOut = txn.type === 'withdrawal' || txn.type === 'investment';
                                         return (
                                         <tr key={txn.id} className="hover:bg-white/5 transition-colors group">
                                             <td className="px-4 py-3 md:px-6 md:py-4">
@@ -382,7 +384,7 @@ export default function TransactionHistory() {
                             ) : filtered.map((txn, index) => {
                                 const meta = TYPE_META[txn.type] || TYPE_META.transfer;
                                 const sMeta = STATUS_META[txn.status] || STATUS_META.pending;
-                                const isOut = txn.type === 'withdrawal';
+                                const isOut = txn.type === 'withdrawal' || txn.type === 'investment';
                                 return (
                                 <React.Fragment key={txn.id}>
                                     <div className="p-2.5 flex flex-col gap-2 bg-surface-container-low/20">

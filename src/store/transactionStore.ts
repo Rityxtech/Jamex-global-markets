@@ -1,13 +1,25 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 
+const FETCH_TIMEOUT_MS = 10000;
+
+function withTimeout<T>(promise: PromiseLike<T>, ms: number, context: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`${context} timed out after ${ms}ms`)), ms)
+    )
+  ]);
+}
+
 export interface Transaction {
     id: string;
-    type: 'deposit' | 'withdrawal' | 'transfer' | 'profit';
+    type: 'deposit' | 'withdrawal' | 'transfer' | 'profit' | 'investment';
     amount: number;
     asset: string;
     status: 'pending' | 'completed' | 'failed';
     destination_address: string | null;
+    description: string | null;
     created_at: string;
 }
 
@@ -31,12 +43,16 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
         set({ isLoading: true });
         try {
             // EGRESS CONTROL: Limit to last 10 records. Pagination can be added later if needed.
-            const { data, error } = await supabase
-                .from('transactions')
-                .select('id, type, amount, asset, status, destination_address, created_at')
-                .eq('user_id', userId)
-                .order('created_at', { ascending: false })
-                .limit(10);
+            const { data, error } = await withTimeout(
+                supabase
+                    .from('transactions')
+                    .select('id, type, amount, asset, status, destination_address, description, created_at')
+                    .eq('user_id', userId)
+                    .order('created_at', { ascending: false })
+                    .limit(10),
+                FETCH_TIMEOUT_MS,
+                'fetchRecentTransactions'
+            );
 
             if (error) {
                 console.error("Error fetching transactions:", error.message);

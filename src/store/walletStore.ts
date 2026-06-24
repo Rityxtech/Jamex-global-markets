@@ -1,6 +1,17 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 
+const FETCH_TIMEOUT_MS = 10000;
+
+function withTimeout<T>(promise: PromiseLike<T>, ms: number, context: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`${context} timed out after ${ms}ms`)), ms)
+    )
+  ]);
+}
+
 interface WalletState {
     mainBalance: number;
     profitBalance: number;
@@ -23,11 +34,15 @@ export const useWalletStore = create<WalletState>((set, get) => ({
         set({ isLoading: true });
         try {
             // SURGICAL QUERY: Only fetching the exact numeric values needed, no extra columns
-            const { data, error } = await supabase
-                .from('wallets')
-                .select('main_balance, profit_balance')
-                .eq('user_id', userId)
-                .single();
+            const { data, error } = await withTimeout(
+                supabase
+                    .from('wallets')
+                    .select('main_balance, profit_balance')
+                    .eq('user_id', userId)
+                    .single(),
+                FETCH_TIMEOUT_MS,
+                'fetchWallet'
+            );
 
             if (error) {
                 console.error("Error fetching wallet:", error.message);

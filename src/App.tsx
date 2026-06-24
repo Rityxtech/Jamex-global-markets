@@ -78,7 +78,7 @@ function RootRoute() {
 }
 
 export default function App() {
-  const { initialize } = useAuthStore();
+  const { initialize, recoverSession } = useAuthStore();
   const { connect, disconnect } = useMarketStore();
   const { siteName, fetchSettings, subscribe } = useSiteSettingsStore();
 
@@ -87,6 +87,16 @@ export default function App() {
     connect();
     return () => disconnect();
   }, [initialize, connect, disconnect]);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        recoverSession();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [recoverSession]);
 
   useEffect(() => {
     fetchSettings();

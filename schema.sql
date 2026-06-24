@@ -36,11 +36,12 @@ CREATE TABLE IF NOT EXISTS public.wallets (
 CREATE TABLE IF NOT EXISTS public.transactions (
   id                  UUID          NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id             UUID          NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  type                TEXT          NOT NULL CHECK (type IN ('deposit','withdrawal','transfer','profit')),
+  type                TEXT          NOT NULL CHECK (type IN ('deposit','withdrawal','transfer','profit','investment')),
   amount              NUMERIC(18,2) NOT NULL,
   asset               TEXT          NOT NULL DEFAULT 'USD',
   status              TEXT          NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','completed','failed')),
   destination_address TEXT,
+  description         TEXT,
   created_at          TIMESTAMPTZ   NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_tx_user   ON public.transactions (user_id);
@@ -798,6 +799,106 @@ BEGIN
     PERFORM cron.schedule('investment-payout-daily', '0 0 * * *', 'SELECT public.process_investment_payouts();');
   END IF;
 END $$;
+
+-- ================================================================
+-- 19c. INVESTMENT CREATION RPC — atomic deduction + record + history
+-- ================================================================
+CREATE OR REPLACE FUNCTION public.create_investment(
+  p_user_id UUID,
+  p_plan_id UUID,
+  p_plan_name TEXT,
+  p_amount NUMERIC,
+  p_expected_roi NUMERIC,
+  p_duration_days INTEGER,
+  p_payment_source TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_wallet RECORD;
+  v_current_balance NUMERIC(18,2);
+  v_new_balance NUMERIC(18,2);
+  v_investment_id UUID;
+BEGIN
+  IF p_payment_source NOT IN ('main', 'profit') THEN
+    RAISE EXCEPTION 'Invalid payment source. Must be main or profit';
+  END IF;
+
+  IF p_amount <= 0 THEN
+    RAISE EXCEPTION 'Investment amount must be greater than zero';
+  END IF;
+
+  IF p_user_id != auth.uid() THEN
+    RAISE EXCEPTION 'Unauthorized investment request';
+  END IF;
+
+  -- Lock wallet row and read current balance directly from the DB
+  SELECT main_balance, profit_balance INTO v_wallet
+  FROM public.wallets
+  WHERE user_id = p_user_id
+  FOR UPDATE;
+
+  IF v_wallet IS NULL THEN
+    RAISE EXCEPTION 'Wallet not found';
+  END IF;
+
+  v_current_balance := CASE WHEN p_payment_source = 'main' THEN v_wallet.main_balance ELSE v_wallet.profit_balance END;
+
+  IF v_current_balance < p_amount THEN
+    RAISE EXCEPTION 'Insufficient balance for this investment';
+  END IF;
+
+  v_new_balance := v_current_balance - p_amount;
+
+  -- Create investment record
+  INSERT INTO public.investments (
+    user_id,
+    plan_id,
+    plan_name,
+    amount,
+    expected_roi,
+    duration_days,
+    status,
+    next_payout_date
+  ) VALUES (
+    p_user_id,
+    p_plan_id,
+    p_plan_name,
+    p_amount,
+    p_expected_roi,
+    p_duration_days,
+    'active',
+    now() + interval '1 day'
+  ) RETURNING id INTO v_investment_id;
+
+  -- Deduct from the correct wallet column atomically
+  UPDATE public.wallets
+  SET
+    main_balance = CASE WHEN p_payment_source = 'main' THEN v_new_balance ELSE main_balance END,
+    profit_balance = CASE WHEN p_payment_source = 'profit' THEN v_new_balance ELSE profit_balance END
+  WHERE user_id = p_user_id;
+
+  -- Record transaction for history
+  INSERT INTO public.transactions (user_id, type, amount, asset, status, description)
+  VALUES (
+    p_user_id,
+    'investment',
+    p_amount,
+    'USD',
+    'completed',
+    'Investment in ' || p_plan_name
+  );
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'investment_id', v_investment_id,
+    'new_balance', v_new_balance
+  );
+END;
+$$;
 
 -- ================================================================
 -- 20. PASSWORD RESET CODES (for Resend-based OTP flow)

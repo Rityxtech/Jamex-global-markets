@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useWalletStore } from '../store/walletStore';
+import { useInvestmentStore } from '../store/investmentStore';
+import { useTransactionStore } from '../store/transactionStore';
 import { supabase } from '../lib/supabase';
 
 const formatCurrency = (val: number) =>
@@ -50,25 +52,20 @@ export default function ConfirmInvestment() {
         setConfirmError('');
         setIsProcessing(true);
         try {
-            const { error: invErr } = await supabase.from('investments').insert({
-                user_id: user.id,
-                plan_id: plan?.id || null,
-                plan_name: PLAN_NAME,
-                amount,
-                expected_roi: DAILY_ROI,
-                duration_days: DURATION || 30,
-                status: 'active',
-                next_payout_date: new Date(Date.now() + 86400000).toISOString(),
+            const { error } = await supabase.rpc('create_investment', {
+                p_user_id: user.id,
+                p_plan_id: plan?.id || null,
+                p_plan_name: PLAN_NAME,
+                p_amount: amount,
+                p_expected_roi: DAILY_ROI,
+                p_duration_days: DURATION || 30,
+                p_payment_source: paymentSource,
             });
-            if (invErr) throw invErr;
-            const col = paymentSource === 'main' ? 'main_balance' : 'profit_balance';
-            const { error: wErr } = await supabase
-                .from('wallets')
-                .update({ [col]: availableBalance - amount })
-                .eq('user_id', user.id);
-            if (wErr) throw wErr;
+            if (error) throw error;
             reset();
             fetchWallet(user.id);
+            useInvestmentStore.getState().clearInvestments();
+            useTransactionStore.getState().reset();
             setIsProcessing(false);
             setIsConfirmed(true);
         } catch (err: any) {

@@ -5,6 +5,18 @@ import { useWalletStore } from './walletStore';
 import { useTransactionStore } from './transactionStore';
 import { useInvestmentStore } from './investmentStore';
 
+const AUTH_TIMEOUT_MS = 10000;
+const LOADING_SAFETY_MS = 15000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, context: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`${context} timed out after ${ms}ms`)), ms)
+    )
+  ]);
+}
+
 interface AuthState {
   session: Session | null;
   user: User | null;
@@ -22,6 +34,7 @@ interface AuthState {
   syncOAuthProfile: (user: User, existingProfile: any) => Promise<any | null>;
   signOut: () => Promise<void>;
   initialize: () => Promise<void>;
+  recoverSession: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -125,48 +138,90 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
   initialize: async () => {
     set({ loading: true });
-    const { data: { session } } = await supabase.auth.getSession();
-    set({ session, user: session?.user || null });
 
-    // Trigger initial fetch if logged in
-    if (session?.user) {
-      const profile = await get().checkProfileStatus(session.user.id);
-      if (profile) {
-        const synced = await get().syncOAuthProfile(session.user, profile);
-        const enforced = await get().ensureSuperAdmin(session.user, synced || profile);
-        set({ profile: enforced });
-        useWalletStore.getState().fetchWallet(session.user.id);
-        useTransactionStore.getState().fetchRecentTransactions(session.user.id);
-        useInvestmentStore.getState().fetchInvestments(session.user.id);
+    // Safety net: never stay stuck in loading forever if Supabase hangs
+    const safetyTimer = setTimeout(() => {
+      if (get().loading) {
+        console.warn('Auth safety timeout reached; forcing loading=false');
+        set({ loading: false });
       }
-    }
-    set({ loading: false });
+    }, LOADING_SAFETY_MS);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      set({ loading: true });
+    try {
+      const { data: { session } } = await withTimeout(supabase.auth.getSession(), AUTH_TIMEOUT_MS, 'getSession');
       set({ session, user: session?.user || null });
 
-      // Handle cache loading and clearing based on auth events
+      // Trigger initial fetch if logged in
       if (session?.user) {
-        const profile = await get().checkProfileStatus(session.user.id);
+        const profile = await withTimeout(get().checkProfileStatus(session.user.id), AUTH_TIMEOUT_MS, 'checkProfileStatus');
         if (profile) {
-          const synced = await get().syncOAuthProfile(session.user, profile);
-          const enforced = await get().ensureSuperAdmin(session.user, synced || profile);
+          const synced = await withTimeout(get().syncOAuthProfile(session.user, profile), AUTH_TIMEOUT_MS, 'syncOAuthProfile');
+          const enforced = await withTimeout(get().ensureSuperAdmin(session.user, synced || profile), AUTH_TIMEOUT_MS, 'ensureSuperAdmin');
           set({ profile: enforced });
           useWalletStore.getState().fetchWallet(session.user.id);
           useTransactionStore.getState().fetchRecentTransactions(session.user.id);
           useInvestmentStore.getState().fetchInvestments(session.user.id);
         }
-      } else {
-        set({ profile: null });
-        useWalletStore.getState().reset();
-        useTransactionStore.getState().reset();
-        useInvestmentStore.getState().clearInvestments();
       }
+    } catch (err: any) {
+      console.error('Auth initialization failed:', err.message || err);
+      set({ session: null, user: null, profile: null, authError: 'Session check failed. Please log in again.' });
+    } finally {
+      clearTimeout(safetyTimer);
       set({ loading: false });
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      set({ loading: true });
+      set({ session, user: session?.user || null });
+
+      const safetyTimer = setTimeout(() => {
+        console.warn('Auth state change safety timeout reached; forcing loading=false');
+        set({ loading: false });
+      }, LOADING_SAFETY_MS);
+
+      try {
+        // Handle cache loading and clearing based on auth events
+        if (session?.user) {
+          const profile = await withTimeout(get().checkProfileStatus(session.user.id), AUTH_TIMEOUT_MS, 'onAuthStateChange checkProfileStatus');
+          if (profile) {
+            const synced = await withTimeout(get().syncOAuthProfile(session.user, profile), AUTH_TIMEOUT_MS, 'onAuthStateChange syncOAuthProfile');
+            const enforced = await withTimeout(get().ensureSuperAdmin(session.user, synced || profile), AUTH_TIMEOUT_MS, 'onAuthStateChange ensureSuperAdmin');
+            set({ profile: enforced });
+            useWalletStore.getState().fetchWallet(session.user.id);
+            useTransactionStore.getState().fetchRecentTransactions(session.user.id);
+            useInvestmentStore.getState().fetchInvestments(session.user.id);
+          }
+        } else {
+          set({ profile: null });
+          useWalletStore.getState().reset();
+          useTransactionStore.getState().reset();
+          useInvestmentStore.getState().clearInvestments();
+        }
+      } catch (err: any) {
+        console.error('Auth state change handler failed:', err.message || err);
+      } finally {
+        clearTimeout(safetyTimer);
+        set({ loading: false });
+      }
     });
 
-    // We can't return the unsubscribe function directly from an async function in zustand, 
+    // We can't return the unsubscribe function directly from an async function in zustand,
     // it expects Promise<void>. We just rely on the listener staying active for the app lifecycle.
+  },
+
+  recoverSession: async () => {
+    // Called when the user returns to the tab after it was hidden.
+    // If the session expired while the tab was in the background, sign out cleanly.
+    try {
+      const { data: { session } } = await withTimeout(supabase.auth.getSession(), AUTH_TIMEOUT_MS, 'recoverSession getSession');
+      if (!session) {
+        console.warn('No session on tab return; signing out');
+        await get().signOut();
+      }
+    } catch (err: any) {
+      console.error('Session recovery failed:', err.message || err);
+      await get().signOut();
+    }
   }
 }));
